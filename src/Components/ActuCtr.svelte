@@ -5,19 +5,19 @@
     A footer
  -->
  <script lang=ts>
-    // interface Article {
-    //     id: string
-    //     title: string
-    //     summary: string
-    //     pubdate: string
-    // }
-    // interface Pagedata {
-    //     arts: Article[]
-    //     count: string
-    // }
+    interface Article {
+        id: string
+        title: string
+        summary: string
+        pubdate: string
+    }
+    interface Pagedata {
+        arts: Article[]
+        count: string
+    }
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
-    export let pagedata;
+    export let pagedata: Pagedata;
  </script>
 
 
