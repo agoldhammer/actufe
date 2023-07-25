@@ -1,3 +1,7 @@
-import { jdata } from './data.js';
+import { data } from './data.js';
 
-let articles = JSON.parse(jdata);
+// const articles = JSON.parse(jdata);
+
+export function load() {
+	return data;
+}

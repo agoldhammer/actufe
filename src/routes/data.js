@@ -1,4 +1,4 @@
-const data = {
+export const data = {
 	arts: [
 		{
 			id: 1,
@@ -12,7 +12,6 @@ const data = {
 			summary: 'my second article',
 			pubdate: 'Jan 2'
 		}
-	]
+	],
+	count: 2
 };
-
-export let jdata = JSON.stringify(data);

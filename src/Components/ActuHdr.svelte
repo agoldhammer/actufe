@@ -1,3 +1,6 @@
+<script>
+    export let count
+</script>
 
 <div class="actu-hdr">
     <nav>
@@ -6,6 +9,7 @@
     </nav>
     <button>Button1</button>
     <button>Button2</button>
+    <p>Count: {count}</p>
 </div>
 
 <style>
@@ -15,5 +19,8 @@
         border: 2px solid red;
         padding: 2px;
         background-color: lightcyan;
+    }
+    p {
+        color: blue;
     }
 </style>

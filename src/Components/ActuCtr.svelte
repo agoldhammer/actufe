@@ -7,8 +7,10 @@
  <script>
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
+    export let pagedata;
+    console.log("ActuCtr", pagedata)
  </script>
 
 
-<ActuHdr />
+<ActuHdr count={pagedata.count}/>
 <ActuContent />
