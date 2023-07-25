@@ -7,8 +7,8 @@
 	    <a href="/">home</a>
 	    <a href="/about">about</a>
     </nav>
-    <button>Button1</button>
-    <button>Button2</button>
+    <button>&#9776</button>
+    <button>&#x2713</button>
     <p>Count: {count}</p>
 </div>
 
