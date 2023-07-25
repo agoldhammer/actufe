@@ -4,11 +4,20 @@
     An article display box
     A footer
  -->
- <script>
+ <script lang=ts>
+    // interface Article {
+    //     id: string
+    //     title: string
+    //     summary: string
+    //     pubdate: string
+    // }
+    // interface Pagedata {
+    //     arts: Article[]
+    //     count: string
+    // }
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
     export let pagedata;
-    console.log("ActuCtr", pagedata)
  </script>
 
 
