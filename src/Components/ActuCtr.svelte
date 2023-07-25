@@ -13,4 +13,4 @@
 
 
 <ActuHdr count={pagedata.count}/>
-<ActuContent />
+<ActuContent articles={pagedata.arts}/>

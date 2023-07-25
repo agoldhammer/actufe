@@ -1,5 +1,5 @@
-<script>
-    export let count
+<script lang=ts>
+    export let count: string
 </script>
 
 <div class="actu-hdr">
