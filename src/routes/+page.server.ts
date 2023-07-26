@@ -14,7 +14,7 @@ import { articles } from '../db/articles'
 // 	console.log("getarts", data)
 // }
 
-export const load = async function () {
+export const load: PageServerLoad = async function () {
 	const data = await articles.find( {}, {limit: 25, projection: {_id: 0, title: 1, summary: 1, pubdate: 1}}).toArray();
 	const retval = {arts: data, count: data.length}
 	return retval
