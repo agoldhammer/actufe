@@ -39,6 +39,9 @@
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
         background-color: seashell;
+        color: magenta;
+        font-size: larger;
+        
     }
 
     .cardbody {
