@@ -15,3 +15,8 @@ js-joda for time stuff
 ## using netlify functions
 
 [video on netlify fns](https://www.youtube.com/watch?v=qHUMu7ZGQwo)
+
+### Where am I
+
+added conn.js, need to replace load in +page.server.ts and rename to +page.ts to load articles
+need to add netlify.toml
