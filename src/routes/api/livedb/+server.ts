@@ -6,6 +6,6 @@ import { error } from '@sveltejs/kit'; //eslint-disable-line
 // tslint-disable-next-line
 export function GET({ url }) { //eslint-disable-line
     
-
+    console.log(url)
     return new Response("hi");
 }

@@ -13,6 +13,10 @@ import { articles } from '../db/articles'
 // 	const data = await _newload()
 // 	console.log("getarts", data)
 // }
+// export const load = async (event) => {
+//     const context = event.platform.context;
+//     console.log(context); // shows up in your functions log in the Netlify app
+// };
 
 export const load: PageServerLoad = async function () {
 	const data = await articles.find( {}, {limit: 25, projection: {_id: 0, title: 1, summary: 1, pubdate: 1}}).toArray();
