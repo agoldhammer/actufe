@@ -34,6 +34,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"mongodb": "^5.7.0"
+		"mongodb": "^5.7.0",
+		"saslprep": "^1.0.3"
 	}
 }
