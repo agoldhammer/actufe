@@ -19,8 +19,7 @@
             <span>{article.title}</span>
         </div>
         <div class="cardbody">
-            <p>{article.summary}</p>
-            
+            {@html article.summary}
         </div>
         
     </div>
@@ -46,11 +45,13 @@
 
     .cardbody {
         padding-left: 16px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         border: solid 2px blue;
         border-style: groove;
         border-bottom-left-radius: 10px;
         border-bottom-right-radius: 10px;
-        background-color: lightblue;
+        background-color: rgb(214, 225, 228);
         /* border-top-style: none; */
     }
 
