@@ -20,6 +20,7 @@
 <style>
     .actu-hdr {
         display:flex;
+        flex-direction: row;
         gap: 1em;
         border: 2px solid red;
         padding: 2px;

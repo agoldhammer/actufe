@@ -9,7 +9,7 @@ export const load = async function () {
 	const response = await fetch('/.netlify/functions/conn')
           .then(response => response.json()
           )
-	console.dir(response)
+	// console.dir(response)
 	// const retval = {arts: data, count: data.length}
 	return {arts: response.articles,
 			count: response.count}

@@ -13,8 +13,9 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
-			$db: './src/db',
-			$livedb: './src/livedb'
+			// $db: './src/db',
+			// $livedb: './src/livedb'
+			$comp: './src/Components'
 		}
 	}
 };
