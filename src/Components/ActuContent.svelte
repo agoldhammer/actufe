@@ -18,7 +18,8 @@
     <div class="card">
         <div class="cardhdr">
             <span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
-            <span>{article.title}   </span><a href="{article.link}">&#8618;</a>
+            <span>{article.title}   </span>
+            <a href="{article.link}" target="_blank" rel="noreferrer noopener">&#8618;</a>
         </div>
         <div class="cardbody">
             {@html article.summary}
