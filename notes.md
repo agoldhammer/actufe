@@ -18,5 +18,4 @@ js-joda for time stuff
 
 ### Where am I
 
-added conn.js, need to replace load in +page.server.ts and rename to +page.ts to load articles
-need to add netlify.toml
+need to parse summaries to get rid of html tags
