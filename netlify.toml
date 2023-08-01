@@ -6,7 +6,7 @@ publish = "public"
 
 ## added per https://answers.netlify.com/t/netlify-dev-failing-with-cannot-use-import-statement-outside-a-module/73044/7
 [functions]
-node_bundler = "esbuild"
+# node_bundler = "esbuild"
 external_node_modules = ["mongodb"]
 
 ## Uncomment to use this redirect for Single Page Applications like create-react-app.
