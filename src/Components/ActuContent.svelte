@@ -4,19 +4,21 @@
         title: string
         summary: string
         pubdate: string
+        pubname: string
+        link: string
     }
 
     export let articles: Articles[]
 </script>
 
 <div class="content">
-    {#each articles as article}
+    {#each articles as article, i}
          <!-- content here -->
     
     <div class="card">
         <div class="cardhdr">
-            <span class="pubdate">[{article.pubdate}:]</span>
-            <span>{article.title}</span>
+            <span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
+            <span>{article.title}   </span><a href="{article.link}">&#8618;</a>
         </div>
         <div class="cardbody">
             {@html article.summary}
@@ -29,8 +31,10 @@
 
 <style>
     .cardhdr {
-        padding: 2px;
+        padding-top: 5px;
+        padding-bottom: 5px;
         padding-left: 8px;
+        padding-right: 8px;
         margin-top: 10px;
         border-top: solid 2px black;
         border-left: solid 2px black;
@@ -41,6 +45,10 @@
         color: magenta;
         font-size: larger;
         
+    }
+
+    .cardhdr a {
+        color: red;
     }
 
     .cardbody {
@@ -56,7 +64,8 @@
     }
 
     .pubdate {
-        font-size: smaller;
+        color: lightseagreen;
+        font-size: xx-small;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 </style>

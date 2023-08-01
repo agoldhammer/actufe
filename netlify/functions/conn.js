@@ -9,7 +9,10 @@ exports.handler = async (event, context) => {
 	const db = client.db();
 	const articles = db.collection('articles');
 	const data = await articles
-		.find({}, { limit: 30, projection: { _id: 0, title: 1, summary: 1, pubdate: 1 } })
+		.find(
+			{},
+			{ limit: 30, projection: { _id: 0, title: 1, summary: 1, pubdate: 1, pubname: 1, link: 1 } }
+		)
 		.sort({ pubdate: -1 })
 		.toArray();
 	// console.log(data);

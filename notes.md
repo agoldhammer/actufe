@@ -18,4 +18,6 @@ js-joda for time stuff
 
 ### Where am I
 
-need to parse summaries to get rid of html tags
+add links
+filter out images or find way to limit display size
+add key to each display in ActuContent

@@ -10,6 +10,8 @@
         title: string
         summary: string
         pubdate: string
+        pubname: string
+        link: string
     }
     interface Pagedata {
         arts: Article[]
