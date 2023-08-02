@@ -1,11 +1,16 @@
 import { MongoClient } from 'mongodb';
+import { subHours } from 'date-fns';
 /* eslint-disable-next-line */
 exports.handler = async (event, context) => {
 	// console.log('event, context', event, context);
 	// console.log(process.env.MONGO_URI);
 	const client = new MongoClient(process.env.MONGO_URI);
 	console.log('conn: starting mongo client');
-	// console.dir(client);
+	const time = event.queryStringParameters.time;
+	console.log('conn: time:', time);
+	const now = new Date();
+	const then = subHours(now, 3);
+	console.log('conn: now, then: ', now, then);
 	const db = client.db();
 	const articles = db.collection('articles');
 	const data = await articles

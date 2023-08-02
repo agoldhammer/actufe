@@ -18,6 +18,6 @@ js-joda for time stuff
 
 ### Where am I
 
-add links
 filter out images or find way to limit display size
-add key to each display in ActuContent
+add time interval searches
+add netlify adapter
