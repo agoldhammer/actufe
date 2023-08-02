@@ -21,3 +21,4 @@ js-joda for time stuff
 filter out images or find way to limit display size
 add time interval searches
 add netlify adapter
+[home routing in sveltekit:](https://stackoverflow.com/questions/68187584/how-to-route-programmatically-in-sveltekit)
