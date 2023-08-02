@@ -18,8 +18,8 @@
     <div class="card">
         <div class="cardhdr">
             <span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
-            <span>{article.title}   </span>
-            <a href="{article.link}" target="_blank" rel="noreferrer noopener">&#8618;</a>
+            <span>{article.title}</span>
+            <a href="{article.link}" target="_blank" rel="noreferrer noopener">&#8618; Continue reading ...</a>
         </div>
         <div class="cardbody">
             {@html article.summary}
@@ -49,10 +49,15 @@
     }
 
     .cardhdr a {
-        color: red;
+        font-size: small;
+        padding-left: 8px;
+        color: blue;
     }
 
     .cardbody {
+        /* display: flex;
+        flex-direction: row;
+        gap: 3px; */
         padding-left: 16px;
         padding-top: 10px;
         padding-bottom: 10px;
@@ -68,5 +73,9 @@
         color: lightseagreen;
         font-size: xx-small;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :global(img) {
+        max-width: 20%;
     }
 </style>

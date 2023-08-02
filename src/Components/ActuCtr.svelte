@@ -22,6 +22,17 @@
     export let pagedata: Pagedata;
  </script>
 
+<div class="pagecontainer">
+    <div class="pageheader">
+        <ActuHdr count={pagedata.count}/>
+    </div>
+    <div class="pagecontent">
+        <ActuContent articles={pagedata.arts}/>
+    </div>
+</div>
 
-<ActuHdr count={pagedata.count}/>
-<ActuContent articles={pagedata.arts}/>
+<style>
+    .pagecontainer {
+        margin-top: 100px;
+    }
+</style>

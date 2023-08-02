@@ -19,10 +19,15 @@
 
 <style>
     .actu-hdr {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 98%;
         display:flex;
         flex-direction: row;
         gap: 1em;
         border: 2px solid red;
+        border-radius: 10px;
         padding: 2px;
         background-color: lightcyan;
     }
