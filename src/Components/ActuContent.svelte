@@ -43,7 +43,9 @@
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
         background-color: seashell;
-        color: magenta;
+        /* color: magenta; */
+        /* color: oklch(40.2, 0.2, 15.5); */
+        color: #9a031e;
         font-size: larger;
         
     }
@@ -51,7 +53,9 @@
     .cardhdr a {
         font-size: small;
         padding-left: 8px;
-        color: blue;
+        /* color: blue; */
+        /* color: oklch(50.66, 0.2018, 269.35); */
+        color:#0077b6;
     }
 
     .cardbody {
@@ -65,14 +69,16 @@
         border-style: groove;
         border-bottom-left-radius: 10px;
         border-bottom-right-radius: 10px;
-        background-color: rgb(214, 225, 228);
+        background-color: aliceblue;
         /* border-top-style: none; */
     }
 
     .pubdate {
-        color: lightseagreen;
+        /* color: lightseagreen; */
+        /* color: oklch(20.1, 0.091, 146.1); */
+        color:#00b4d8;
         font-size: xx-small;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
     }
 
     :global(img) {
