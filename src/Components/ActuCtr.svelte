@@ -13,27 +13,22 @@
         pubname: string
         link: string
     }
-    interface Pagedata {
-        arts: Article[]
-        count: string
-        timeframe: string
-    }
+    
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
-    // export let data;
-    // export let pagedata: Pagedata;
-    // export const data;
-    // const tf = {data.timeframe};
-    // console.log('ActuCtr. data', tf)
-    // export const data;
+    export let data;
+    export let count = data.count;
+    export let timeframe = data.timeframe;
+    export let articles = data.arts;
+ 
  </script>
 
 <div class="pagecontainer">
     <div class="pageheader">
-        <ActuHdr count={pagedata.count} timeframe={pagedata.timeframe}/>
+        <ActuHdr {count} {timeframe}/>
     </div>
     <div class="pagecontent">
-        <ActuContent articles={pagedata.arts}/>
+        <ActuContent {articles}/>
     </div>
 </div>
 

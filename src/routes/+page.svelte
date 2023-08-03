@@ -7,14 +7,10 @@
         pubname: string
         link: string
     }
-    interface Pagedata {
-        arts: Article[]
-        count: string
-        timeframe: string
-    }
+    
     import ActuCtr from "../Components/ActuCtr.svelte"
-    export let data: Pagedata;
+    export let data;
 </script>
 
 <!-- <ActuCtr style="background-color: lightblue"/> -->
-<ActuCtr pagedata={data}/>
+<ActuCtr {data}/>
