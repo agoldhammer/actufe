@@ -37,13 +37,14 @@
 
 <style>
     .actu-hdr {
-        position: fixed;
+        /* position: fixed;
         top: 0;
         width: 96%;
         max-width: inherit;
         margin-left: 0px;
-        margin-right: 0px;
+        margin-right: 0px; */
         display:flex;
+        flex-wrap: wrap;
         flex-direction: row;
         gap: 1em;
         border: 2px solid red;

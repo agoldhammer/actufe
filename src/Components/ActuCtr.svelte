@@ -39,15 +39,15 @@
 
 <style>
     .pagecontainer {
-        max-width: 100svw;
         max-height: 100svh;
         margin-top: 80px;
+        margin-right: 4rem;
     }
 
     .pageheader {
         position: fixed;
         top: 0;
-        width: 100svw;
+        width: 99svw;
     }
     
 </style>
