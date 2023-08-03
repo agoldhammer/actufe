@@ -39,7 +39,7 @@
     .actu-hdr {
         position: fixed;
         top: 0;
-        left: 0;
+        /* left: 0; */
         /* width: 97svw; */
         /* max-width: fit-content(100%); */
         width: 96%;

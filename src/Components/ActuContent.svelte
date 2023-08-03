@@ -32,7 +32,7 @@
 
 <style>
     .cardhdr {
-        padding-top: 5px;
+        padding-top: 55px;
         padding-bottom: 5px;
         padding-left: 8px;
         padding-right: 8px;
