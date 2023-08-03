@@ -40,7 +40,7 @@
 <style>
     .pagecontainer {
         max-height: 100svh;
-        margin-top: 80px;
+        /* margin-top: 80px; */
         margin-right: 4rem;
     }
 
@@ -48,6 +48,10 @@
         position: fixed;
         top: 0;
         width: 99svw;
+    }
+
+    .pagecontent {
+        margin-top: 5rem;
     }
     
 </style>
