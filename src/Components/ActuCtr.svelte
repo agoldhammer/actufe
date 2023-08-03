@@ -20,7 +20,11 @@
     }
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
-    export let pagedata: Pagedata;
+    // export let data;
+    // export let pagedata: Pagedata;
+    // export const data;
+    // const tf = {data.timeframe};
+    // console.log('ActuCtr. data', tf)
     // export const data;
  </script>
 
