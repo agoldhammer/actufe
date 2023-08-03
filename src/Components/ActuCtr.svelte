@@ -39,6 +39,8 @@
 
 <style>
     .pagecontainer {
+        max-width: 100svw;
+        max-height: 100svh;
         margin-top: 80px;
     }
     

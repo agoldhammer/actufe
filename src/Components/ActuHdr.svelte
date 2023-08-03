@@ -40,7 +40,9 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 97svw;
+        /* width: 97svw; */
+        /* max-width: fit-content(100%); */
+        width: 96%;
         margin-left: 5px;
         margin-right: 8px;
         display:flex;

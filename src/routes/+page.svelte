@@ -4,4 +4,12 @@
 </script>
 
 <!-- <ActuCtr style="background-color: lightblue"/> -->
-<ActuCtr appdata={data}/>
+<div class="pageframe">
+    <ActuCtr appdata={data}/>
+</div>
+
+<style>
+    .pageframe {
+        max-width: 100%;
+    }
+</style>
