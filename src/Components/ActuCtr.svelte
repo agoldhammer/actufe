@@ -43,5 +43,11 @@
         max-height: 100svh;
         margin-top: 80px;
     }
+
+    .pageheader {
+        position: fixed;
+        top: 0;
+        width: 100svw;
+    }
     
 </style>

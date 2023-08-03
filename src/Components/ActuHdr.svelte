@@ -39,12 +39,10 @@
     .actu-hdr {
         position: fixed;
         top: 0;
-        /* left: 0; */
-        /* width: 97svw; */
-        /* max-width: fit-content(100%); */
         width: 96%;
-        margin-left: 5px;
-        margin-right: 8px;
+        max-width: inherit;
+        margin-left: 0px;
+        margin-right: 0px;
         display:flex;
         flex-direction: row;
         gap: 1em;
