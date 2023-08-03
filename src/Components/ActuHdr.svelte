@@ -29,7 +29,9 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 99lvw;
+        width: 97svw;
+        margin-left: 5px;
+        margin-right: 8px;
         display:flex;
         flex-direction: row;
         gap: 1em;
@@ -44,6 +46,11 @@
         border-radius: 8px;
         background-color:lightcoral;
         color: white;
+        transition-duration: 0.3s;
+    }
+
+    .hamburger:hover, .timebutton:hover, .help:hover {
+        background-color: green;
     }
 
     .spacer {
