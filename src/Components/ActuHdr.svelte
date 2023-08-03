@@ -1,13 +1,14 @@
 <script lang=ts>
 	import { goto } from '$app/navigation';
     export let count: string;
+    export let timeframe: string;
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
         console.log(event.target.value)
         if (event.target.value === 'back') {
-            goto('/?time=back')
+            goto('/?timeframe=1')
         } else {
-            goto('/?time=fwd')
+            goto('/?timeframe=0')
         }
 
     }
@@ -28,6 +29,7 @@
     <!-- <span>{FETCHED_ARTS}</span> -->
     <div class="spacer"></div>
     <button class="count">Count: {count}</button>
+    <span>Timeframe: {timeframe}</span>
 </div>
 
 <style>

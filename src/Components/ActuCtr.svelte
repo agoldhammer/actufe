@@ -16,15 +16,17 @@
     interface Pagedata {
         arts: Article[]
         count: string
+        timeframe: string
     }
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
     export let pagedata: Pagedata;
+    // export const data;
  </script>
 
 <div class="pagecontainer">
     <div class="pageheader">
-        <ActuHdr count={pagedata.count}/>
+        <ActuHdr count={pagedata.count} timeframe={pagedata.timeframe}/>
     </div>
     <div class="pagecontent">
         <ActuContent articles={pagedata.arts}/>
