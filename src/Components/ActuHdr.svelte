@@ -6,9 +6,12 @@
     const handleTimeBtnClick = (event) => {
         console.log(event.target.value)
         if (event.target.value === 'back') {
-            goto('/?timeframe=1')
+            const newframe = +timeframe + 1
+            goto('/?timeframe=' + newframe)
         } else {
-            goto('/?timeframe=0')
+            let newframe = +timeframe - 1;
+            newframe = newframe < 0 ? 0: newframe;
+            goto('/?timeframe=' + newframe)
         }
 
     }
