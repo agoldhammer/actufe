@@ -13,22 +13,27 @@
         pubname: string
         link: string
     }
+    interface Appdata {
+        arts: Article[]
+        count: string
+        timeframe: string
+    }
     
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
-    export let data;
-    export let count = data.count;
-    export let timeframe = data.timeframe;
-    export let articles = data.arts;
+    export let appdata: Appdata;
+    //export let count = data.count;
+    //export let timeframe = data.timeframe;
+    //export let articles = data.arts;
  
  </script>
 
 <div class="pagecontainer">
     <div class="pageheader">
-        <ActuHdr {count} {timeframe}/>
+        <ActuHdr count={appdata.count} timeframe={appdata.timeframe}/>
     </div>
     <div class="pagecontent">
-        <ActuContent {articles}/>
+        <ActuContent articles={appdata.arts}/>
     </div>
 </div>
 
