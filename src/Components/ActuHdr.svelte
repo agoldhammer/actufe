@@ -1,8 +1,15 @@
 <script lang=ts>
 	import { goto } from '$app/navigation';
     export let count: string;
-    const handleTimeBtnClick = function(event) {
+    // @ts-ignore
+    const handleTimeBtnClick = (event) => {
         console.log(event.target.value)
+        if (event.target.value === 'back') {
+            goto('/?time=back')
+        } else {
+            goto('/?time=fwd')
+        }
+
     }
     // let FETCHED_ARTS: string
 </script>
@@ -12,10 +19,9 @@
     <button class="hamburger" type="button" on:click|preventDefault={() => goto('/')}>&#9776</button>
     <div class="spacer"></div>
     <!-- time buttons -->
-    <button class="timebutton" type="button" value="1" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>3-0</button>
-    <button class="timebutton" type="button" value="2" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>6-3</button> 
-    <button class="timebutton" type="button" value="3" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>9-6</button> 
-    <button class="timebutton" type="button" value="4" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>12-9</button> 
+    <button class="timebutton" type="button" value="back" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8592</button>
+    <span class="timetravel">Time Travel</span>
+    <button class="timebutton" type="button" value="fwd" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8594</button> 
     <!-- help button -->
     <div class="spacer"></div>
     <button class="help" type="button" on:click|preventDefault={() => goto('/about')} >Help</button>
@@ -51,6 +57,10 @@
 
     .hamburger:hover, .timebutton:hover, .help:hover {
         background-color: green;
+    }
+
+    .timetravel {
+        font-size: smaller;
     }
 
     .spacer {
