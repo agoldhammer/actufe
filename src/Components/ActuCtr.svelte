@@ -50,6 +50,7 @@
     .pageheader {
         position: fixed;
         top: 0;
+        margin-right: 2px;
         width: 99svw;
     }
 

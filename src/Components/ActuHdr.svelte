@@ -7,6 +7,12 @@
     export let count: string;
     export let timeframe: string; // used in computations, do not change
     export let timespan: Timespan; // strings for displaying timeframe to humans
+    // console.log('timeframe', timeframe)
+    $: flag = (timeframe === '0'?true: false);
+
+    function disableFwd() {
+        return timeframe === '0'? true: false;
+    }
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
         // console.log(event.target.value)
@@ -28,9 +34,12 @@
     <button class="hamburger" type="button" on:click|preventDefault={() => goto('/')}>&#9776</button>
     <div class="spacer"></div>
     <!-- time buttons -->
-    <button class="timebutton" type="button" value="back" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8592</button>
+    <!-- back button -->
+    <button class="timebutton" type="button" value="back" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8678</button>
     <span class="timetravel">Time Travel</span>
-    <button class="timebutton" type="button" value="fwd" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8594</button> 
+    <!-- forward button -->
+    <button class="timebutton" type="button" value="fwd"
+        disabled={flag} on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8680</button> 
     <!-- help button -->
     <div class="spacer"></div>
     <button class="help" type="button" on:click|preventDefault={() => goto('/about')} >Help</button>
@@ -69,6 +78,11 @@
         background-color:lightcoral;
         color: white;
         transition-duration: 0.3s;
+    }
+
+    .timebutton:disabled,
+    .timebutton:hover:disabled {
+        background-color: lightgray;
     }
 
     .hamburger:hover, .timebutton:hover, .help:hover {

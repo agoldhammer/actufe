@@ -33,7 +33,8 @@
 
 <style>
     .content {
-        width: 100%;
+        width: 99svw;
+        height: 100svh;
     }
     .cardhdr {
         padding-top: 5px;
