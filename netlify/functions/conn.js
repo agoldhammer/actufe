@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
 	const reply = {
 		articles: data,
 		count: data.length,
-		timespan: { start: format(start, 'hh:mm x'), end: format(end, 'hh:mm x') }
+		timespan: { start: format(start, 'HH:mm O'), end: format(end, 'HH:mm O') }
 	};
 
 	return {
