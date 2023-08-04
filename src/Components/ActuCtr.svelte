@@ -29,9 +29,7 @@
 	import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
     export let appdata: Appdata;
-    //export let count = data.count;
-    //export let timeframe = data.timeframe;
-    //export let articles = data.arts;
+    console.log('ActuCtr: timeframe', appdata.timeframe)
  
  </script>
 
@@ -51,14 +49,21 @@
         position: fixed;
         top: 1px;
         margin-right: 4px;
+        margin-bottom: 6px;
         width: 99svw;
     }
 
     .pagecontent {
-        width: 99svw;
-        margin-top: 7rem;
-        margin-right: 6px;
+        padding: 5px;
+        width: 97svw;
+        border: 2px solid black;
+        margin-top: 5rem;
+        margin-right: 2px;
+        margin-left: 2px;
         max-width: inherit;
+        height: 80svh;
+        max-height: 80svh;
+        overflow: scroll;
     }
     
 </style>

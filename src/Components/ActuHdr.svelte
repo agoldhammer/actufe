@@ -3,7 +3,7 @@
         start: string
         end: string
     }
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
     export let count: string;
     export let timeframe: string; // used in computations, do not change
     export let timespan: Timespan; // strings for displaying timeframe to humans
@@ -12,6 +12,13 @@
 
     function disableFwd() {
         return timeframe === '0'? true: false;
+    }
+
+    const handleHamburgerBtnClick = () => {
+        console.log('Handling hamburger')
+        //timeframe = "0";
+        // 
+        goto('/about')
     }
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
@@ -31,7 +38,7 @@
 
 <div class="actu-hdr">
     <!-- TODO: hamburger button, for now is just HOME button-->
-    <button class="hamburger" type="button" on:click|preventDefault={() => goto('/')}>&#9776</button>
+    <button class="hamburger" type="button" on:click|preventDefault={() => handleHamburgerBtnClick()}>&#9776</button>
     <div class="spacer"></div>
     <!-- time buttons -->
     <!-- back button -->
@@ -55,12 +62,6 @@
 
 <style>
     .actu-hdr {
-        /* position: fixed;
-        top: 0;
-        width: 96%;
-        max-width: inherit;
-        margin-left: 0px;
-        margin-right: 0px; */
         display:flex;
         flex-wrap: wrap;
         flex-direction: row;

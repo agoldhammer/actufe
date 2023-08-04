@@ -1,9 +1,10 @@
 export const ssr = false;
 
-export const load = async function ({fetch, params, url}) {
+export const load = async function ({fetch, url}) {
 	// console.log("load:", params)
 	// console.log("load: url.searchParams", url.searchParams.get('timeframe') || '0')
 	const timeframe = url.searchParams.get('timeframe') || '0'
+	console.log('load: timeframe', timeframe)
 	const response = await fetch('/.netlify/functions/conn?timeframe=' + timeframe)
           .then(response => response.json()
           )
