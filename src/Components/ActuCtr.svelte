@@ -14,10 +14,16 @@
         link: string
         hash: string
     }
+
+    interface Timespan {
+        start: string
+        end: string
+    }
     interface Appdata {
         arts: Article[]
         count: string
         timeframe: string
+        timespan: Timespan
     }
     
 	import ActuContent from "./ActuContent.svelte";
@@ -31,7 +37,8 @@
 
 <div class="pagecontainer">
     <div class="pageheader">
-        <ActuHdr count={appdata.count} timeframe={appdata.timeframe}/>
+        <ActuHdr count={appdata.count} timeframe={appdata.timeframe}
+            timespan={appdata.timespan}/>
     </div>
     <div class="pagecontent">
         <ActuContent articles={appdata.arts}/>
@@ -40,7 +47,7 @@
 
 <style>
     .pagecontainer {
-        max-height: 100svh;
+        max-height: 100%;
         /* margin-top: 80px; */
         margin-right: 4rem;
     }
@@ -52,7 +59,8 @@
     }
 
     .pagecontent {
-        margin-top: 5rem;
+        width: 100%;
+        margin-top: 7rem;
     }
     
 </style>

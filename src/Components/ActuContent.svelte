@@ -32,6 +32,9 @@
 </div>
 
 <style>
+    .content {
+        width: 100%;
+    }
     .cardhdr {
         padding-top: 5px;
         padding-bottom: 5px;

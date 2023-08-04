@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb';
-import { subHours } from 'date-fns';
+import { subHours, format } from 'date-fns';
 /* eslint-disable-next-line */
 exports.handler = async (event, context) => {
 	// db setup
@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
 	const reply = {
 		articles: data,
 		count: data.length,
-		message: 'Hello Conn'
+		timespan: { start: format(start, 'hh:mm x'), end: format(end, 'hh:mm x') }
 	};
 
 	return {

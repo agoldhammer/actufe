@@ -1,10 +1,15 @@
 <script lang=ts>
+    interface Timespan {
+        start: string
+        end: string
+    }
 	import { goto } from '$app/navigation';
     export let count: string;
-    export let timeframe: string;
+    export let timeframe: string; // used in computations, do not change
+    export let timespan: Timespan; // strings for displaying timeframe to humans
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
-        console.log(event.target.value)
+        // console.log(event.target.value)
         if (event.target.value === 'back') {
             const newframe = +timeframe + 1
             goto('/?timeframe=' + newframe)
@@ -31,8 +36,12 @@
     <button class="help" type="button" on:click|preventDefault={() => goto('/about')} >Help</button>
     <!-- <span>{FETCHED_ARTS}</span> -->
     <div class="spacer"></div>
-    <button class="count">Count: {count}</button>
-    <span>Timeframe: {timeframe}</span>
+    <!-- <button class="count">Count: {count}</button> -->
+    <div class="timespan">
+        <span>Displaying {count}</span>
+        <span>{timespan.start}</span>
+        <span>{timespan.end}</span>
+    </div>
 </div>
 
 <style>
@@ -46,14 +55,15 @@
         display:flex;
         flex-wrap: wrap;
         flex-direction: row;
-        gap: 1em;
+        align-items: center;
+        gap: 2px;
         border: 2px solid red;
         border-radius: 10px;
         padding: 10px;
         background-color: lightcyan;
     }
 
-    .hamburger, .timebutton, .help, .count {
+    .hamburger, .timebutton, .help {
         height: 85%;
         border-radius: 8px;
         background-color:lightcoral;
@@ -66,8 +76,15 @@
     }
 
     .timetravel {
-        font-size: smaller;
+        font-size: xx-small;
     }
+
+    .timespan {
+        font-size: xx-small;
+        display: flex;
+        flex-direction: column;
+    }
+
 
     .spacer {
         width: 1em;
