@@ -71,6 +71,8 @@
         border-bottom-right-radius: 10px;
         background-color: aliceblue;
         margin-bottom: 1rem;
+        font-size: smaller;
+        color: black;
 
         /* border-top-style: none; */
     }
