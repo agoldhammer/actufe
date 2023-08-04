@@ -35,7 +35,7 @@
  
  </script>
 
-<div class="pagecontainer">
+<!-- <div class="pagecontainer"> -->
     <div class="pageheader">
         <ActuHdr count={appdata.count} timeframe={appdata.timeframe}
             timespan={appdata.timespan}/>
@@ -43,7 +43,7 @@
     <div class="pagecontent">
         <ActuContent articles={appdata.arts}/>
     </div>
-</div>
+<!-- </div> -->
 
 <style>
     .pagecontainer {
