@@ -6,6 +6,7 @@
         pubdate: string
         pubname: string
         link: string
+        hash: string
     }
 
     export let articles: Articles[]
@@ -17,7 +18,7 @@
     
     <div class="card">
         <div class="cardhdr">
-            <span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
+            <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span>
             <span>{article.title}</span>
             <a href="{article.link}" target="_blank" rel="noreferrer noopener">&#8618; Continue reading ...</a>
         </div>

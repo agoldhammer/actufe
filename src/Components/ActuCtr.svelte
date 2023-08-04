@@ -12,6 +12,7 @@
         pubdate: string
         pubname: string
         link: string
+        hash: string
     }
     interface Appdata {
         arts: Article[]
