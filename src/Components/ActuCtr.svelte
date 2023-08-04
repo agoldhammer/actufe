@@ -57,6 +57,7 @@
     .pagecontent {
         width: 99svw;
         margin-top: 7rem;
+        margin-right: 4px;
     }
     
 </style>
