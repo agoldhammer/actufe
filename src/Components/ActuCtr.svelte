@@ -49,13 +49,13 @@
 
     .pageheader {
         position: fixed;
-        top: 0;
-        margin-right: 2px;
+        top: 1px;
+        margin-right: 4px;
         width: 99svw;
     }
 
     .pagecontent {
-        width: 100%;
+        width: 99svh;
         margin-top: 7rem;
     }
     
