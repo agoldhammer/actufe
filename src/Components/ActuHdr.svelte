@@ -57,8 +57,8 @@
         flex-direction: row;
         align-items: center;
         gap: 2px;
-        border: 2px solid red;
-        border-radius: 10px;
+        border: 2px ridge blue;
+        border-radius: 6px 8px 10px 10px;
         padding: 10px;
         background-color: lightcyan;
     }
@@ -76,6 +76,7 @@
     }
 
     .timetravel {
+        color: lightseagreen;
         font-size: xx-small;
     }
 
@@ -83,6 +84,7 @@
         font-size: xx-small;
         display: flex;
         flex-direction: column;
+        color: lightseagreen;
     }
 
 

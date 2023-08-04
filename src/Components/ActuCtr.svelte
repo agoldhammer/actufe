@@ -46,11 +46,6 @@
 <!-- </div> -->
 
 <style>
-    .pagecontainer {
-        max-height: 100%;
-        /* margin-top: 80px; */
-        margin-right: 4rem;
-    }
 
     .pageheader {
         position: fixed;
