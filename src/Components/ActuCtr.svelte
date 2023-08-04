@@ -50,14 +50,16 @@
         top: 1px;
         margin-right: 4px;
         margin-bottom: 6px;
+        --pg-width: 99svw;
         width: 99svw;
+        min-width: --pg-width;
     }
 
     .pagecontent {
         padding: 5px;
-        width: 97svw;
+        width: --pg-width;
         border: 2px solid black;
-        margin-top: 5rem;
+        margin-top: 6rem;
         margin-right: 2px;
         margin-left: 2px;
         max-width: inherit;
