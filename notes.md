@@ -23,3 +23,4 @@ add time interval searches
 add netlify adapter
 [home routing in sveltekit:](https://stackoverflow.com/questions/68187584/how-to-route-programmatically-in-sveltekit)
 [on spinner](https://www.ratamero.com/blog/showing-a-loading-spinner-when-navigation-is-delayed-in-sveltekit)
+[sidebar](https://svelte-sidebar.vercel.app/)
