@@ -3,7 +3,7 @@
         start: string
         end: string
     }
-	import { goto, invalidate } from '$app/navigation';
+	import { goto } from '$app/navigation';
     export let count: string;
     export let timeframe: string; // used in computations, do not change
     export let timespan: Timespan; // strings for displaying timeframe to humans
@@ -43,7 +43,7 @@
     <!-- time buttons -->
     <!-- back button -->
     <button class="timebutton" type="button" value="back" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8678</button>
-    <span class="timetravel">Time Travel</span>
+    <span class="timetravel">Time</span>
     <!-- forward button -->
     <button class="timebutton" type="button" value="fwd"
         disabled={flag} on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8680</button> 
@@ -67,11 +67,8 @@
         flex-direction: row;
         align-items: center;
         gap: 2px;
-        border: 3px ridge blue;
-        border-radius: 6px 8px 10px 10px;
-        padding: 10px;
-        margin-right: 4px;
-        background-color: lightcyan;
+        width: inherit;
+        padding: 5px;
     }
 
     .hamburger, .timebutton, .help {
@@ -94,6 +91,7 @@
     .timetravel {
         color: lightseagreen;
         font-size: xx-small;
+        padding: 2px;
     }
 
     .timespan {

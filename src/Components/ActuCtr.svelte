@@ -48,18 +48,20 @@
     .pageheader {
         position: fixed;
         top: 1px;
-        margin-right: 4px;
+        background-color: lightcyan;
+        border: 3px ridge blue;
+        border-radius: 10px;
+        margin-right: 2px;
         margin-bottom: 6px;
-        --pg-width: 99svw;
-        width: 99svw;
-        min-width: --pg-width;
+        width: 96%;
     }
 
     .pagecontent {
         padding: 5px;
-        width: --pg-width;
+        width: 96%;
         border: 2px solid black;
-        margin-top: 6rem;
+        border-radius: 8px;
+        margin-top: 5.5rem;
         margin-right: 2px;
         margin-left: 2px;
         max-width: inherit;
