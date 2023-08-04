@@ -55,7 +55,7 @@
     }
 
     .pagecontent {
-        width: 99svh;
+        width: 99svw;
         margin-top: 7rem;
     }
     
