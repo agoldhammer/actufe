@@ -38,15 +38,15 @@
 
 <div class="actu-hdr">
     <!-- TODO: hamburger button, for now is just HOME button-->
-    <button class="hamburger" type="button" on:click|preventDefault={() => handleHamburgerBtnClick()}>&#9776</button>
+    <button class="hamburger" type="button" on:click|preventDefault={handleHamburgerBtnClick}>&#9776</button>
     <div class="spacer"></div>
     <!-- time buttons -->
     <!-- back button -->
-    <button class="timebutton" type="button" value="back" on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8678</button>
+    <button class="timebutton" type="button" value="back" on:click|preventDefault={handleTimeBtnClick}>&#8678</button>
     <span class="timetravel">Time</span>
     <!-- forward button -->
     <button class="timebutton" type="button" value="fwd"
-        disabled={flag} on:click|preventDefault={(event) => handleTimeBtnClick(event)}>&#8680</button> 
+        disabled={flag} on:click|preventDefault={handleTimeBtnClick}>&#8680</button> 
     <!-- help button -->
     <div class="spacer"></div>
     <button class="help" type="button" on:click|preventDefault={() => goto('/about')} >Help</button>
