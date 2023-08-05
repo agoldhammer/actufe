@@ -1,8 +1,6 @@
 <script lang=ts>
-    interface Timespan {
-        start: string
-        end: string
-    }
+
+    import type { Timespan } from "$comp/ActuCtr.svelte"
 	import { goto } from '$app/navigation';
     export let count: string;
     export let timeframe: string; // used in computations, do not change
@@ -23,8 +21,6 @@
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
         // console.log(event.target.value)
-        // @ts-ignore
-        document.getElementById("pagecontent").scrollTop=0;
         if (event.target.value === 'back') {
             const newframe = +timeframe + 1
             goto('/?timeframe=' + newframe)
@@ -33,6 +29,10 @@
             newframe = newframe < 0 ? 0: newframe;
             goto('/?timeframe=' + newframe)
         }
+        // scroll back to top after time travel
+        // @ts-ignore
+        document.getElementById("pagecontent").scrollTop=0;
+
 
     }
     // let FETCHED_ARTS: string
