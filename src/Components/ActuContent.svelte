@@ -1,15 +1,6 @@
 <script lang=ts>
-    interface Articles {
-        id: string
-        title: string
-        summary: string
-        pubdate: string
-        pubname: string
-        link: string
-        hash: string
-    }
-
-    export let articles: Articles[]
+    import type { Article } from "$comp/ActuCtr.svelte"
+    export let articles: Article[]
 </script>
 
 <!-- <div class="content"> -->

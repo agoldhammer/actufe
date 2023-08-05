@@ -4,8 +4,8 @@
     An article display box
     A footer
  -->
- <script lang=ts>
-    interface Article {
+ <script lang=ts context=module>
+    export interface Article {
         id: string
         title: string
         summary: string
@@ -15,7 +15,7 @@
         hash: string
     }
 
-    interface Timespan {
+    export interface Timespan {
         start: string
         end: string
     }
@@ -25,12 +25,16 @@
         timeframe: string
         timespan: Timespan
     }
-    
-	import ActuContent from "./ActuContent.svelte";
+ 
+ </script>
+
+ <script lang=ts>
+
+    import ActuContent from "./ActuContent.svelte";
 	import ActuHdr from "./ActuHdr.svelte";
     export let appdata: Appdata;
-    console.log('ActuCtr: timeframe', appdata.timeframe)
- 
+    // console.log('ActuCtr: timeframe', appdata.timeframe)
+
  </script>
 
 <!-- <div class="pagecontainer"> -->
