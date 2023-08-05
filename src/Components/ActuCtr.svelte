@@ -67,8 +67,8 @@
         margin-right: 2px;
         margin-left: 2px;
         max-width: inherit;
-        height: 80svh;
-        max-height: 80svh;
+        height: 90svh;
+        max-height: 95svh;
         overflow: scroll;
     }
     
