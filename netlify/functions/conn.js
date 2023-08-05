@@ -24,6 +24,7 @@ exports.handler = async (event, context) => {
 		)
 		.sort({ pubdate: -1 })
 		.toArray();
+	db.close();
 	// console.log(data);
 	const reply = {
 		articles: data,
