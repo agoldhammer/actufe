@@ -37,15 +37,13 @@
 
  </script>
 
-<!-- <div class="pagecontainer"> -->
-    <div class="pageheader">
-        <ActuHdr count={appdata.count} timeframe={appdata.timeframe}
-            timespan={appdata.timespan}/>
-    </div>
-    <div class="pagecontent">
-        <ActuContent articles={appdata.arts}/>
-    </div>
-<!-- </div> -->
+<div class="pageheader">
+    <ActuHdr count={appdata.count} timeframe={appdata.timeframe}
+        timespan={appdata.timespan}/>
+</div>
+<div id="pagecontent">
+    <ActuContent articles={appdata.arts}/>
+</div>
 
 <style>
 
@@ -60,7 +58,7 @@
         width: 96%;
     }
 
-    .pagecontent {
+    #pagecontent {
         padding: 5px;
         width: 96%;
         border: 2px solid black;

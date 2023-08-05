@@ -23,6 +23,8 @@
     // @ts-ignore
     const handleTimeBtnClick = (event) => {
         // console.log(event.target.value)
+        // @ts-ignore
+        document.getElementById("pagecontent").scrollTop=0;
         if (event.target.value === 'back') {
             const newframe = +timeframe + 1
             goto('/?timeframe=' + newframe)
