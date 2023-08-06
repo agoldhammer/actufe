@@ -30,5 +30,8 @@ In css, can toggle class list with onclick=this.classList.toggle(...)
 [add tooltips with tippy, see svelte tutorial](https://learn.svelte.dev/tutorial/adding-parameters-to-actions)
 
 [sliding sidebar](https://codepen.io/dphrag/pen/JeayLw)
+[svelte sliding sidebar](https://svelte.dev/repl/03f0be0c4dc54eb4af5a168f644f5c31?version=3.19.1)
+
+[group inputs](https://svelte.dev/examples/group-inputs)
 
 need to fix listk of pubnames so it updates with timeshift

@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let pubnames: Set<string>;
+	export let pubnames: Array<string>;
 </script>
 
 <div class="sidebar">

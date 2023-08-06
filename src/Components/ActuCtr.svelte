@@ -24,6 +24,7 @@
 		count: string;
 		timeframe: string;
 		timespan: Timespan;
+		pubnames: Array<string>; // sorted array of pubnames on current page
 	}
 </script>
 
@@ -33,9 +34,10 @@
 	import ActuSidebar from './ActuSidebar.svelte';
 	export let appdata: Appdata;
 	// console.log('ActuCtr: timeframe', appdata.timeframe)
-	export let pubnames: Set<string> = new Set();
-	appdata.arts.forEach((art) => pubnames.add(art.pubname));
-	console.log(pubnames);
+	// let pubnames: Set<string> = new Set();
+	// appdata.arts.forEach((art) => pubnames.add(art.pubname));
+	// $: pubnames = pubnames;
+	// console.log(pubnames);
 </script>
 
 <div class="pagewrapper">
@@ -47,7 +49,7 @@
 		<ActuContent articles={appdata.arts} />
 	</div>
 	<div class="aside">
-		<ActuSidebar {pubnames} />
+		<ActuSidebar pubnames={appdata.pubnames} />
 	</div>
 	<div class="footer">footer</div>
 </div>
