@@ -55,9 +55,10 @@
 <style>
 	.pagewrapper {
 		display: grid;
+		margin: 0 0 0 0;
 		border: 2px solid blue;
 		border-radius: 10px;
-		height: 100svh;
+		height: 98svh;
 		background-color: rgba(208, 198, 203, 0.2);
 		grid-template-columns: auto 1fr;
 		grid-template-rows: 1fr 11fr 1fr;
@@ -71,6 +72,7 @@
 	.aside {
 		grid-area: aside;
 		border: 1px solid magenta;
+		border-radius: 10px;
 		width: 100px;
 		padding: 6px;
 		margin-left: 2px;
@@ -100,6 +102,7 @@
 		grid-area: content;
 		color: green;
 		border: 1px groove magenta;
+		border-radius: 10px;
 		margin-right: 2px;
 		padding: 1em;
 		overflow: scroll;
