@@ -28,3 +28,7 @@ add netlify adapter
 In css, can toggle class list with onclick=this.classList.toggle(...)
 
 [add tooltips with tippy, see svelte tutorial](https://learn.svelte.dev/tutorial/adding-parameters-to-actions)
+
+[sliding sidebar](https://codepen.io/dphrag/pen/JeayLw)
+
+need to fix listk of pubnames so it updates with timeshift
