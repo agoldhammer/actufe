@@ -32,6 +32,43 @@
 		// @ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
+
+	import tippy from 'tippy.js';
+	import 'tippy.js/dist/tippy.css';
+	import 'tippy.js/themes/material.css';
+
+	// @ts-ignore
+	function tooltip(node, options) {
+		// @ts-ignore
+		const tooltip = tippy(node, options);
+		return {
+			//@ts-ignore
+			update(options) {
+				//@ts-ignore
+				tooltip.setProps(options);
+			},
+			destroy() {
+				//@ts-ignore
+				tooltip.destroy();
+			}
+		};
+	}
+
+	const fwdBtnTip = 'Next time frame';
+	const backBtnTip = 'Prev time frame';
+
+	// const tooltip = (node, options) => {
+	// 	const tooltip = tippy(node, options);
+
+	// 	return {
+	// 		update(options) {
+	// 			tooltip.setProps(options);
+	// 		},
+	// 		destroy() {
+	// 			tooltip.destroy();
+	// 		}
+	// 	};
+	// }
 </script>
 
 <div class="actu-hdr">
@@ -42,13 +79,18 @@
 	<div class="spacer" />
 	<!-- time buttons -->
 	<!-- back button -->
-	<button class="timebutton" type="button" value="back" on:click|preventDefault={handleTimeBtnClick}
-		>&#8678</button
+	<button
+		class="timebutton"
+		type="button"
+		use:tooltip={{ content: backBtnTip, theme: 'material', animation: 'fade' }}
+		value="back"
+		on:click|preventDefault={handleTimeBtnClick}>&#8678</button
 	>
 	<span class="timetravel">Time</span>
 	<!-- forward button -->
 	<button
 		class="timebutton"
+		use:tooltip={{ content: fwdBtnTip, theme: 'material', animation: 'fade' }}
 		type="button"
 		value="fwd"
 		disabled={flag}
