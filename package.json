@@ -36,6 +36,7 @@
 	"dependencies": {
 		"date-fns": "^2.30.0",
 		"mongodb": "^5.7.0",
-		"saslprep": "^1.0.3"
+		"saslprep": "^1.0.3",
+		"tippy.js": "^6.3.7"
 	}
 }

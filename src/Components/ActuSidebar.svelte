@@ -16,7 +16,7 @@
 		flex-direction: column;
 		justify-content: space-around;
 		font-size: xx-small;
-		overflow: scroll;
+		overflow-y: scroll;
 		color: blue;
 	}
 	.option {

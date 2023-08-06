@@ -1,110 +1,118 @@
-<script lang=ts>
-
-    import type { Timespan } from "$comp/ActuCtr.svelte"
+<script lang="ts">
+	import type { Timespan } from '$comp/ActuCtr.svelte';
 	import { goto } from '$app/navigation';
-    export let count: string;
-    export let timeframe: string; // used in computations, do not change
-    export let timespan: Timespan; // strings for displaying timeframe to humans
-    // console.log('timeframe', timeframe)
-    $: flag = (timeframe === '0'?true: false);
+	export let count: string;
+	export let timeframe: string; // used in computations, do not change
+	export let timespan: Timespan; // strings for displaying timeframe to humans
+	// console.log('timeframe', timeframe)
+	$: flag = timeframe === '0' ? true : false;
 
-    function disableFwd() {
-        return timeframe === '0'? true: false;
-    }
+	function disableFwd() {
+		return timeframe === '0' ? true : false;
+	}
 
-    const handleHamburgerBtnClick = () => {
-        console.log('Handling hamburger')
-        //timeframe = "0";
-        // 
-        goto('/about')
-    }
-    // @ts-ignore
-    const handleTimeBtnClick = (event) => {
-        // console.log(event.target.value)
-        if (event.target.value === 'back') {
-            const newframe = +timeframe + 1
-            goto('/?timeframe=' + newframe)
-        } else {
-            let newframe = +timeframe - 1;
-            newframe = newframe < 0 ? 0: newframe;
-            goto('/?timeframe=' + newframe)
-        }
-        // scroll back to top after time travel
-        // @ts-ignore
-        document.getElementById("pagecontent").scrollTop=0;
-
-
-    }
-    // let FETCHED_ARTS: string
+	const handleHamburgerBtnClick = () => {
+		console.log('Handling hamburger');
+		//timeframe = "0";
+		//
+		goto('/about');
+	};
+	// @ts-ignore
+	const handleTimeBtnClick = (event) => {
+		// console.log(event.target.value)
+		if (event.target.value === 'back') {
+			const newframe = +timeframe + 1;
+			goto('/?timeframe=' + newframe);
+		} else {
+			let newframe = +timeframe - 1;
+			newframe = newframe < 0 ? 0 : newframe;
+			goto('/?timeframe=' + newframe);
+		}
+		// scroll back to top after time travel
+		// @ts-ignore
+		document.getElementById('pagecontent').scrollTop = 0;
+	};
 </script>
 
 <div class="actu-hdr">
-    <!-- TODO: hamburger button, for now is just HOME button-->
-    <button class="hamburger" type="button" on:click|preventDefault={handleHamburgerBtnClick}>&#9776</button>
-    <div class="spacer"></div>
-    <!-- time buttons -->
-    <!-- back button -->
-    <button class="timebutton" type="button" value="back" on:click|preventDefault={handleTimeBtnClick}>&#8678</button>
-    <span class="timetravel">Time</span>
-    <!-- forward button -->
-    <button class="timebutton" type="button" value="fwd"
-        disabled={flag} on:click|preventDefault={handleTimeBtnClick}>&#8680</button> 
-    <!-- help button -->
-    <div class="spacer"></div>
-    <button class="help" type="button" on:click|preventDefault={() => goto('/about')} >Help</button>
-    <!-- <span>{FETCHED_ARTS}</span> -->
-    <div class="spacer"></div>
-    <!-- <button class="count">Count: {count}</button> -->
-    <div class="timespan">
-        <span>Displaying {count}</span>
-        <span>{timespan.start}</span>
-        <span>{timespan.end}</span>
-    </div>
+	<!-- TODO: hamburger button, for now is just HOME button-->
+	<button class="hamburger" type="button" on:click|preventDefault={handleHamburgerBtnClick}
+		>&#9776</button
+	>
+	<div class="spacer" />
+	<!-- time buttons -->
+	<!-- back button -->
+	<button class="timebutton" type="button" value="back" on:click|preventDefault={handleTimeBtnClick}
+		>&#8678</button
+	>
+	<span class="timetravel">Time</span>
+	<!-- forward button -->
+	<button
+		class="timebutton"
+		type="button"
+		value="fwd"
+		disabled={flag}
+		on:click|preventDefault={handleTimeBtnClick}>&#8680</button
+	>
+	<!-- help button -->
+	<div class="spacer" />
+	<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
+	<!-- <span>{FETCHED_ARTS}</span> -->
+	<div class="spacer" />
+	<!-- <button class="count">Count: {count}</button> -->
+	<div class="timespan">
+		<span>Displaying {count}</span>
+		<span>{timespan.start}</span>
+		<span>{timespan.end}</span>
+	</div>
 </div>
 
 <style>
-    .actu-hdr {
-        display:flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        align-items: center;
-        gap: 2px;
-        width: inherit;
-        padding: 5px;
-    }
+	.actu-hdr {
+		display: flex;
+		flex-wrap: wrap;
+		flex-direction: row;
+		align-items: center;
+		gap: 2px;
+		width: inherit;
+		padding: 5px;
+	}
 
-    .hamburger, .timebutton, .help {
-        height: 85%;
-        border-radius: 8px;
-        background-color:lightcoral;
-        color: white;
-        transition-duration: 0.3s;
-    }
+	.hamburger,
+	.timebutton,
+	.help {
+		height: 85%;
+		border-radius: 8px;
+		background-color: lightcoral;
+		color: white;
+		transition-duration: 0.3s;
+	}
 
-    .timebutton:disabled,
-    .timebutton:hover:disabled {
-        background-color: lightgray;
-    }
+	.timebutton:disabled,
+	.timebutton:hover:disabled {
+		background-color: lightgray;
+	}
 
-    .hamburger:hover, .timebutton:hover, .help:hover {
-        background-color: green;
-    }
+	.hamburger:hover,
+	.timebutton:hover,
+	.help:hover {
+		background-color: green;
+	}
 
-    .timetravel {
-        color: lightseagreen;
-        font-size: xx-small;
-        padding: 2px;
-    }
+	.timetravel {
+		color: lightseagreen;
+		font-size: xx-small;
+		padding: 2px;
+	}
 
-    .timespan {
-        font-size: xx-small;
-        display: flex;
-        flex-direction: column;
-        color: lightseagreen;
-    }
+	.timespan {
+		font-size: xx-small;
+		display: flex;
+		flex-direction: column;
+		color: lightseagreen;
+	}
 
-
-    .spacer {
-        width: 1em;
-    }
+	.spacer {
+		width: 1em;
+	}
 </style>

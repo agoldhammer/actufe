@@ -60,6 +60,7 @@
 		border-radius: 10px;
 		height: 98svh;
 		background-color: rgba(208, 198, 203, 0.2);
+		/* grid-template-columns: minmax(100px, 1fr) 7fr; */
 		grid-template-columns: auto 1fr;
 		grid-template-rows: 1fr 11fr 1fr;
 		gap: 0.3em;
@@ -74,8 +75,8 @@
 		border: 1px solid magenta;
 		border-radius: 10px;
 		width: 100px;
-		padding: 6px;
-		margin-left: 2px;
+		padding: 1px;
+		margin-left: 0px;
 		color: lightsalmon;
 		display: flex;
 		flex-direction: column;
@@ -101,10 +102,11 @@
 	.content {
 		grid-area: content;
 		color: green;
-		border: 1px groove magenta;
-		border-radius: 10px;
+		/* border: 1px groove magenta; */
+		/* border-radius: 10px; */
+		margin-left: 0px;
 		margin-right: 2px;
-		padding: 1em;
+		padding: 0px;
 		overflow: scroll;
 	}
 

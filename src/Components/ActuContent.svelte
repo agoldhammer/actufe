@@ -65,16 +65,11 @@
 		margin-bottom: 1rem;
 		font-size: smaller;
 		color: black;
-
-		/* border-top-style: none; */
 	}
 
 	.pubdate {
-		/* color: lightseagreen; */
-		/* color: oklch(20.1, 0.091, 146.1); */
 		color: #00b4d8;
 		font-size: xx-small;
-		/* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
 	}
 
 	:global(img) {
