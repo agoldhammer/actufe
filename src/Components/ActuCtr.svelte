@@ -57,7 +57,7 @@
 		display: grid;
 		border: 2px solid blue;
 		border-radius: 10px;
-		height: 100lvh;
+		height: 100svh;
 		background-color: rgba(208, 198, 203, 0.2);
 		grid-template-columns: auto 1fr;
 		grid-template-rows: 1fr 11fr 1fr;
@@ -78,6 +78,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+		font-size: xx-small;
 	}
 
 	.header {
