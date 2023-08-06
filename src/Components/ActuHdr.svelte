@@ -56,19 +56,6 @@
 
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
-
-	// const tooltip = (node, options) => {
-	// 	const tooltip = tippy(node, options);
-
-	// 	return {
-	// 		update(options) {
-	// 			tooltip.setProps(options);
-	// 		},
-	// 		destroy() {
-	// 			tooltip.destroy();
-	// 		}
-	// 	};
-	// }
 </script>
 
 <div class="actu-hdr">

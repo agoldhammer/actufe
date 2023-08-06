@@ -33,11 +33,6 @@
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
 	export let appdata: Appdata;
-	// console.log('ActuCtr: timeframe', appdata.timeframe)
-	// let pubnames: Set<string> = new Set();
-	// appdata.arts.forEach((art) => pubnames.add(art.pubname));
-	// $: pubnames = pubnames;
-	// console.log(pubnames);
 </script>
 
 <div class="pagewrapper">
