@@ -16,15 +16,19 @@ exports.handler = async (event, context) => {
 	const now = new Date();
 	const end = subHours(now, timeframe * timewindow);
 	const start = subHours(end, timewindow);
+	let data;
 
-	const data = await articles
-		.find(
-			{ pubdate: { $gte: start, $lt: end } },
-			{ projection: { _id: 0, title: 1, summary: 1, pubdate: 1, pubname: 1, link: 1, hash: 1 } }
-		)
-		.sort({ pubdate: -1 })
-		.toArray();
-	client.close();
+	try {
+		data = await articles
+			.find(
+				{ pubdate: { $gte: start, $lt: end } },
+				{ projection: { _id: 0, title: 1, summary: 1, pubdate: 1, pubname: 1, link: 1, hash: 1 } }
+			)
+			.sort({ pubdate: -1 })
+			.toArray();
+	} finally {
+		client.close();
+	}
 	// console.log(data);
 	const reply = {
 		articles: data,
