@@ -1,24 +1,27 @@
 <script lang="ts">
 	import type { Article } from '$comp/ActuCtr.svelte';
 	export let articles: Article[];
+	export let selected_pubnames: string[];
 </script>
 
 <!-- <div class="content"> -->
 {#each articles as article, i}
-	<!-- content here -->
+	{#if selected_pubnames.includes(article.pubname)}
+		<!-- content here -->
 
-	<div class="card">
-		<div class="cardhdr">
-			<span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span>
-			<span>{article.title}</span>
-			<a href={article.link} target="_blank" rel="noreferrer noopener"
-				>&#8618; Continue reading ...</a
-			>
+		<div class="card">
+			<div class="cardhdr">
+				<span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span>
+				<span>{article.title}</span>
+				<a href={article.link} target="_blank" rel="noreferrer noopener"
+					>&#8618; Continue reading ...</a
+				>
+			</div>
+			<div class="cardbody">
+				{@html article.summary}
+			</div>
 		</div>
-		<div class="cardbody">
-			{@html article.summary}
-		</div>
-	</div>
+	{/if}
 {/each}
 
 <!-- </div> -->

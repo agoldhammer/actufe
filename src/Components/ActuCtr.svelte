@@ -37,7 +37,11 @@
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
-	onMount(() => console.log('ActuCtr mounted'));
+	// onMount(() => console.log('ActuCtr mounted'));
+	let selected_pubnames: string[] = appdata.pubnames;
+	// function handleAsideClick() {
+	// 	console.log(selected_pubnames);
+	// }
 </script>
 
 <div class="pagewrapper">
@@ -46,10 +50,10 @@
 	</div>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
-		<ActuContent articles={appdata.arts} />
+		<ActuContent articles={appdata.arts} {selected_pubnames} />
 	</div>
 	<div class="aside">
-		<ActuSidebar pubnames={appdata.pubnames} />
+		<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames />
 	</div>
 	<div class="footer">
 		<ActuFtr ndocs={appdata.ndocs} />

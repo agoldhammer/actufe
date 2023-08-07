@@ -1,12 +1,14 @@
 <script lang="ts">
-	export let pubnames: Array<string>;
+	export let pubnames: string[];
+	export let selected_pubnames: string[];
 </script>
 
 <div class="sidebar">
 	{#each pubnames as pubname, i}
-		<div class="option">
-			<span>{pubname}</span>
-		</div>
+		<label class="option">
+			{pubname}
+			<input type="checkbox" bind:group={selected_pubnames} value={pubname} />
+		</label>
 	{/each}
 </div>
 
@@ -23,7 +25,7 @@
 		margin: 2px;
 	}
 
-	.option span:hover {
+	.option:hover {
 		color: magenta;
 	}
 </style>
