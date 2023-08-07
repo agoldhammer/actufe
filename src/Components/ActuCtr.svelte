@@ -104,7 +104,7 @@
 		margin-left: 0px;
 		margin-right: 2px;
 		padding: 0px;
-		overflow: scroll;
+		overflow-y: scroll;
 	}
 
 	/* checkbox {
