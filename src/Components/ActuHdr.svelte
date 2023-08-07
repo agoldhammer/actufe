@@ -15,7 +15,9 @@
 		console.log('Handling hamburger');
 		//timeframe = "0";
 		//
-		goto('/about');
+		// goto('/about');
+		//@ts-ignore
+		document.getElementById('pagecontent').scrollTop = 0;
 	};
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {

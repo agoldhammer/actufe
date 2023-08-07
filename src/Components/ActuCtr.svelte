@@ -29,10 +29,13 @@
 </script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import ActuContent from './ActuContent.svelte';
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
 	export let appdata: Appdata;
+	onMount(() => console.log('ActuCtr mounted'));
 </script>
 
 <div class="pagewrapper">
@@ -52,7 +55,8 @@
 <style>
 	.pagewrapper {
 		display: grid;
-		margin: 0 0 0 0;
+		margin: 0px;
+		padding: 2px;
 		border: 2px solid blue;
 		border-radius: 10px;
 		height: 98svh;

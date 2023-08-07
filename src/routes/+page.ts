@@ -15,9 +15,13 @@ export const load = async function ({fetch, url}) {
 	// console.log("load: url.searchParams", url.searchParams.get('timeframe') || '0')
 	const timeframe = url.searchParams.get('timeframe') || '0'
 	console.log('load: timeframe', timeframe)
-	const response = await fetch('/.netlify/functions/conn?timeframe=' + timeframe)
+	let response;
+	try{
+		response = await fetch('/.netlify/functions/conn?timeframe=' + timeframe)
           .then(response => response.json()
-          )
+          )} catch (e) {
+				console.log("load error:", e);
+		  } 
 	const pubnameset: Set<string> = new Set();
 	const articles: Article[] = response.articles
 	articles.forEach((article) => pubnameset.add(article.pubname));
