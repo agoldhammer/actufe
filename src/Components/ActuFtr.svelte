@@ -1,3 +1,7 @@
+<script lang="ts">
+	export let ndocs: string;
+</script>
+
 <p>
-    This is footer
+	Total no. of docs {ndocs}
 </p>

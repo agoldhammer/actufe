@@ -31,5 +31,7 @@ export const load = async function ({fetch, url}) {
 			count: response.count,
 			timeframe: timeframe,
 			timespan: response.timespan,
-			pubnames: pubnames}
+			pubnames: pubnames,
+			ndocs: response.ndocs
+		}
 }

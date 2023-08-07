@@ -25,6 +25,7 @@
 		timeframe: string;
 		timespan: Timespan;
 		pubnames: Array<string>; // sorted array of pubnames on current page
+		ndocs: string;
 	}
 </script>
 
@@ -34,6 +35,7 @@
 	import ActuContent from './ActuContent.svelte';
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
+	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
 	onMount(() => console.log('ActuCtr mounted'));
 </script>
@@ -49,7 +51,9 @@
 	<div class="aside">
 		<ActuSidebar pubnames={appdata.pubnames} />
 	</div>
-	<div class="footer">footer</div>
+	<div class="footer">
+		<ActuFtr ndocs={appdata.ndocs} />
+	</div>
 </div>
 
 <style>
@@ -123,7 +127,7 @@
 		border: 2px solid orange;
 		border-radius: 10px;
 		grid-area: footer;
-		color: lightcoral;
+		color: blue;
 		padding: 0.5rem;
 		margin: 2px;
 		font-size: xx-small;

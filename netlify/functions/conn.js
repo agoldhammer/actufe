@@ -17,6 +17,7 @@ exports.handler = async (event, context) => {
 	const end = subHours(now, timeframe * timewindow);
 	const start = subHours(end, timewindow);
 	let data;
+	let ndocs = 0;
 
 	try {
 		data = await articles
@@ -26,6 +27,7 @@ exports.handler = async (event, context) => {
 			)
 			.sort({ pubdate: -1 })
 			.toArray();
+		ndocs = await articles.countDocuments();
 	} finally {
 		client.close();
 	}
@@ -33,7 +35,8 @@ exports.handler = async (event, context) => {
 	const reply = {
 		articles: data,
 		count: data.length,
-		timespan: { start: format(start, 'HH:mm O'), end: format(end, 'HH:mm O') }
+		timespan: { start: format(start, 'HH:mm O'), end: format(end, 'HH:mm O') },
+		ndocs: ndocs
 	};
 
 	return {
