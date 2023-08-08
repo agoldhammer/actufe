@@ -1,15 +1,12 @@
 <script lang="ts">
 	// import { redirect } from '@sveltejs/kit';
-	// import { user } from '../store';
+	import { user } from '../store';
 	import { goto } from '$app/navigation';
 	let value = '';
 	function handleReady() {
 		console.log('hdl', value);
 		if (value === 'shazam') {
-			// user.update((u) => (u = JSON.stringify('identified')));
-			//@ts-ignore
-			// user.update((u) => (u = JSON.stringify('identified')));
-			// user.set(JSON.stringify('identified'));
+			user.set(true);
 			console.log('bingo');
 			goto('/');
 		}

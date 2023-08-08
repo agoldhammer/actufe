@@ -1,6 +1,6 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-// import { user } from '../routes/store';
+import { user } from '../routes/store';
 
 
 export interface Article {
@@ -16,14 +16,14 @@ export interface Article {
 
 
 export const load = async function ({fetch, url}) {
-	let user_id ='';
-	// user.subscribe((u) => (user_id = u));
-	// console.log("load", user_id)
-	// if (user_id === '') {
-	// 	throw redirect(307, "login")
-	// }
+	let credentials = false;
+	user.subscribe((u) => credentials = u);
+	console.log("load credentials", credentials)
+	if (!credentials) {
+		throw redirect(307, "login")
+	}
 	const timeframe = url.searchParams.get('timeframe') || '0'
-	console.log('load: timeframe', timeframe)
+	// console.log('load: timeframe', timeframe)
 	let response;
 	try{
 		response = await fetch('/.netlify/functions/conn?timeframe=' + timeframe)
