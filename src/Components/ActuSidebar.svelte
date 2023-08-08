@@ -3,10 +3,8 @@
 	export let selected_pubnames: string[];
 	let all = true;
 	function handleAllNone() {
-		console.log('hdl entr', all);
 		all = !all;
 		selected_pubnames = all ? pubnames : [];
-		console.log('hdl leave', all);
 	}
 </script>
 
