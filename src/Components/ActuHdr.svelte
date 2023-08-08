@@ -13,9 +13,6 @@
 
 	const handleHamburgerBtnClick = () => {
 		console.log('Handling hamburger');
-		//timeframe = "0";
-		//
-		// goto('/about');
 		//@ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
