@@ -1,9 +1,21 @@
 <script lang="ts">
 	export let pubnames: string[];
 	export let selected_pubnames: string[];
+	let all = true;
+	function handleAllNone() {
+		console.log('hdl entr', all);
+		all = !all;
+		selected_pubnames = all ? pubnames : [];
+		console.log('hdl leave', all);
+	}
 </script>
 
 <div class="sidebar">
+	<label class="option">
+		All/None
+		<input type="checkbox" bind:checked={all} on:click={handleAllNone} />
+	</label>
+	<hr />
 	{#each pubnames as pubname, i}
 		<label class="option">
 			{pubname}
@@ -32,5 +44,11 @@
 
 	.option:hover {
 		color: magenta;
+	}
+
+	hr {
+		border: solid lightblue 1px;
+		width: 90%;
+		margin: 4px;
 	}
 </style>

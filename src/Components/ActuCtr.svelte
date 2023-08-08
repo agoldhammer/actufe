@@ -83,7 +83,7 @@
 		grid-area: aside;
 		border: 1px solid magenta;
 		border-radius: 10px;
-		width: 100px;
+		/* width: 120px; */
 		padding: 1px;
 		margin-left: 0px;
 		color: lightsalmon;
