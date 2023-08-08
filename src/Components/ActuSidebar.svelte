@@ -16,12 +16,17 @@
 	.sidebar {
 		display: flex;
 		flex-direction: column;
-		justify-content: space-around;
+		justify-content: center;
+		row-gap: 5px;
 		font-size: xx-small;
 		overflow-y: scroll;
 		color: blue;
 	}
 	.option {
+		display: flex;
+		flex-direction: row;
+		width: inherit;
+		justify-content: space-between;
 		margin: 2px;
 	}
 
