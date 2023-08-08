@@ -1,6 +1,6 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-import { user } from '../routes/store';
+// import { user } from '../routes/store';
 
 
 export interface Article {
@@ -13,14 +13,15 @@ export interface Article {
 		hash: string;
 	}
 
-let user_id: string
-user.subscribe((u) => (user_id = u))
+
 
 export const load = async function ({fetch, url}) {
-	console.log("load", user_id)
-	if (user_id === '') {
-		throw redirect(307, "login")
-	}
+	let user_id ='';
+	// user.subscribe((u) => (user_id = u));
+	// console.log("load", user_id)
+	// if (user_id === '') {
+	// 	throw redirect(307, "login")
+	// }
 	const timeframe = url.searchParams.get('timeframe') || '0'
 	console.log('load: timeframe', timeframe)
 	let response;
