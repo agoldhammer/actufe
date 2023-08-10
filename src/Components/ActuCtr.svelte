@@ -63,11 +63,12 @@
 <style>
 	.pagewrapper {
 		display: grid;
-		margin: 0px;
+		margin: 0 auto;
 		padding: 2px;
 		border: 2px solid blue;
 		border-radius: 10px;
 		height: 98svh;
+		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
 		/* grid-template-columns: minmax(100px, 1fr) 7fr; */
 		grid-template-columns: auto 1fr;
