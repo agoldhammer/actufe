@@ -30,7 +30,7 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	// import { onMount } from 'svelte';
 
 	import ActuContent from './ActuContent.svelte';
 	import ActuHdr from './ActuHdr.svelte';
@@ -39,8 +39,7 @@
 	export let appdata: Appdata;
 	// onMount(() => console.log('ActuCtr mounted'));
 	let selected_pubnames: string[] = appdata.pubnames;
-	// function handleAsideClick() {
-	// 	console.log(selected_pubnames);
+	let collapse_summary = false;
 	// }
 </script>
 
@@ -50,10 +49,10 @@
 	</div>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
-		<ActuContent articles={appdata.arts} {selected_pubnames} />
+		<ActuContent articles={appdata.arts} {selected_pubnames} {collapse_summary} />
 	</div>
 	<div class="aside">
-		<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames />
+		<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames bind:collapse_summary />
 	</div>
 	<div class="footer">
 		<ActuFtr ndocs={appdata.ndocs} />

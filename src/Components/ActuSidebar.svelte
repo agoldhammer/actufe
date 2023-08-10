@@ -6,6 +6,7 @@
 		all = !all;
 		selected_pubnames = all ? pubnames : [];
 	}
+	export let collapse_summary: boolean;
 </script>
 
 <div class="sidebar">
@@ -14,12 +15,17 @@
 		<input type="checkbox" bind:checked={all} on:click={handleAllNone} />
 	</label>
 	<hr />
-	{#each pubnames as pubname, i}
+	{#each pubnames as pubname}
 		<label class="option">
 			{pubname}
 			<input type="checkbox" bind:group={selected_pubnames} value={pubname} />
 		</label>
 	{/each}
+	<hr />
+	<label class="option">
+		No summary
+		<input type="checkbox" bind:checked={collapse_summary} />
+	</label>
 </div>
 
 <style>
