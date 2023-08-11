@@ -69,7 +69,6 @@
 		height: 98lvh;
 		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
-		/* grid-template-columns: minmax(100px, 1fr) 7fr; */
 		grid-template-columns: auto 1fr;
 		grid-template-rows: 1fr 11fr 1fr;
 		gap: 0.3em;
@@ -104,10 +103,6 @@
 		gap: 15px;
 	}
 
-	/* button {
-  height: 60%;
-} */
-
 	.content {
 		grid-area: content;
 		color: green;
@@ -119,14 +114,6 @@
 		overflow-y: scroll;
 	}
 
-	/* checkbox {
-  padding: 10px;
-  margin: 10px;
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: gray;
-} */
-
 	.footer {
 		border: 2px solid orange;
 		border-radius: 10px;
@@ -136,13 +123,4 @@
 		margin: 2px;
 		font-size: xx-small;
 	}
-
-	/* .opt {
-  padding-left: 8px;
-  font-size: xx-small;
-}
-
-.opt:first-of-type {
-  margin-top: 8px;
-}    */
 </style>

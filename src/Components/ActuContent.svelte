@@ -48,6 +48,7 @@
 		color: #9a031e;
 		font-size: larger;
 		box-shadow: 8px 8px #c1bebe;
+		overflow-wrap: break-word;
 	}
 
 	.cardhdr {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let pubnames: string[];
 	export let selected_pubnames: string[];
-	let all = true;
+	let all = true; //display all pubnames
 	function handleAllNone() {
 		all = !all;
 		selected_pubnames = all ? pubnames : [];
