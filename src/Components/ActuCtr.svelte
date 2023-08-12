@@ -66,7 +66,7 @@
 		padding: 2px;
 		border: 2px solid blue;
 		border-radius: 10px;
-		height: 98lvh;
+		height: 98svh;
 		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
 		grid-template-columns: auto 1fr;
