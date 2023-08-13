@@ -90,6 +90,7 @@
 		flex-direction: column;
 		gap: 1rem;
 		font-size: xx-small;
+		overflow: hidden;
 	}
 
 	.header {
