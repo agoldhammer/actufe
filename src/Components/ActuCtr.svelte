@@ -13,6 +13,7 @@
 		pubname: string;
 		link: string;
 		hash: string;
+		cat?: string;
 	}
 
 	export interface Timespan {

@@ -17,7 +17,12 @@
 				<span>{article.title}</span>
 				<a href={article.link} target="_blank" rel="noreferrer noopener"
 					>&#8618; Continue reading ...</a
-				>
+				><br />
+				{#if article.cat}
+					<span class="category">Category {article.cat}</span>
+				{:else}
+					<span class="category">No category</span>
+				{/if}
 			</div>
 			{#if !collapse_summary}
 				<div class="cardbody">
@@ -77,7 +82,8 @@
 		color: black;
 	}
 
-	.pubdate {
+	.pubdate,
+	.category {
 		color: #00b4d8;
 		font-size: xx-small;
 	}
