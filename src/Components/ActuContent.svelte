@@ -82,10 +82,14 @@
 		color: black;
 	}
 
-	.pubdate,
-	.category {
+	.pubdate {
 		color: #00b4d8;
 		font-size: xx-small;
+	}
+
+	.category {
+		color: red;
+		font-size: x-small;
 	}
 
 	:global(img) {
