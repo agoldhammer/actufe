@@ -19,7 +19,7 @@
 					>&#8618; Continue reading ...</a
 				><br />
 				{#if article.cat}
-					<span class="category">Category {article.cat}</span>
+					<span class="category">Category: {article.cat}</span>
 				{:else}
 					<span class="category">No category</span>
 				{/if}
