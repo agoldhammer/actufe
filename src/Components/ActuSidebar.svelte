@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ActuCats from './ActuCats.svelte';
 	export let pubnames: string[];
 	export let selected_pubnames: string[];
 	let all = true; //display all pubnames

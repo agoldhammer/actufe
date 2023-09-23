@@ -2,6 +2,6 @@
 	export let ndocs: string;
 </script>
 
-<p>
+<span>
 	Total no. of docs {ndocs}
-</p>
+</span>

@@ -31,9 +31,17 @@ export const load = async function ({ fetch, url }) {
 		console.log('load error:', e);
 	}
 	const pubnameset: Set<string> = new Set();
+	const catset: Set<string> = new Set();
+	if (response.articles === undefined) {
+		throw new Error('articles missing from response; check actuproxy');
+	}
 	const articles: Article[] = response.articles;
-	articles.forEach((article) => pubnameset.add(article.pubname));
+	articles.forEach((article) => {
+		pubnameset.add(article.pubname);
+		catset.add(article.cat);
+	});
 	const pubnames: Array<string> = Array.from(pubnameset).sort();
+	const catnames: Array<string> = Array.from(catset).sort();
 
 	return {
 		arts: response.articles,
@@ -42,6 +50,6 @@ export const load = async function ({ fetch, url }) {
 		timespan: response.timespan,
 		pubnames: pubnames,
 		ndocs: response.ndocs,
-		cat: response.cat
+		cats: catnames
 	};
 };

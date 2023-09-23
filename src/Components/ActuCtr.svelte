@@ -5,6 +5,7 @@
     A footer
  -->
 <script lang="ts" context="module">
+	import ActuCats from './ActuCats.svelte';
 	export interface Article {
 		id: string;
 		title: string;
@@ -27,6 +28,7 @@
 		timespan: Timespan;
 		pubnames: Array<string>; // sorted array of pubnames on current page
 		ndocs: string;
+		cats: Array<string>;
 	}
 </script>
 
@@ -38,15 +40,16 @@
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
-	// onMount(() => console.log('ActuCtr mounted'));
 	let selected_pubnames: string[] = appdata.pubnames;
 	let collapse_summary = false;
-	// }
 </script>
 
 <div class="pagewrapper">
 	<div class="header">
 		<ActuHdr count={appdata.count} timeframe={appdata.timeframe} timespan={appdata.timespan} />
+	</div>
+	<div class="cats-ctr">
+		<ActuCats cats={appdata.cats} />
 	</div>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
@@ -71,10 +74,11 @@
 		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
 		grid-template-columns: auto 1fr;
-		grid-template-rows: 1fr 11fr 1fr;
+		grid-template-rows: 1fr 1fr 11fr 1fr;
 		gap: 0.3em;
 		grid-template-areas:
 			'hdr hdr'
+			'cats cats'
 			'aside content'
 			'footer footer';
 	}
@@ -124,5 +128,16 @@
 		padding: 0.5rem;
 		margin: 2px;
 		font-size: xx-small;
+	}
+
+	.cats-ctr {
+		border: 1px solid black;
+		border-radius: 10px;
+		grid-area: cats;
+		column-gap: 2px;
+		font-size: xx-small;
+		background-color: rgba(0, 13, 51, 0.8);
+		color: white;
+		overflow-x: hidden;
 	}
 </style>
