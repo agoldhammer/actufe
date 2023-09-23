@@ -1,8 +1,8 @@
 <script lang="ts">
 	// import { redirect } from '@sveltejs/kit';
-	// import { user } from '../../../outtakes/store.js.outtake';
+	import { user } from '../store.js';
 	import { goto } from '$app/navigation';
-	import { user } from '../+page.svelte';
+	// import { user } from '../+page.svelte';
 	let value = '';
 	function handleReady() {
 		console.log('hdl', value);

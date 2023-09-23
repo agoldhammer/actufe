@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ActuCtr from '../Components/ActuCtr.svelte';
 	export let data;
-	export const user = data.user;
+	// export const user = data.user;
 </script>
 
 <svelte:head>

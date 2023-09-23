@@ -60,7 +60,7 @@ export const load = async function ({ fetch, url }) {
 		timespan: response.timespan,
 		pubnames: pubnames,
 		ndocs: response.ndocs,
-		cats: catnames,
-		user: user
+		cats: catnames
+		// user: user
 	};
 };
