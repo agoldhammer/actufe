@@ -1,10 +1,12 @@
 <script lang="ts">
 	import type { Timespan } from '$comp/ActuCtr.svelte';
 	import { goto } from '$app/navigation';
-	export let count: string;
-	export let timeframe: string; // used in computations, do not change
-	export let timespan: Timespan; // strings for displaying timeframe to humans
-	// console.log('timeframe', timeframe)
+	// export let count: string;
+	// export let timeframe: string; // used in computations, do not change
+	// export let timespan: Timespan; // strings for displaying timeframe to humans
+	export let appdata;
+	const { count, timeframe, timespan } = appdata;
+	// console.log('timeframe', count, timeframe, timespan);
 	$: flag = timeframe === '0' ? true : false;
 
 	function disableFwd() {

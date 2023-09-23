@@ -46,7 +46,8 @@
 
 <div class="pagewrapper">
 	<div class="header">
-		<ActuHdr count={appdata.count} timeframe={appdata.timeframe} timespan={appdata.timespan} />
+		<!-- <ActuHdr count={appdata.count} timeframe={appdata.timeframe} timespan={appdata.timespan} /> -->
+		<ActuHdr {appdata} />
 	</div>
 	<div class="cats-ctr">
 		<ActuCats cats={appdata.cats} />
