@@ -31,6 +31,8 @@
 		// @ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
+	// @ts-ignore
+	const handleCatBtnClick = (event) => {};
 
 	import tippy from 'tippy.js';
 	import 'tippy.js/dist/tippy.css';
@@ -55,6 +57,7 @@
 
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
+	const catBtnTip = 'Toggle category display';
 </script>
 
 <div class="actu-hdr">
@@ -62,6 +65,22 @@
 	<button class="hamburger" type="button" on:click|preventDefault={handleHamburgerBtnClick}
 		>&#9776</button
 	>
+	<div class="spacer" />
+	<button
+		class="cat-button"
+		type="button"
+		use:tooltip={{ content: catBtnTip, theme: 'material', animation: 'fade' }}
+		value="cats"
+		on:click|preventDefault={handleCatBtnClick}
+	>
+		Categories
+	</button>
+	<!-- <div class="cat-dropdown">
+		<button class="cat-dropdown-btn" type="button"> Categories </button>
+		<div class="cat-dropdown-content">
+			<p>Cats</p>
+		</div>
+	</div> -->
 	<div class="spacer" />
 	<!-- time buttons -->
 	<!-- back button -->
@@ -108,6 +127,8 @@
 
 	.hamburger,
 	.timebutton,
+	.cat-button,
+	/* .cat-dropdown-btn, */
 	.help {
 		height: 85%;
 		border-radius: 8px;
@@ -123,6 +144,7 @@
 
 	.hamburger:hover,
 	.timebutton:hover,
+	.cat-button:hover,
 	.help:hover {
 		background-color: green;
 	}
@@ -143,4 +165,47 @@
 	.spacer {
 		width: 1em;
 	}
+
+	/* .cat-dropdown {
+		position: relative;
+		display: inline-block;
+		height: 85%;
+		border-radius: 8px;
+		background-color: lightcoral;
+		color: white;
+		transition-duration: 0.3s;
+	}
+
+	.cat-dropdown-content {
+		display: none;
+		position: absolute;
+		background-color: white;
+		z-index: 1;
+	}
+
+	.cat-dropdown:hover .cat-dropdown-content {
+		background-color: blue;
+		color: white;
+		display: block;
+	}
+
+	.cat-dropdown > .cat-dropdown-btn {
+		height: 100%;
+		border-radius: 8px;
+		background-color: lightcoral;
+		color: white;
+		transition-duration: 0.3s;
+	}
+
+	.cat-dropdown:hover .cat-dropdown-btn {
+		background-color: green;
+	}
+
+	.cat-dropdown:hover .cat-dropdown-content {
+		display: block;
+	}
+
+	.cat-dropdown-content p:hover {
+		background-color: red;
+	} */
 </style>

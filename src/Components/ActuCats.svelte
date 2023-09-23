@@ -13,8 +13,8 @@
 	.cats {
 		display: flex;
 		flex-direction: row;
-		justify-content: left;
-		justify-items: stretch;
+		justify-content: left stretch;
+		flex-wrap: wrap;
 		gap: 10px;
 		font-size: small;
 	}

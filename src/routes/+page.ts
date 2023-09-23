@@ -1,6 +1,16 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-import { user } from '../routes/store';
+// import { user } from '../routes/store';
+
+import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
+
+const persistedUser = browser && localStorage.getItem('user');
+const user = writable(persistedUser ? JSON.parse(persistedUser) : '');
+
+if (browser) {
+	user.subscribe((u) => (localStorage.user = u));
+}
 
 export interface Article {
 	id: string;

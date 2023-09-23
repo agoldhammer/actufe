@@ -74,7 +74,7 @@
 		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
 		grid-template-columns: auto 1fr;
-		grid-template-rows: 1fr 1fr 11fr 1fr;
+		grid-template-rows: 1fr 2fr 11fr 1fr;
 		gap: 0.3em;
 		grid-template-areas:
 			'hdr hdr'
