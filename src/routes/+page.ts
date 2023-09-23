@@ -9,6 +9,7 @@ const persistedUser = browser && localStorage.getItem('user');
 const user = writable(persistedUser ? JSON.parse(persistedUser) : '');
 
 if (browser) {
+	console.log('user is:', user);
 	user.subscribe((u) => (localStorage.user = u));
 }
 
@@ -27,9 +28,9 @@ export const load = async function ({ fetch, url }) {
 	let credentials = false;
 	user.subscribe((u) => (credentials = u));
 	console.log('load credentials', credentials);
-	// if (!credentials) {
-	// 	throw redirect(307, 'login');
-	// }
+	if (!credentials) {
+		throw redirect(307, 'login');
+	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	// console.log('load: timeframe', timeframe);
 	let response;
