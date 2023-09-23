@@ -26,10 +26,10 @@ export interface Article {
 export const load = async function ({ fetch, url }) {
 	let credentials = false;
 	user.subscribe((u) => (credentials = u));
-	// console.log('load credentials', credentials);
-	if (!credentials) {
-		throw redirect(307, 'login');
-	}
+	console.log('load credentials', credentials);
+	// if (!credentials) {
+	// 	throw redirect(307, 'login');
+	// }
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	// console.log('load: timeframe', timeframe);
 	let response;
