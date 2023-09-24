@@ -109,11 +109,11 @@
 	<!-- <span>{FETCHED_ARTS}</span> -->
 	<div class="spacer" />
 	<!-- <button class="count">Count: {count}</button> -->
-	<div class="timespan">
+	<!-- <div class="timespan">
 		<span>Displaying {count}</span>
 		<span>{timespan.start}</span>
 		<span>{timespan.end}</span>
-	</div>
+	</div> -->
 </div>
 
 <style>
@@ -157,12 +157,12 @@
 		padding: 2px;
 	}
 
-	.timespan {
+	/* .timespan {
 		font-size: xx-small;
 		display: flex;
 		flex-direction: column;
 		color: lightseagreen;
-	}
+	} */
 
 	.spacer {
 		width: 1em;

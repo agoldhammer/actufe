@@ -6,8 +6,6 @@ exports.handler = async event => {
   const uri = `${proxy_uri}/?timeframe=${tf}`;
   //   console.log ('connProxy uri', uri);
   const body = await fetch (uri).then (resp => resp.json ());
-  //   console.log (body);
-  //   .then (resp => resp.json ()).then (data => console.log (data));
   // TODO decoding/encoding json is inefficient; do something with stream passthrough?
   return {
     statusCode: 200,

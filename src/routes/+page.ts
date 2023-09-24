@@ -1,17 +1,5 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-// import { user } from '../routes/store';
-
-// import { writable } from 'svelte/store';
-// import { browser } from '$app/environment';
-
-// const persistedUser = browser && localStorage.getItem('user');
-// const user = writable(persistedUser ? JSON.parse(persistedUser) : '');
-
-// if (browser) {
-// 	console.log('user is:', user);
-// 	user.subscribe((u) => (localStorage.user = u));
-// }
 
 export interface Article {
 	id: string;
@@ -26,7 +14,7 @@ export interface Article {
 
 export const load = async function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');
-	console.log('authed');
+	// console.log('authed');
 	if (authed !== 'ok') {
 		console.log('not authenticated!');
 		throw redirect(307, 'login');

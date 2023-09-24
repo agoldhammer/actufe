@@ -59,7 +59,7 @@
 		<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames bind:collapse_summary />
 	</div>
 	<div class="footer">
-		<ActuFtr ndocs={appdata.ndocs} />
+		<ActuFtr {appdata} />
 	</div>
 </div>
 
