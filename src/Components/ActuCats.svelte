@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { cats_store, selected_cats_store } from '$lib/catstore';
-	selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
+	// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
 
 	const cats = $cats_store;
 	const hdlClick = (event: any) => {
 		const cat = event.target.id;
 		const selcats = $selected_cats_store;
-		console.log(selcats);
+		// console.log(selcats);
 		if (selcats.includes(cat)) {
-			console.log('already in, so remove and chg color');
+			// console.log('already in, so remove and chg color');
 			event.target.style.color = 'white';
 			const i = selcats.indexOf(cat);
 			selcats.splice(i, 1);
@@ -20,7 +20,7 @@
 			event.target.style.color = 'lightsalmon';
 		}
 		// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
-		console.log($selected_cats_store);
+		// console.log('hdl click', $selected_cats_store);
 	};
 </script>
 

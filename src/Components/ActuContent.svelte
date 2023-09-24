@@ -1,37 +1,52 @@
 <script lang="ts">
 	import type { Article } from '$comp/ActuCtr.svelte';
+	import { selected_cats_store } from '$lib/catstore';
 	export let articles: Article[];
 	export let selected_pubnames: string[];
 	export let collapse_summary: boolean;
+	function isCatShowing(cat: string): boolean {
+		const selected_cats = $selected_cats_store;
+		let retval: boolean;
+		// console.log('isCatShowing', cat, selected_cats);
+		if (selected_cats.length === 0 || selected_cats.includes(cat)) {
+			retval = true;
+		} else {
+			retval = false;
+		}
+		// console.log('retval', cat, retval);
+		return retval;
+	}
 </script>
 
-<!-- <div class="content"> -->
-{#each articles as article (article.hash)}
-	{#if selected_pubnames.includes(article.pubname)}
-		<!-- content here -->
+<!-- force rerender when cats change -->
+{#key $selected_cats_store}
+	{#each articles as article (article.hash)}
+		{#if isCatShowing(article.cat ?? 'uncategorized') && selected_pubnames.includes(article.pubname)}
+			<!-- content here -->
 
-		<div class="card">
-			<div class="cardhdr">
-				<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
-				<span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
-				<span>{article.title}</span>
-				<a href={article.link} target="_blank" rel="noreferrer noopener"
-					>&#8618; Continue reading ...</a
-				><br />
-				{#if article.cat}
-					<span class="category">Category: {article.cat}</span>
-				{:else}
-					<span class="category">No category</span>
+			<div class="card">
+				<div class="cardhdr">
+					<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
+					<span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
+					<span>{article.title}</span>
+					<a href={article.link} target="_blank" rel="noreferrer noopener"
+						>&#8618; Continue reading ...</a
+					><br />
+					{#if article.cat}
+						<span class="category">Category: {article.cat}</span>
+					{:else}
+						<span class="category">No category</span>
+					{/if}
+				</div>
+				{#if !collapse_summary}
+					<div class="cardbody">
+						{@html article.summary}
+					</div>
 				{/if}
 			</div>
-			{#if !collapse_summary}
-				<div class="cardbody">
-					{@html article.summary}
-				</div>
-			{/if}
-		</div>
-	{/if}
-{/each}
+		{/if}
+	{/each}
+{/key}
 
 <!-- </div> -->
 
