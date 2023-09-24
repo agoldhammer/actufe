@@ -1,9 +1,6 @@
 <script lang="ts">
 	import type { Timespan } from '$comp/ActuCtr.svelte';
 	import { goto } from '$app/navigation';
-	// export let count: string;
-	// export let timeframe: string; // used in computations, do not change
-	// export let timespan: Timespan; // strings for displaying timeframe to humans
 	export let appdata;
 	const { count, timeframe, timespan } = appdata;
 	// console.log('timeframe', count, timeframe, timespan);
@@ -77,12 +74,7 @@
 	>
 		Categories
 	</button>
-	<!-- <div class="cat-dropdown">
-		<button class="cat-dropdown-btn" type="button"> Categories </button>
-		<div class="cat-dropdown-content">
-			<p>Cats</p>
-		</div>
-	</div> -->
+
 	<div class="spacer" />
 	<!-- time buttons -->
 	<!-- back button -->
@@ -106,14 +98,6 @@
 	<!-- help button -->
 	<div class="spacer" />
 	<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
-	<!-- <span>{FETCHED_ARTS}</span> -->
-	<div class="spacer" />
-	<!-- <button class="count">Count: {count}</button> -->
-	<!-- <div class="timespan">
-		<span>Displaying {count}</span>
-		<span>{timespan.start}</span>
-		<span>{timespan.end}</span>
-	</div> -->
 </div>
 
 <style>
@@ -157,57 +141,7 @@
 		padding: 2px;
 	}
 
-	/* .timespan {
-		font-size: xx-small;
-		display: flex;
-		flex-direction: column;
-		color: lightseagreen;
-	} */
-
 	.spacer {
 		width: 1em;
 	}
-
-	/* .cat-dropdown {
-		position: relative;
-		display: inline-block;
-		height: 85%;
-		border-radius: 8px;
-		background-color: lightcoral;
-		color: white;
-		transition-duration: 0.3s;
-	}
-
-	.cat-dropdown-content {
-		display: none;
-		position: absolute;
-		background-color: white;
-		z-index: 1;
-	}
-
-	.cat-dropdown:hover .cat-dropdown-content {
-		background-color: blue;
-		color: white;
-		display: block;
-	}
-
-	.cat-dropdown > .cat-dropdown-btn {
-		height: 100%;
-		border-radius: 8px;
-		background-color: lightcoral;
-		color: white;
-		transition-duration: 0.3s;
-	}
-
-	.cat-dropdown:hover .cat-dropdown-btn {
-		background-color: green;
-	}
-
-	.cat-dropdown:hover .cat-dropdown-content {
-		display: block;
-	}
-
-	.cat-dropdown-content p:hover {
-		background-color: red;
-	} */
 </style>

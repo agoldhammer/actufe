@@ -1,5 +1,6 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
+import { cats_store } from '$lib/catstore.js';
 
 export interface Article {
 	id: string;
@@ -41,6 +42,7 @@ export const load = async function ({ fetch, url }) {
 	});
 	const pubnames: Array<string> = Array.from(pubnameset).sort();
 	const catnames: Array<string> = Array.from(catset).sort();
+	cats_store.set(catnames);
 
 	return {
 		arts: response.articles,
@@ -48,8 +50,6 @@ export const load = async function ({ fetch, url }) {
 		timeframe: timeframe,
 		timespan: response.timespan,
 		pubnames: pubnames,
-		ndocs: response.ndocs,
-		cats: catnames
-		// user: user
+		ndocs: response.ndocs
 	};
 };

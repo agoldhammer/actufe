@@ -1,10 +1,33 @@
 <script lang="ts">
-	export let cats: string[];
+	import { cats_store, selected_cats_store } from '$lib/catstore';
+	selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
+
+	const cats = $cats_store;
+	const hdlClick = (event: any) => {
+		const cat = event.target.id;
+		const selcats = $selected_cats_store;
+		console.log(selcats);
+		if (selcats.includes(cat)) {
+			console.log('already in, so remove and chg color');
+			event.target.style.color = 'white';
+			const i = selcats.indexOf(cat);
+			selcats.splice(i, 1);
+			selected_cats_store.update((s) => selcats);
+		} else {
+			// add it if not already in
+
+			selected_cats_store.update((selcats) => [...selcats, cat]);
+			event.target.style.color = 'lightsalmon';
+		}
+		// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
+		console.log($selected_cats_store);
+	};
 </script>
 
 <div class="cats">
+	<!-- svelte-ignore a11y -->
 	{#each cats as cat}
-		<span class="cat">{cat}</span>
+		<div id={cat} class="cat" on:click|preventDefault={hdlClick}>{cat}</div>
 		<!-- <input type="checkbox" /> -->
 	{/each}
 </div>

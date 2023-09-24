@@ -49,7 +49,7 @@
 		<ActuHdr {appdata} />
 	</div>
 	<div class="cats-ctr">
-		<ActuCats cats={appdata.cats} />
+		<ActuCats />
 	</div>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
@@ -136,7 +136,7 @@
 		grid-area: cats;
 		column-gap: 2px;
 		font-size: xx-small;
-		background-color: rgba(0, 13, 51, 0.8);
+		background-color: rgba(68, 95, 177, 0.8);
 		color: white;
 		overflow-x: hidden;
 	}
