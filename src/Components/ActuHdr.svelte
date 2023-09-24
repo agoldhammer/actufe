@@ -1,9 +1,8 @@
 <script lang="ts">
-	import type { Timespan } from '$comp/ActuCtr.svelte';
+	// import type { Timespan } from '$comp/ActuCtr.svelte';
 	import { goto } from '$app/navigation';
-	export let appdata;
-	const { count, timeframe, timespan } = appdata;
-	// console.log('timeframe', count, timeframe, timespan);
+	export let timeframe: string;
+	// console.log('timeframe', timeframe);
 	$: flag = timeframe === '0' ? true : false;
 
 	function disableFwd() {
@@ -11,13 +10,13 @@
 	}
 
 	const handleHamburgerBtnClick = () => {
-		console.log('Handling hamburger');
+		// console.log('Handling hamburger');
 		//@ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {
-		// console.log(event.target.value)
+		// console.log('handleTimeBtnClick', event.target.value);
 		if (event.target.value === 'back') {
 			const newframe = +timeframe + 1;
 			goto('/?timeframe=' + newframe);
@@ -31,6 +30,7 @@
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
 	// @ts-ignore
+	// TODO does NOTHING
 	const handleCatBtnClick = (event) => {};
 
 	import tippy from 'tippy.js';

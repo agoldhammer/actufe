@@ -21,14 +21,14 @@
 		start: string;
 		end: string;
 	}
-	interface Appdata {
+	export interface Appdata {
 		arts: Article[];
 		count: string;
 		timeframe: string;
 		timespan: Timespan;
 		pubnames: Array<string>; // sorted array of pubnames on current page
 		ndocs: string;
-		cats: Array<string>;
+		// cats: Array<string>;
 	}
 </script>
 
@@ -46,7 +46,7 @@
 
 <div class="pagewrapper">
 	<div class="header">
-		<ActuHdr {appdata} />
+		<ActuHdr timeframe={appdata.timeframe} />
 	</div>
 	<div class="cats-ctr">
 		<ActuCats />
@@ -131,6 +131,8 @@
 	}
 
 	.cats-ctr {
+		width: 99%;
+		margin: 0 auto;
 		border: 1px solid black;
 		border-radius: 10px;
 		grid-area: cats;

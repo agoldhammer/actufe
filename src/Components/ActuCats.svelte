@@ -46,6 +46,6 @@
 		width: fit-content;
 		text-wrap: nowrap;
 		margin: 2px;
-		padding: 2px;
+		padding-left: 3px;
 	}
 </style>

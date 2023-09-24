@@ -1,16 +1,16 @@
 <script lang="ts">
-	export let appdata;
-	const { count, ndocs, timespan } = appdata;
+	import type { Appdata } from './ActuCtr.svelte';
+	export let appdata: Appdata;
 </script>
 
 <div class="ftr">
 	<div class="ndocs">
-		Total no. of docs {ndocs}
-		<span>Displaying {count}</span>
+		Total no. of docs {appdata.ndocs}
+		<span>Displaying {appdata.count}</span>
 	</div>
 	<div class="timespan">
-		<span>{timespan.start}</span>
-		<span>{timespan.end}</span>
+		<span>{appdata.timespan.start}</span>
+		<span>{appdata.timespan.end}</span>
 	</div>
 </div>
 

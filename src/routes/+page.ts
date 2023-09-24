@@ -1,6 +1,6 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-import { cats_store } from '$lib/catstore.js';
+import { cats_store, selected_cats_store } from '$lib/catstore.js';
 
 export interface Article {
 	id: string;
@@ -42,7 +42,9 @@ export const load = async function ({ fetch, url }) {
 	});
 	const pubnames: Array<string> = Array.from(pubnameset).sort();
 	const catnames: Array<string> = Array.from(catset).sort();
+	// reset the category stores
 	cats_store.set(catnames);
+	selected_cats_store.set([]);
 
 	return {
 		arts: response.articles,
