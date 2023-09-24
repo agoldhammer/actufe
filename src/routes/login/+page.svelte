@@ -1,13 +1,16 @@
 <script lang="ts">
-	// import { redirect } from '@sveltejs/kit';
-	import { user } from '../store.js';
 	import { goto } from '$app/navigation';
-	// import { user } from '../+page.svelte';
 	let value = '';
+	function handleEnter(event: any) {
+		if (event.key === 'Enter') {
+			console.log('Entered');
+			handleReady();
+		}
+	}
 	function handleReady() {
 		console.log('hdl', value);
 		if (value === 'shazam') {
-			user.set(true);
+			localStorage.setItem('auth', 'ok');
 			console.log('bingo');
 			goto('/');
 		}
@@ -17,7 +20,13 @@
 <div class="login">
 	<h1 class="banner">Sorry, but this is not a public website</h1>
 	<h2 class="deck">For development use only</h2>
-	<input type="text" class="magic" bind:value placeholder="type magic word here" />
+	<input
+		type="text"
+		class="magic"
+		on:keypress={handleEnter}
+		bind:value
+		placeholder="type magic word here"
+	/>
 	<button class="ready" on:click={handleReady}>Enter</button>
 </div>
 
