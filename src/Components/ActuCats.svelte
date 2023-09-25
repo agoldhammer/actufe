@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { cats_store, selected_cats_store } from '$lib/catstore';
-	// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
-
-	const cats = $cats_store;
 	const hdlClick = (event: any) => {
 		const cat = event.target.id;
 		const selcats = $selected_cats_store;
@@ -19,8 +16,6 @@
 			selected_cats_store.update((selcats) => [...selcats, cat]);
 			// event.target.style.color = 'lightsalmon';
 		}
-		// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
-		// console.log('hdl click', $selected_cats_store);
 	};
 </script>
 
@@ -28,7 +23,7 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	{#key $cats_store}
-		{#each cats as cat}
+		{#each $cats_store as cat}
 			{#if $selected_cats_store.includes(cat)}
 				<div id={cat} class="cat" style="color:lightsalmon" on:click|preventDefault={hdlClick}>
 					{cat}
