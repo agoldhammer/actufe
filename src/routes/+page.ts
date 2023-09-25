@@ -40,11 +40,15 @@ export const load = async function ({ fetch, url }) {
 		pubnameset.add(article.pubname);
 		catset.add(article.cat);
 	});
+	// console.log('catset', catset);
+
 	const pubnames: Array<string> = Array.from(pubnameset).sort();
 	const catnames: Array<string> = Array.from(catset).sort();
 	// reset the category stores
+	// console.log('resetting stores');
 	cats_store.set(catnames);
 	selected_cats_store.set([]);
+	// selected_cats_store.subscribe((selcats) => console.log('resetting selcats', selcats));
 
 	return {
 		arts: response.articles,

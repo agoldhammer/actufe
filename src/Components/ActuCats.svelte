@@ -14,10 +14,10 @@
 			selcats.splice(i, 1);
 			selected_cats_store.update((s) => selcats);
 		} else {
-			// add it if not already in
+			// add it in
 
 			selected_cats_store.update((selcats) => [...selcats, cat]);
-			event.target.style.color = 'lightsalmon';
+			// event.target.style.color = 'lightsalmon';
 		}
 		// selected_cats_store.subscribe((sel_cats) => console.log('selcats', sel_cats));
 		// console.log('hdl click', $selected_cats_store);
@@ -27,10 +27,18 @@
 <div class="cats">
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	{#each cats as cat}
-		<div id={cat} class="cat" on:click|preventDefault={hdlClick}>{cat}</div>
-		<!-- <input type="checkbox" /> -->
-	{/each}
+	{#key $cats_store}
+		{#each cats as cat}
+			{#if $selected_cats_store.includes(cat)}
+				<div id={cat} class="cat" style="color:lightsalmon" on:click|preventDefault={hdlClick}>
+					{cat}
+				</div>
+			{:else}
+				<div id={cat} class="cat" on:click|preventDefault={hdlClick}>{cat}</div>
+			{/if}
+			<!-- <input type="checkbox" /> -->
+		{/each}
+	{/key}
 </div>
 
 <style>
