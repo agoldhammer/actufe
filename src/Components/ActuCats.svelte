@@ -25,7 +25,8 @@
 </script>
 
 <div class="cats">
-	<!-- svelte-ignore a11y -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	{#each cats as cat}
 		<div id={cat} class="cat" on:click|preventDefault={hdlClick}>{cat}</div>
 		<!-- <input type="checkbox" /> -->
