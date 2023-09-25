@@ -51,5 +51,6 @@
 		text-wrap: nowrap;
 		margin: 2px;
 		padding-left: 3px;
+		cursor: zoom-in;
 	}
 </style>
