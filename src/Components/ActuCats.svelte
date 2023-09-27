@@ -12,10 +12,13 @@
 			selected_cats_store.update((s) => selcats);
 		} else {
 			// add it in
-
-			selected_cats_store.update((selcats) => [...selcats, cat]);
+			// TODO: single cat sel for now
+			// selected_cats_store.update((selcats) => [...selcats, cat]);
+			selected_cats_store.update((selcats) => [cat]);
 			// event.target.style.color = 'lightsalmon';
 		}
+		// @ts-ignore
+		document.getElementById('pagecontent').scrollTop = 0;
 	};
 </script>
 

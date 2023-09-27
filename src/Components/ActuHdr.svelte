@@ -65,7 +65,7 @@
 		>&#9776</button
 	>
 	<div class="spacer" />
-	<button
+	<!-- <button
 		class="cat-button"
 		type="button"
 		use:tooltip={{ content: catBtnTip, theme: 'material', animation: 'fade' }}
@@ -73,7 +73,14 @@
 		on:click|preventDefault={handleCatBtnClick}
 	>
 		Categories
-	</button>
+	</button> -->
+	<details>
+		<summary>Options</summary>
+		<div class="cat-opts">
+			<span class="cat-opt">Single Cat</span>
+			<span class="cat-opt">Reset Cats on TT</span>
+		</div>
+	</details>
 
 	<div class="spacer" />
 	<!-- time buttons -->
@@ -113,7 +120,7 @@
 
 	.hamburger,
 	.timebutton,
-	.cat-button,
+	/* .cat-button, */
 	/* .cat-dropdown-btn, */
 	.help {
 		height: 85%;
@@ -121,6 +128,26 @@
 		background-color: lightcoral;
 		color: white;
 		transition-duration: 0.3s;
+	}
+
+	details {
+		height: 85%;
+		text-align: center;
+		border-radius: 8px;
+		border: 1px solid black;
+		background-color: lightcoral;
+		padding: 5px 4px 0px 4px;
+		color: white;
+	}
+
+	.cat-opts {
+		display: flex;
+		flex-direction: column;
+		margin: 2px;
+	}
+
+	.cat-opt {
+		padding: 2px;
 	}
 
 	.timebutton:disabled,
