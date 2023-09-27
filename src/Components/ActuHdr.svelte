@@ -157,7 +157,7 @@
 
 	.hamburger:hover,
 	.timebutton:hover,
-	.cat-button:hover,
+	/* .cat-button:hover, */
 	.help:hover {
 		background-color: green;
 	}

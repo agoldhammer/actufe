@@ -55,9 +55,11 @@
 	<div id="pagecontent" class="content">
 		<ActuContent articles={appdata.arts} {selected_pubnames} {collapse_summary} />
 	</div>
-	<div class="aside">
-		<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames bind:collapse_summary />
-	</div>
+	{#key appdata.pubnames}
+		<div class="aside">
+			<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames bind:collapse_summary />
+		</div>
+	{/key}
 	<div class="footer">
 		<ActuFtr {appdata} />
 	</div>
