@@ -74,13 +74,13 @@
 	>
 		Categories
 	</button> -->
-	<details>
+	<!-- <details>
 		<summary>Options</summary>
 		<div class="cat-opts">
 			<span class="cat-opt">Single Cat</span>
 			<span class="cat-opt">Reset Cats on TT</span>
 		</div>
-	</details>
+	</details> -->
 
 	<div class="spacer" />
 	<!-- time buttons -->
@@ -130,7 +130,7 @@
 		transition-duration: 0.3s;
 	}
 
-	details {
+	/* details {
 		height: 85%;
 		text-align: center;
 		border-radius: 8px;
@@ -148,7 +148,7 @@
 
 	.cat-opt {
 		padding: 2px;
-	}
+	} */
 
 	.timebutton:disabled,
 	.timebutton:hover:disabled {
