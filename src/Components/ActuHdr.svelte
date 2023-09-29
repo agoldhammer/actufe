@@ -54,6 +54,11 @@
 		};
 	}
 
+	// @ts-ignore
+	function twinChange(event) {
+		console.log(event.target.value);
+	}
+
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
 	const catBtnTip = 'Toggle category display';
@@ -64,46 +69,40 @@
 	<button class="hamburger" type="button" on:click|preventDefault={handleHamburgerBtnClick}
 		>&#9776</button
 	>
-	<div class="spacer" />
-	<!-- <button
-		class="cat-button"
-		type="button"
-		use:tooltip={{ content: catBtnTip, theme: 'material', animation: 'fade' }}
-		value="cats"
-		on:click|preventDefault={handleCatBtnClick}
-	>
-		Categories
-	</button> -->
-	<!-- <details>
-		<summary>Options</summary>
-		<div class="cat-opts">
-			<span class="cat-opt">Single Cat</span>
-			<span class="cat-opt">Reset Cats on TT</span>
-		</div>
-	</details> -->
+	<!-- <div class="spacer" /> -->
+	<label for="tsel">Time window:</label>
+	<select class="tsel" name="twindow" id="twin" on:change={twinChange}>
+		<option value="2">2 hrs</option>
+		<option value="4">4 hrs</option>
+		<option value="6">6 hrs</option>
+		<option value="12">12 hrs</option>
+		<option value="24">24 hrs</option>
+	</select>
 
-	<div class="spacer" />
+	<!-- <div class="spacer" /> -->
 	<!-- time buttons -->
 	<!-- back button -->
-	<button
-		class="timebutton"
-		type="button"
-		use:tooltip={{ content: backBtnTip, theme: 'material', animation: 'fade' }}
-		value="back"
-		on:click|preventDefault={handleTimeBtnClick}>&#8678</button
-	>
-	<span class="timetravel">Time</span>
-	<!-- forward button -->
-	<button
-		class="timebutton"
-		use:tooltip={{ content: fwdBtnTip, theme: 'material', animation: 'fade' }}
-		type="button"
-		value="fwd"
-		disabled={flag}
-		on:click|preventDefault={handleTimeBtnClick}>&#8680</button
-	>
+	<div class="time">
+		<button
+			class="timebutton"
+			type="button"
+			use:tooltip={{ content: backBtnTip, theme: 'material', animation: 'fade' }}
+			value="back"
+			on:click|preventDefault={handleTimeBtnClick}>&#8678</button
+		>
+		<span class="timetravel">Time</span>
+		<!-- forward button -->
+		<button
+			class="timebutton"
+			use:tooltip={{ content: fwdBtnTip, theme: 'material', animation: 'fade' }}
+			type="button"
+			value="fwd"
+			disabled={flag}
+			on:click|preventDefault={handleTimeBtnClick}>&#8680</button
+		>
+	</div>
 	<!-- help button -->
-	<div class="spacer" />
+	<!-- <div class="spacer" /> -->
 	<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
 </div>
 
@@ -113,7 +112,7 @@
 		flex-wrap: wrap;
 		flex-direction: row;
 		align-items: center;
-		gap: 2px;
+		gap: 1em;
 		width: inherit;
 		padding: 5px;
 	}
@@ -130,29 +129,21 @@
 		transition-duration: 0.3s;
 	}
 
-	/* details {
-		height: 85%;
-		text-align: center;
-		border-radius: 8px;
-		border: 1px solid black;
-		background-color: lightcoral;
-		padding: 5px 4px 0px 4px;
-		color: white;
-	}
-
-	.cat-opts {
-		display: flex;
-		flex-direction: column;
-		margin: 2px;
-	}
-
-	.cat-opt {
-		padding: 2px;
-	} */
-
 	.timebutton:disabled,
 	.timebutton:hover:disabled {
 		background-color: lightgray;
+	}
+
+	label {
+		font-size: xx-small;
+		color: lightseagreen;
+	}
+	.tsel {
+		background-color: lightcoral;
+		color: white;
+		border: 2px solid black;
+		border-radius: 8px;
+		font-size: small;
 	}
 
 	.hamburger:hover,
@@ -166,9 +157,5 @@
 		color: lightseagreen;
 		font-size: xx-small;
 		padding: 2px;
-	}
-
-	.spacer {
-		width: 1em;
 	}
 </style>

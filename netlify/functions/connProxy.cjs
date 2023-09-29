@@ -3,7 +3,8 @@ exports.handler = async event => {
   const tf = event.queryStringParameters.timeframe || '0';
   console.log ('tf', tf);
   const proxy_uri = process.env.PROXY_URI;
-  const uri = `${proxy_uri}/?timeframe=${tf}`;
+  // TODO fix this to use timewindow properly
+  const uri = `${proxy_uri}/?timeframe=${tf}&timewindow=2`;
   console.log ('connProxy uri', uri);
   const body = await fetch (uri).then (resp => resp.json ());
   // TODO decoding/encoding json is inefficient; do something with stream passthrough?
