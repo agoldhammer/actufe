@@ -71,7 +71,7 @@
 		>&#9776</button
 	>
 	<!-- <div class="spacer" /> -->
-	<label for="tsel">Time window:</label>
+	<label for="twin">Time window:</label>
 	<select class="tsel" name="twindow" id="twin" on:change={twinChange}>
 		<option value="3">3 hrs</option>
 		<option value="6">6 hrs</option>
