@@ -6,12 +6,20 @@
 
 <div>
 	<h2>Time travel</h2>
-	<p>In the navigation bar at the top, there are two time travel buttons.</p>
 	<p>
-		Pressing these will move the display forward or backward in time by the amount of the time
-		window, normally 2 hours (this will eventually become an option). The forward button will be
-		disabled (grayed out) if the display is already at the latest available time in the database.
-		The 'hamburger' menu at the left of the navbar will return the display to the top of the screen.
+		In the navigation bar at the top, there is a time window dropdown and two time travel buttons.
+	</p>
+
+	<p>
+		The time window dropdown selects the displayed timeframe. The default window starts 3 hours
+		before the present time, but this can be widened to 6, 12, or 24 hours. The start and end times
+		of the currently selected window are displayed in the page footer.
+	</p>
+	<p>
+		Pressing the time travel buttons will move the display forward or backward in time by the amount
+		of the time window currently selected time window. The forward button will be disabled (grayed
+		out) if the display is already at the latest available time in the database. The 'hamburger'
+		menu at the left of the navbar will return the display to the top of the screen.
 	</p>
 
 	<h2>Select Categories</h2>
