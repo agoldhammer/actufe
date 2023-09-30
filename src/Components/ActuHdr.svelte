@@ -1,8 +1,7 @@
 <script lang="ts">
-	// import type { Timespan } from '$comp/ActuCtr.svelte';
 	import { goto } from '$app/navigation';
+	import { time_window_store } from '$lib/actustores';
 	export let timeframe: string;
-	// console.log('timeframe', timeframe);
 	$: flag = timeframe === '0' ? true : false;
 
 	function disableFwd() {
@@ -17,21 +16,19 @@
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {
 		// console.log('handleTimeBtnClick', event.target.value);
+		const tw = $time_window_store;
 		if (event.target.value === 'back') {
 			const newframe = +timeframe + 1;
-			goto('/?timeframe=' + newframe);
+			goto(`/?timeframe=${newframe}&timewindow=${tw}`);
 		} else {
 			let newframe = +timeframe - 1;
 			newframe = newframe < 0 ? 0 : newframe;
-			goto('/?timeframe=' + newframe);
+			goto(`/?timeframe=${newframe}&timewindow=${tw}`);
 		}
 		// scroll back to top after time travel
 		// @ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
 	};
-	// @ts-ignore
-	// TODO does NOTHING
-	const handleCatBtnClick = (event) => {};
 
 	import tippy from 'tippy.js';
 	import 'tippy.js/dist/tippy.css';
@@ -56,11 +53,15 @@
 
 	// @ts-ignore
 	function twinChange(event) {
-		console.log(event.target.value);
+		const twin = event.target.value;
+		// console.log('twinchange', twin);
+		time_window_store.set(twin);
+		goto(`/?timewindow=${twin}`);
 	}
 
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
+	// TODO switch to timewindow dropdown
 	const catBtnTip = 'Toggle category display';
 </script>
 
@@ -72,8 +73,7 @@
 	<!-- <div class="spacer" /> -->
 	<label for="tsel">Time window:</label>
 	<select class="tsel" name="twindow" id="twin" on:change={twinChange}>
-		<option value="2">2 hrs</option>
-		<option value="4">4 hrs</option>
+		<option value="3">3 hrs</option>
 		<option value="6">6 hrs</option>
 		<option value="12">12 hrs</option>
 		<option value="24">24 hrs</option>

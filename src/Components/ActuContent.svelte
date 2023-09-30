@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Article } from '$comp/ActuCtr.svelte';
-	import { selected_cats_store } from '$lib/catstore';
+	import { selected_cats_store } from '$lib/actustores';
 	export let articles: Article[];
 	export let selected_pubnames: string[];
 	export let collapse_summary: boolean;

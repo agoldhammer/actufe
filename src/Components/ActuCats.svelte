@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cats_store, selected_cats_store } from '$lib/catstore';
+	import { cats_store, selected_cats_store } from '$lib/actustores';
 	const hdlClick = (event: any) => {
 		const cat = event.target.id;
 		const selcats = $selected_cats_store;
