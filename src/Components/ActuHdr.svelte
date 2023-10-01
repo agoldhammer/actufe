@@ -61,8 +61,8 @@
 
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
-	// TODO switch to timewindow dropdown
-	const catBtnTip = 'Toggle category display';
+	$: tval = $time_window_store.toString() ?? '3';
+	const twinTip = 'Select time frame';
 </script>
 
 <div class="actu-hdr">
@@ -72,7 +72,14 @@
 	>
 	<!-- <div class="spacer" /> -->
 	<label for="twin">Time window:</label>
-	<select class="tsel" name="twindow" id="twin" on:change={twinChange}>
+	<select
+		class="tsel"
+		bind:value={tval}
+		use:tooltip={{ content: twinTip, theme: 'material', animation: 'fade' }}
+		name="twindow"
+		id="twin"
+		on:change={twinChange}
+	>
 		<option value="3">3 hrs</option>
 		<option value="6">6 hrs</option>
 		<option value="12">12 hrs</option>
@@ -119,8 +126,6 @@
 
 	.hamburger,
 	.timebutton,
-	/* .cat-button, */
-	/* .cat-dropdown-btn, */
 	.help {
 		height: 85%;
 		border-radius: 8px;

@@ -1,6 +1,6 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-import { cats_store, selected_cats_store } from '$lib/actustores';
+import { cats_store, selected_cats_store, time_window_store } from '$lib/actustores';
 // import { time_window_store } from '$lib/actustores';
 
 export interface Article {
@@ -22,11 +22,13 @@ export const load = async function ({ fetch, url }) {
 		throw redirect(307, 'login');
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
-	const time_window = url.searchParams.get('timewindow') ?? '3';
+	const time_window = url.searchParams.get('timewindow') || '3';
+	time_window_store.set(parseInt(time_window));
 	// console.log('load: timeframe', timeframe);
 	let response;
 	try {
 		// console.log('loader', timeframe, time_window);
+		// time_window_store.subscribe((tw) => console.log('loader tw', tw));
 		const url = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}`;
 		response = await fetch(url).then((response) => response.json());
 	} catch (e) {
