@@ -40,7 +40,7 @@
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
-	let selected_pubnames: string[] = appdata.pubnames;
+	// let selected_pubnames: string[] = appdata.pubnames;
 	let collapse_summary = false;
 </script>
 
@@ -53,11 +53,11 @@
 	</div>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
-		<ActuContent articles={appdata.arts} {selected_pubnames} {collapse_summary} />
+		<ActuContent articles={appdata.arts} {collapse_summary} />
 	</div>
 	{#key appdata.pubnames}
 		<div class="aside">
-			<ActuSidebar pubnames={appdata.pubnames} bind:selected_pubnames bind:collapse_summary />
+			<ActuSidebar pubnames={appdata.pubnames} bind:collapse_summary />
 		</div>
 	{/key}
 	<div class="footer">

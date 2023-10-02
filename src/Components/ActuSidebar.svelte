@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { selected_pubs_store } from '$lib/actustores';
 	// import ActuCats from './ActuCats.svelte';
 	export let pubnames: string[];
-	export let selected_pubnames: string[];
+	// export let selected_pubnames: string[];
 	let all = true; //display all pubnames
 	function handleAllNone() {
 		all = !all;
-		selected_pubnames = all ? pubnames : [];
+		// selected_pubnames = all ? pubnames : [];
+		selected_pubs_store.set(all ? pubnames : []);
 	}
 	export let collapse_summary: boolean;
 </script>
@@ -19,7 +21,7 @@
 	{#each pubnames as pubname}
 		<label class="option">
 			{pubname}
-			<input type="checkbox" bind:group={selected_pubnames} value={pubname} />
+			<input type="checkbox" bind:group={$selected_pubs_store} value={pubname} />
 		</label>
 	{/each}
 	<hr />

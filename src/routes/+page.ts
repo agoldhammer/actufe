@@ -1,6 +1,11 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
-import { cats_store, selected_cats_store, time_window_store } from '$lib/actustores';
+import {
+	cats_store,
+	selected_cats_store,
+	time_window_store,
+	selected_pubs_store
+} from '$lib/actustores';
 // import { time_window_store } from '$lib/actustores';
 
 export interface Article {
@@ -52,6 +57,7 @@ export const load = async function ({ fetch, url }) {
 	// console.log('resetting stores');
 	cats_store.set(catnames);
 	selected_cats_store.set([]);
+	selected_pubs_store.set(pubnames);
 	// selected_cats_store.subscribe((selcats) => console.log('resetting selcats', selcats));
 
 	return {

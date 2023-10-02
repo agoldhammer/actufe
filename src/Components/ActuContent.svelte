@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Article } from '$comp/ActuCtr.svelte';
-	import { selected_cats_store } from '$lib/actustores';
+	import { selected_cats_store, selected_pubs_store } from '$lib/actustores';
 	export let articles: Article[];
-	export let selected_pubnames: string[];
+	// export let selected_pubnames: string[];
 	export let collapse_summary: boolean;
 	function isCatShowing(cat: string): boolean {
 		const selected_cats = $selected_cats_store;
@@ -21,7 +21,7 @@
 <!-- force rerender when cats change -->
 {#key $selected_cats_store}
 	{#each articles as article (article.hash)}
-		{#if isCatShowing(article.cat ?? 'uncategorized') && selected_pubnames.includes(article.pubname)}
+		{#if isCatShowing(article.cat ?? 'uncategorized') && $selected_pubs_store.includes(article.pubname)}
 			<!-- content here -->
 
 			<div class="card">
