@@ -1,12 +1,13 @@
 <script lang="ts">
+	type MouseEvent = { currentTarget: HTMLDivElement };
 	import { cats_store, selected_cats_store } from '$lib/actustores';
-	const hdlClick = (event: any) => {
-		const cat = event.target.id;
+	const hdlClick = (event: MouseEvent) => {
+		const cat = event.currentTarget.id;
 		const selcats = $selected_cats_store;
 		// console.log(selcats);
 		if (selcats.includes(cat)) {
 			// console.log('already in, so remove and chg color');
-			event.target.style.color = 'white';
+			event.currentTarget.style.color = 'white';
 			const i = selcats.indexOf(cat);
 			selcats.splice(i, 1);
 			selected_cats_store.update((s) => selcats);

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	let value = '';
-	function handleEnter(event: any) {
+	function handleEnter(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
 			console.log('Entered');
 			handleReady();
