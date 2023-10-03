@@ -45,3 +45,4 @@ change time window
 refactor pub selection
 allow single or multiple cat selection
 save initial logon time
+spruce up help page

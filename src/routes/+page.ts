@@ -1,8 +1,10 @@
 export const ssr = false;
 import { redirect } from '@sveltejs/kit';
+import { Counter } from '$lib/counter';
 import {
 	cats_store,
 	selected_cats_store,
+	cat_count_store,
 	time_window_store,
 	selected_pubs_store
 } from '$lib/actustores';
@@ -45,20 +47,20 @@ export const load = async function ({ fetch, url }) {
 		throw new Error('articles missing from response; check actuproxy');
 	}
 	const articles: Article[] = response.articles;
+	const cat_counter = new Counter();
 	articles.forEach((article) => {
 		pubnameset.add(article.pubname);
 		catset.add(article.cat);
+		cat_counter.inc(article.cat);
 	});
-	// console.log('catset', catset);
 
 	const pubnames: Array<string> = Array.from(pubnameset).sort();
 	const catnames: Array<string> = Array.from(catset).sort();
 	// reset the category stores
-	// console.log('resetting stores');
 	cats_store.set(catnames);
 	selected_cats_store.set([]);
+	cat_count_store.set(cat_counter);
 	selected_pubs_store.set(pubnames);
-	// selected_cats_store.subscribe((selcats) => console.log('resetting selcats', selcats));
 
 	return {
 		arts: response.articles,

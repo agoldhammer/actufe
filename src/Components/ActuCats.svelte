@@ -1,6 +1,6 @@
 <script lang="ts">
 	type MouseEvent = { currentTarget: HTMLDivElement };
-	import { cats_store, selected_cats_store } from '$lib/actustores';
+	import { cats_store, selected_cats_store, cat_count_store } from '$lib/actustores';
 	const hdlClick = (event: MouseEvent) => {
 		const cat = event.currentTarget.id;
 		const selcats = $selected_cats_store;
@@ -14,9 +14,7 @@
 		} else {
 			// add it in
 			// TODO: single cat sel for now
-			// selected_cats_store.update((selcats) => [...selcats, cat]);
 			selected_cats_store.update((selcats) => [cat]);
-			// event.target.style.color = 'lightsalmon';
 		}
 		// @ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
@@ -26,18 +24,21 @@
 <div class="cats">
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	{#key $cats_store}
-		{#each $cats_store as cat}
-			{#if $selected_cats_store.includes(cat)}
-				<div id={cat} class="cat" style="color:lightsalmon" on:click|preventDefault={hdlClick}>
-					{cat}
-				</div>
-			{:else}
-				<div id={cat} class="cat" on:click|preventDefault={hdlClick}>{cat}</div>
-			{/if}
-			<!-- <input type="checkbox" /> -->
-		{/each}
-	{/key}
+	{#each $cats_store as cat}
+		{#if $selected_cats_store.includes(cat)}
+			<div id={cat} class="cat" style="color:lightsalmon" on:click|preventDefault={hdlClick}>
+				{cat}
+				({$cat_count_store.getCount(cat)})
+			</div>
+		{:else}
+			<div id={cat} class="cat" on:click|preventDefault={hdlClick}>
+				{cat}
+				<span class="cat-count">
+					({$cat_count_store.getCount(cat)})
+				</span>
+			</div>
+		{/if}
+	{/each}
 </div>
 
 <style>
@@ -56,5 +57,9 @@
 		margin: 2px;
 		padding-left: 3px;
 		cursor: zoom-in;
+	}
+
+	.cat-count {
+		font-size: xx-small;
 	}
 </style>
