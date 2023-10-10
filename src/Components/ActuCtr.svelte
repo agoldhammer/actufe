@@ -67,6 +67,7 @@
 
 <style>
 	.pagewrapper {
+		font-family: Verdana, Geneva, Tahoma, sans-serif;
 		display: grid;
 		margin: 0 auto;
 		padding: 2px;
