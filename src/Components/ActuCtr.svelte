@@ -121,6 +121,7 @@
 		margin-right: 2px;
 		padding: 0px;
 		overflow-y: scroll;
+		overflow-x: hidden;
 	}
 
 	.footer {
