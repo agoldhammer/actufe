@@ -25,7 +25,7 @@
 			<!-- content here -->
 
 			<div class="card">
-				<div class="cardhdr">
+				<div class="cardhdr" class:nosumm={collapse_summary}>
 					<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
 					<span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
 					<span>{article.title}</span>
@@ -78,6 +78,13 @@
 		border-top-left-radius: 10px;
 		border-top-right-radius: 10px;
 		/* box-shadow: 10px 10px #888888; */
+	}
+
+	.nosumm {
+		margin-bottom: 1rem;
+		border-bottom: solid 1px black;
+		border-bottom-left-radius: 8px;
+		border-bottom-right-radius: 8px;
 	}
 
 	.cardhdr a {
