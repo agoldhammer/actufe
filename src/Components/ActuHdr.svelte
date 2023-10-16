@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { time_window_store } from '$lib/actustores';
+	import logo from '$lib/images/favicon.ico';
 	export let timeframe: string;
 	$: flag = timeframe === '0' ? true : false;
 
@@ -92,9 +93,8 @@
 			>Submit</button
 		>
 	{:else}
-		<!-- TODO: hamburger button, for now is just HOME button-->
-
 		<!-- <label for="twin">Window:</label> -->
+		<img src={logo} alt="Nz logo" width="30" height="30" />
 		<select
 			class="tsel"
 			bind:value={tval}

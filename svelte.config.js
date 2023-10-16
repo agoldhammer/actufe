@@ -15,7 +15,7 @@ const config = {
 		alias: {
 			// $db: './src/db',
 			// $livedb: './src/livedb'
-			$comp: './src/Components'
+			$comp: './src/Components',
 		}
 	}
 };
