@@ -168,10 +168,10 @@
 		background-color: lightgray;
 	}
 
-	label {
+	/* label {
 		font-size: xx-small;
 		color: lightseagreen;
-	}
+	} */
 	.tsel {
 		background-color: lightcoral;
 		color: white;
