@@ -39,6 +39,15 @@
 		const text = elt.value;
 		console.log('submit', text);
 		textQueryVisible = false;
+		if (text.length > 0) {
+			const txtpart = encodeURIComponent(text);
+			const tw = $time_window_store;
+			const query = `timeframe=${timeframe}&timewindow=${tw}&txtquery=${txtpart}`;
+			console.log('query', query);
+			goto(`/?${query}`);
+		} else {
+			return;
+		}
 	};
 
 	import tippy from 'tippy.js';
