@@ -40,7 +40,6 @@
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
-	// let selected_pubnames: string[] = appdata.pubnames;
 	let collapse_summary = false;
 </script>
 
