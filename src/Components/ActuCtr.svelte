@@ -39,7 +39,6 @@
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
-	import TextQuery from './TextQuery.svelte';
 	export let appdata: Appdata;
 	let collapse_summary = false;
 </script>
