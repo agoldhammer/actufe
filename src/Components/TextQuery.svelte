@@ -5,11 +5,9 @@
 
 <style>
 	.frame {
-		position: absolute;
-		top: 2rem;
-		left: 2rem;
-		width: 50%;
-		height: 25%;
+		display: flex;
+		flex-direction: column;
 		z-index: 1;
+		border: 2px solid red;
 	}
 </style>

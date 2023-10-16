@@ -41,11 +41,9 @@
 	import ActuFtr from './ActuFtr.svelte';
 	import TextQuery from './TextQuery.svelte';
 	export let appdata: Appdata;
-	// let selected_pubnames: string[] = appdata.pubnames;
 	let collapse_summary = false;
 </script>
 
-<!-- <TextQuery /> -->
 <div class="pagewrapper">
 	<div class="header">
 		<ActuHdr timeframe={appdata.timeframe} />
