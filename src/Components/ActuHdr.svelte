@@ -72,7 +72,8 @@
 	const fwdBtnTip = 'Next time frame';
 	const backBtnTip = 'Prev time frame';
 	$: tval = $time_window_store.toString() ?? '3';
-	const twinTip = 'Select time frame';
+	const twinTip = 'Select time frame size';
+	const txtQryTip = 'Search for keywords in selected time window';
 </script>
 
 <div class="actu-hdr">
@@ -84,7 +85,7 @@
 			autofocus
 			id="txtqry"
 			cols="30"
-			rows="4"
+			rows="2"
 			value=""
 		/>
 		<button type="button" class="textqrysubmit" on:click|preventDefault={textQuerySubmit}
@@ -92,11 +93,8 @@
 		>
 	{:else}
 		<!-- TODO: hamburger button, for now is just HOME button-->
-		<button class="textreq" type="button" on:click|preventDefault={handleTextReqBtnClick}
-			>Text Query</button
-		>
-		<!-- <div class="spacer" /> -->
-		<label for="twin">Time window:</label>
+
+		<!-- <label for="twin">Window:</label> -->
 		<select
 			class="tsel"
 			bind:value={tval}
@@ -111,9 +109,6 @@
 			<option value="24">24 hrs</option>
 		</select>
 
-		<!-- <div class="spacer" /> -->
-		<!-- time buttons -->
-		<!-- back button -->
 		<div class="time">
 			<button
 				class="timebutton"
@@ -133,6 +128,12 @@
 				on:click|preventDefault={handleTimeBtnClick}>&#8680</button
 			>
 		</div>
+		<button
+			class="textreq"
+			type="button"
+			use:tooltip={{ content: txtQryTip, theme: 'material', animation: 'fade' }}
+			on:click|preventDefault={handleTextReqBtnClick}>Query</button
+		>
 		<!-- help button -->
 		<!-- <div class="spacer" /> -->
 		<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
@@ -145,9 +146,10 @@
 		flex-wrap: wrap;
 		flex-direction: row;
 		align-items: center;
-		gap: 1em;
+		gap: 0.5em;
 		width: inherit;
-		padding: 5px;
+		padding: 3px;
+		font-size: x-small;
 	}
 
 	.textreq,
