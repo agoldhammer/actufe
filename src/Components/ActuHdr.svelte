@@ -117,7 +117,10 @@
 				value="back"
 				on:click|preventDefault={handleTimeBtnClick}>&#8678</button
 			>
-			<span class="timetravel">Time</span>
+			<div class="tt">
+				<span class="timetravel">Time</span>
+				<span class="timetravel">Travel</span>
+			</div>
 			<!-- forward button -->
 			<button
 				class="timebutton"
@@ -146,7 +149,7 @@
 		flex-wrap: wrap;
 		flex-direction: row;
 		align-items: center;
-		gap: 0.5em;
+		gap: 1em;
 		width: inherit;
 		padding: 3px;
 		font-size: x-small;
@@ -185,6 +188,11 @@
 	/* .cat-button:hover, */
 	.help:hover {
 		background-color: green;
+	}
+
+	.time {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.timetravel {
