@@ -3,15 +3,15 @@
 	let value = '';
 	function handleEnter(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			console.log('Entered');
+			// console.log('Entered');
 			handleReady();
 		}
 	}
 	function handleReady() {
-		console.log('hdl', value);
+		// console.log('hdl', value);
 		if (value === 'shazam') {
 			localStorage.setItem('auth', 'ok');
-			console.log('bingo');
+			// console.log('bingo');
 			goto('/');
 		}
 	}

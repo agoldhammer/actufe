@@ -41,13 +41,13 @@
 	const textQuerySubmit = (event) => {
 		const elt = document.getElementById('txtqry') as HTMLTextAreaElement;
 		const text = elt.value;
-		console.log('submit', text);
+		// console.log('submit', text);
 		textQueryVisible = false;
 		if (text.length > 0) {
 			const txtpart = encodeURIComponent(text);
 			const tw = $time_window_store;
 			const query = `timeframe=${timeframe}&timewindow=${tw}&txtquery=${txtpart}`;
-			console.log('query', query);
+			// console.log('query', query);
 			goto(`/?${query}`);
 		}
 	};

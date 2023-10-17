@@ -24,7 +24,7 @@ export const load = async function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');
 	// console.log('authed');
 	if (authed !== 'ok') {
-		console.log('not authenticated!');
+		// console.log('not authenticated!');
 		throw redirect(307, 'login');
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';

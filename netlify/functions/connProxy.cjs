@@ -1,11 +1,11 @@
 exports.handler = async event => {
-  console.log ('event qsp', event.queryStringParameters);
+  // console.log ('event qsp', event.queryStringParameters);
   const tf = event.queryStringParameters.timeframe || '0';
   const tw = event.queryStringParameters.timewindow || '2';
   const tx = event.queryStringParameters.txtquery;
-  console.log ('tf', tf);
-  console.log ('tw', tw);
-  console.log ('tx', tx);
+  // console.log ('tf', tf);
+  // console.log ('tw', tw);
+  // console.log ('tx', tx);
 
   const proxy_uri = process.env.PROXY_URI;
   let uri;
@@ -14,7 +14,7 @@ exports.handler = async event => {
   } else {
     uri = `${proxy_uri}/?timeframe=${tf}&timewindow=${tw}`;
   }
-  console.log ('connProxy uri', uri);
+  // console.log ('connProxy uri', uri);
   const body = await fetch (uri).then (resp => resp.json ());
   // TODO decoding/encoding json is inefficient; do something with stream passthrough?
   return {
