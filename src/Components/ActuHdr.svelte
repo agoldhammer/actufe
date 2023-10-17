@@ -105,7 +105,7 @@
 		>
 	{:else}
 		<!-- <label for="twin">Window:</label> -->
-		<img src={logo} alt="Nz logo" width="30" height="30" />
+		<img src={logo} alt="Nz logo" width="40" height="40" />
 		<select
 			class="tsel"
 			bind:value={tval}
