@@ -111,8 +111,6 @@
 	.content {
 		grid-area: content;
 		color: green;
-		/* border: 1px groove magenta; */
-		/* border-radius: 10px; */
 		margin-left: 0px;
 		margin-right: 2px;
 		padding: 0px;
@@ -141,5 +139,6 @@
 		background-color: rgba(68, 95, 177, 0.8);
 		color: white;
 		overflow-x: hidden;
+		overflow-y: auto;
 	}
 </style>
