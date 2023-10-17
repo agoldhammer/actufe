@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { time_window_store } from '$lib/actustores';
 	import logo from '$lib/images/favicon.ico';
+	import { text } from '@sveltejs/kit';
 	export let timeframe: string;
 	$: flag = timeframe === '0' ? true : false;
 
@@ -16,6 +17,13 @@
 		//@ts-ignore
 		// document.getElementById('pagecontent').scrollTop = 0;
 		textQueryVisible = true;
+	};
+
+	const tapress = (event: KeyboardEvent) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			textQuerySubmit(event);
+		}
 	};
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {
@@ -89,6 +97,7 @@
 		<!-- svelte-ignore a11y-autofocus -->
 		<textarea
 			name="txtqry"
+			on:keypress={tapress}
 			placeholder="Type one or more search terms separated by spaces"
 			autofocus
 			id="txtqry"
