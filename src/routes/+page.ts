@@ -8,7 +8,6 @@ import {
 	time_window_store,
 	selected_pubs_store
 } from '$lib/actustores';
-// import { time_window_store } from '$lib/actustores';
 
 export interface Article {
 	id: string;
@@ -36,8 +35,6 @@ export const load = async function ({ fetch, url }) {
 	let response;
 	let uri;
 	try {
-		// console.log('loader', timeframe, time_window);
-		// time_window_store.subscribe((tw) => console.log('loader tw', tw));
 		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
 			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}&txtquery=${text_query}`;
 		} else {
