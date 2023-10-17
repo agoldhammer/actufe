@@ -45,8 +45,6 @@
 			const query = `timeframe=${timeframe}&timewindow=${tw}&txtquery=${txtpart}`;
 			console.log('query', query);
 			goto(`/?${query}`);
-		} else {
-			return;
 		}
 	};
 

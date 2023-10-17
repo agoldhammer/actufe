@@ -1,9 +1,12 @@
 exports.handler = async event => {
-  //   console.log ('event', event);
+  console.log ('event qsp', event.queryStringParameters);
   const tf = event.queryStringParameters.timeframe || '0';
   const tw = event.queryStringParameters.timewindow || '2';
   const tx = event.queryStringParameters.txtquery;
   console.log ('tf', tf);
+  console.log ('tw', tw);
+  console.log ('tx', tx);
+
   const proxy_uri = process.env.PROXY_URI;
   let uri;
   if (tx) {

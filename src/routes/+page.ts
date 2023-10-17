@@ -30,14 +30,20 @@ export const load = async function ({ fetch, url }) {
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	const time_window = url.searchParams.get('timewindow') || '3';
+	const text_query = url.searchParams.get('txtquery');
 	time_window_store.set(parseInt(time_window));
 	// console.log('load: timeframe', timeframe);
 	let response;
+	let uri;
 	try {
 		// console.log('loader', timeframe, time_window);
 		// time_window_store.subscribe((tw) => console.log('loader tw', tw));
-		const url = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}`;
-		response = await fetch(url).then((response) => response.json());
+		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
+			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}&txtquery=${text_query}`;
+		} else {
+			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}`;
+		}
+		response = await fetch(uri).then((response) => response.json());
 	} catch (e) {
 		console.log('load error:', e);
 	}
