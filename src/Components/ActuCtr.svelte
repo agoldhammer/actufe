@@ -33,8 +33,6 @@
 </script>
 
 <script lang="ts">
-	// import { onMount } from 'svelte';
-
 	import ActuContent from './ActuContent.svelte';
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
@@ -89,7 +87,6 @@
 		grid-area: aside;
 		border: 1px solid magenta;
 		border-radius: 10px;
-		/* width: 120px; */
 		padding: 1px;
 		margin-left: 0px;
 		color: lightsalmon;

@@ -41,8 +41,4 @@ need to fix listk of pubnames so it updates with timeshift
 
 ## Todos
 
-change time window
-refactor pub selection
-allow single or multiple cat selection
 save initial logon time
-spruce up help page
