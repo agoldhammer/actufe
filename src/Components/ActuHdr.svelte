@@ -13,9 +13,6 @@
 	let textQueryVisible = false;
 
 	const handleTextReqBtnClick = () => {
-		// console.log('Handling hamburger');
-		//@ts-ignore
-		// document.getElementById('pagecontent').scrollTop = 0;
 		textQueryVisible = true;
 	};
 
@@ -27,7 +24,6 @@
 	};
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {
-		// console.log('handleTimeBtnClick', event.target.value);
 		const tw = $time_window_store;
 		if (event.target.value === 'back') {
 			const newframe = +timeframe + 1;
@@ -80,7 +76,6 @@
 	// @ts-ignore
 	function twinChange(event) {
 		const twin = event.target.value;
-		// console.log('twinchange', twin);
 		time_window_store.set(twin);
 		goto(`/?timewindow=${twin}`);
 	}
@@ -154,7 +149,6 @@
 			on:click|preventDefault={handleTextReqBtnClick}>Query</button
 		>
 		<!-- help button -->
-		<!-- <div class="spacer" /> -->
 		<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
 	{/if}
 </div>
@@ -187,10 +181,6 @@
 		background-color: lightgray;
 	}
 
-	/* label {
-		font-size: xx-small;
-		color: lightseagreen;
-	} */
 	.tsel {
 		background-color: lightcoral;
 		color: white;
