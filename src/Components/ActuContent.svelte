@@ -27,11 +27,13 @@
 			<div class="card">
 				<div class="cardhdr" class:nosumm={collapse_summary}>
 					<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
-					<span class="pubdate">[{article.pubdate}: {article.pubname}]</span>
-					<span>{article.title}</span>
-					<a href={article.link} target="_blank" rel="noreferrer noopener"
-						>&#8618; Continue reading ...</a
-					><br />
+					<div class="pubdate">[{article.pubdate}: {article.pubname}]</div>
+					<div>
+						<span>{article.title}</span>
+						<a href={article.link} target="_blank" rel="noreferrer noopener"
+							>&#8618; Continue reading ...</a
+						>
+					</div>
 					{#if article.cat}
 						<span class="category">Category: {article.cat}</span>
 					{:else}
@@ -56,8 +58,7 @@
 		margin: 0px;
 		padding-right: 2px;
 	}
-	.cardhdr,
-	.cardbody {
+	.cardhdr {
 		padding-top: 5px;
 		padding-bottom: 5px;
 		padding-left: 4px;
@@ -66,9 +67,30 @@
 		margin-right: 20px;
 		background-color: seashell;
 		color: #9a031e;
-		font-size: larger;
+		font-size: x-large;
 		box-shadow: 8px 8px #c1bebe;
 		overflow-wrap: break-word;
+	}
+
+	.cardbody {
+		/* display: flex;
+		flex-direction: row;
+		gap: 2px; */
+		margin-left: 2px;
+		margin-right: 20px;
+		padding-left: 8px;
+		padding-top: 2px;
+		padding-right: 4px;
+		padding-bottom: 3px;
+		border: solid 2px blue;
+		border-style: groove;
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
+		background-color: aliceblue;
+		margin-bottom: 1rem;
+		box-shadow: 8px 8px #c1bebe;
+		font-size: large;
+		color: black;
 	}
 
 	.cardhdr {
@@ -93,25 +115,15 @@
 		color: #0077b6;
 	}
 
-	.cardbody {
-		border: solid 2px blue;
-		border-style: groove;
-		border-bottom-left-radius: 10px;
-		border-bottom-right-radius: 10px;
-		background-color: aliceblue;
-		margin-bottom: 1rem;
-		font-size: smaller;
-		color: black;
-	}
-
 	.pubdate {
 		color: #00b4d8;
 		font-size: xx-small;
+		margin-bottom: 2px;
 	}
 
 	.category {
 		color: red;
-		font-size: x-small;
+		font-size: small;
 	}
 
 	:global(img) {

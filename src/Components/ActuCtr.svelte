@@ -89,6 +89,7 @@
 		border-radius: 10px;
 		padding: 1px;
 		margin-left: 0px;
+		margin-top: 4px;
 		color: lightsalmon;
 		display: flex;
 		flex-direction: column;
@@ -113,6 +114,7 @@
 		color: green;
 		margin-left: 0px;
 		margin-right: 2px;
+		margin-top: 4px;
 		padding: 0px;
 		overflow-y: scroll;
 		overflow-x: hidden;
