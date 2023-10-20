@@ -78,10 +78,10 @@
 		gap: 2px; */
 		margin-left: 2px;
 		margin-right: 20px;
+		padding-top: 8px;
 		padding-left: 8px;
-		padding-top: 2px;
 		padding-right: 4px;
-		padding-bottom: 3px;
+		padding-bottom: 8px;
 		border: solid 2px blue;
 		border-style: groove;
 		border-bottom-left-radius: 10px;
