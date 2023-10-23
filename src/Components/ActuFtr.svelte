@@ -9,8 +9,8 @@
 		<span>Displaying {appdata.count}</span>
 	</div>
 	<div class="timespan">
-		<span>{appdata.timespan.start}</span>
-		<span>{appdata.timespan.end}</span>
+		<span>Start: {appdata.timespan.start}</span>
+		<span>End:&nbsp;&nbsp;&nbsp;{appdata.timespan.end}</span>
 	</div>
 	<div class="version">
 		<span>Ver. 0.1 beta</span>
