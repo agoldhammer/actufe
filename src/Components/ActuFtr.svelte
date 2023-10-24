@@ -37,4 +37,8 @@
 		flex-direction: column;
 		color: lightseagreen;
 	}
+
+	.timespan {
+		color: red;
+	}
 </style>
