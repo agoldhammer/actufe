@@ -176,6 +176,10 @@
 		transition-duration: 0.3s;
 	}
 
+	.timebutton {
+		color: yellow;
+	}
+
 	.timebutton:disabled,
 	.timebutton:hover:disabled {
 		background-color: lightgray;
