@@ -35,7 +35,7 @@
 		justify-content: center;
 		row-gap: 5px;
 		font-size: xx-small;
-		overflow: hidden;
+		overflow-y: auto;
 		color: blue;
 	}
 	.option {
