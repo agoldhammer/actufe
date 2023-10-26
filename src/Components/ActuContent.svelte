@@ -17,7 +17,7 @@
 		if (!parent) return;
 		const top = parent.scrollTop;
 		const height = parent.offsetHeight;
-		if (topElementId && !collapse_summary) {
+		if (topElementId) {
 			// console.log('b4: expdg, so scroll to topElementId\n', topElementId);
 			let el = document.getElementById(topElementId) as HTMLDivElement;
 			if (el) {
@@ -26,18 +26,16 @@
 				el = cardElts[0] as HTMLDivElement;
 			}
 		}
-		if (collapse_summary) {
-			for (let i = cardElts.length - 1; i >= 0; i--) {
-				let el = cardElts.item(i) as HTMLDivElement;
-				let y = el.offsetTop;
-				// console.log('y', y);
-				// check if el is visible in container
-				if (top && height && y >= top && y <= top + height) {
-					topElementId = el.id;
-					// console.log('setting topElementId', topElementId);
-					// break out after first visible el, which will be top one
-					break;
-				}
+		for (let i = cardElts.length - 1; i >= 0; i--) {
+			let el = cardElts.item(i) as HTMLDivElement;
+			let y = el.offsetTop;
+			// console.log('y', y);
+			// check if el is visible in container
+			if (top && height && y >= top && y <= top + height) {
+				topElementId = el.id;
+				// console.log('setting topElementId', topElementId);
+				// break out after first visible el, which will be top one
+				break;
 			}
 		}
 	});

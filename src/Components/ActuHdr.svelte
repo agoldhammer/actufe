@@ -178,7 +178,7 @@
 
 	.timebutton {
 		color: yellow;
-		font-size: large;
+		font-size: small;
 	}
 
 	.timebutton:disabled,
