@@ -26,16 +26,18 @@
 				el = cardElts[0] as HTMLDivElement;
 			}
 		}
-		for (let i = cardElts.length - 1; i >= 0; i--) {
-			let el = cardElts.item(i) as HTMLDivElement;
-			let y = el.offsetTop;
-			// console.log('y', y);
-			// check if el is visible in container
-			if (top && height && y >= top && y <= top + height) {
-				topElementId = el.id;
-				// console.log('setting topElementId', topElementId);
-				// break out after first visible el, which will be top one
-				break;
+		if (collapse_summary) {
+			for (let i = cardElts.length - 1; i >= 0; i--) {
+				let el = cardElts.item(i) as HTMLDivElement;
+				let y = el.offsetTop;
+				// console.log('y', y);
+				// check if el is visible in container
+				if (top && height && y >= top && y <= top + height) {
+					topElementId = el.id;
+					// console.log('setting topElementId', topElementId);
+					// break out after first visible el, which will be top one
+					break;
+				}
 			}
 		}
 	});
