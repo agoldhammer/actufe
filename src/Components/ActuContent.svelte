@@ -9,6 +9,7 @@
 	/* * before update, get id of top elt in pagecontent viewport*/
 	let topElementId: string = '';
 	//
+	/* ! This still seems to have an annoying off-by-one behavior */
 	beforeUpdate(() => {
 		// console.log('before update called');
 
@@ -17,29 +18,19 @@
 		if (!parent) return;
 		const top = parent.scrollTop;
 		const height = parent.offsetHeight;
-		if (topElementId && !collapse_summary) {
-			// console.log('b4: expdg, so scroll to topElementId\n', topElementId);
-			let el = document.getElementById(topElementId) as HTMLDivElement;
-			if (el) {
-				el.scrollIntoView(true);
-			} else {
-				el = cardElts[0] as HTMLDivElement;
+		for (let i = 0; i < cardElts.length; i++) {
+			let el = cardElts.item(i) as HTMLDivElement;
+			let y = el.offsetTop;
+			// console.log('id y top height', el.id, y, top, height);
+			// check if el is visible in container
+			if (top && height && y >= top && y <= top + height) {
+				topElementId = el.id;
+				// console.log('setting topElementId', topElementId);
+				// break out after first visible el, which will be top one
+				break;
 			}
 		}
-		if (collapse_summary) {
-			for (let i = cardElts.length - 1; i >= 0; i--) {
-				let el = cardElts.item(i) as HTMLDivElement;
-				let y = el.offsetTop;
-				// console.log('y', y);
-				// check if el is visible in container
-				if (top && height && y >= top && y <= top + height) {
-					topElementId = el.id;
-					// console.log('setting topElementId', topElementId);
-					// break out after first visible el, which will be top one
-					break;
-				}
-			}
-		}
+		// }
 	});
 
 	/* * After update, find top elt and scroll to it*/
@@ -53,7 +44,7 @@
 				el.scrollIntoView(true);
 			}
 		} else {
-			console.log('no top el');
+			// console.log('no top el');
 		}
 	});
 
@@ -73,11 +64,11 @@
 
 <!-- force rerender when cats change -->
 {#key $selected_cats_store}
-	{#each articles as article (article.hash)}
+	{#each articles as article, i}
 		{#if isCatShowing(article.cat ?? 'uncategorized') && $selected_pubs_store.includes(article.pubname)}
 			<!-- content here -->
 
-			<div id={article.hash} class="card">
+			<div id={i.toString()} class="card">
 				<div class="cardhdr" class:nosumm={collapse_summary}>
 					<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
 					<div class="pubdate">[{article.pubdate}: {article.pubname}]</div>
