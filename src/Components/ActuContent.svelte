@@ -17,7 +17,7 @@
 		if (!parent) return;
 		const top = parent.scrollTop;
 		const height = parent.offsetHeight;
-		if (topElementId) {
+		if (topElementId && !collapse_summary) {
 			// console.log('b4: expdg, so scroll to topElementId\n', topElementId);
 			let el = document.getElementById(topElementId) as HTMLDivElement;
 			if (el) {
@@ -52,6 +52,8 @@
 			if (el) {
 				el.scrollIntoView(true);
 			}
+		} else {
+			console.log('no top el');
 		}
 	});
 
