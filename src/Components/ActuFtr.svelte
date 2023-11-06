@@ -13,7 +13,7 @@
 		<span>End:&nbsp;&nbsp;&nbsp;{appdata.timespan.end}</span>
 	</div>
 	<div class="version">
-		<span>Ver. 0.2 beta</span>
+		<span>Ver. 0.2 alpha</span>
 	</div>
 </div>
 
