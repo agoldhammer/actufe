@@ -1,4 +1,11 @@
 exports.handler = async event => {
+  // * check backend alive
+  const radar_uri = process.env.RADAR_URI;
+	const radar_resp = await fetch(radar_uri);
+  if (radar_resp.status !== 204) {
+    console.error('Backend not responding');
+  }
+
   // console.log ('event qsp', event.queryStringParameters);
   const tf = event.queryStringParameters.timeframe || '0';
   const tw = event.queryStringParameters.timewindow || '2';
