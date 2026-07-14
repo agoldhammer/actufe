@@ -1,4 +1,5 @@
 export const ssr = false;
+export const prerender = false;
 import { redirect } from '@sveltejs/kit';
 import { Counter } from '$lib/counter';
 import {
@@ -35,11 +36,11 @@ export const load = async function ({ fetch, url }) {
 	let response;
 	let uri;
 	try {
+		const params = new URLSearchParams({ timeframe, timewindow: time_window });
 		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
-			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}&txtquery=${text_query}`;
-		} else {
-			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}`;
+			params.set('txtquery', text_query);
 		}
+		uri = `/api/articles?${params}`;
 		response = await fetch(uri).then((response) => response.json());
 	} catch (e) {
 		console.log('load error:', e);
