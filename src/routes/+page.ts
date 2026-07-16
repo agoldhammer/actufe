@@ -44,6 +44,7 @@ export const load = async function ({ fetch, url }) {
 		response = await fetch(uri).then((response) => response.json());
 	} catch (e) {
 		console.log('load error:', e);
+		throw new Error(`failed to fetch articles from ${uri}: ${e}`);
 	}
 	const pubnameset: Set<string> = new Set();
 	const catset: Set<string> = new Set();
