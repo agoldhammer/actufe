@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { time_window_store } from '$lib/actustores';
 	import logo from '$lib/images/favicon.ico';
 	import { text } from '@sveltejs/kit';
@@ -27,11 +28,11 @@
 		const tw = $time_window_store;
 		if (event.target.value === 'back') {
 			const newframe = +timeframe + 1;
-			goto(`/?timeframe=${newframe}&timewindow=${tw}`);
+			goto(`${base}/?timeframe=${newframe}&timewindow=${tw}`);
 		} else {
 			let newframe = +timeframe - 1;
 			newframe = newframe < 0 ? 0 : newframe;
-			goto(`/?timeframe=${newframe}&timewindow=${tw}`);
+			goto(`${base}/?timeframe=${newframe}&timewindow=${tw}`);
 		}
 		// scroll back to top after time travel
 		// @ts-ignore
@@ -48,7 +49,7 @@
 			const tw = $time_window_store;
 			const query = `timeframe=${timeframe}&timewindow=${tw}&txtquery=${txtpart}`;
 			// console.log('query', query);
-			goto(`/?${query}`);
+			goto(`${base}/?${query}`);
 		}
 	};
 
@@ -77,7 +78,7 @@
 	function twinChange(event) {
 		const twin = event.target.value;
 		time_window_store.set(twin);
-		goto(`/?timewindow=${twin}`);
+		goto(`${base}/?timewindow=${twin}`);
 	}
 
 	const fwdBtnTip = 'Next time frame';
@@ -149,7 +150,7 @@
 			on:click|preventDefault={handleTextReqBtnClick}>Query</button
 		>
 		<!-- help button -->
-		<button class="help" type="button" on:click|preventDefault={() => goto('/about')}>Help</button>
+		<button class="help" type="button" on:click|preventDefault={() => goto(`${base}/about`)}>Help</button>
 	{/if}
 </div>
 

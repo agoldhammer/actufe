@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	let value = '';
 	function handleEnter(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
@@ -12,7 +13,7 @@
 		if (value === 'shazam') {
 			localStorage.setItem('auth', 'ok');
 			// console.log('bingo');
-			goto('/');
+			goto(`${base}/`);
 		}
 	}
 </script>
