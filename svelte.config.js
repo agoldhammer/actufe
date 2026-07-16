@@ -10,6 +10,11 @@ const config = {
 	kit: {
 		// SPA mode: no prerendering, nginx serves index.html as fallback for all routes.
 		adapter: adapter({ fallback: 'index.html' }),
+		paths: {
+			// Set when the app is served from a subpath, e.g. on tiny:
+			//   BASE_PATH=/news npm run build
+			base: process.env.BASE_PATH || ''
+		},
 		alias: {
 			// $db: './src/db',
 			// $livedb: './src/livedb'
