@@ -97,3 +97,19 @@ Verified end-to-end: page 200, /_app asset 200 with immutable
 Cache-Control, /api/articles returns JSON, /about hard reload 200,
 http→https 301. The old placeholder is kept at
 /var/www/nooz/index.html.noapp.
+
+### news.ghmr.net: left on Netlify for now
+
+Decided 2026-07-17 to keep the news.ghmr.net CNAME pointing at the old
+Netlify site. Just repointing it at nooz.ghmr.net would NOT work: nginx
+routes by SNI/Host, not DNS, so con1 would serve a wrong cert (browser
+warning) and the request would fall through to the default server (404).
+To move the name later, in this order:
+
+1. flip the CNAME to point at con1
+2. add news.ghmr.net to the nooz server block's server_name in
+   noozeconf (both the 443 block and the port-80 redirect block)
+3. `certbot --nginx -d nooz.ghmr.net -d news.ghmr.net` — must run
+   *after* the DNS flip, since HTTP-01 validation has to reach con1
+
+Note the flip retires the Netlify frontend immediately.
