@@ -98,6 +98,19 @@ Cache-Control, /api/articles returns JSON, /about hard reload 200,
 http→https 301. The old placeholder is kept at
 /var/www/nooz/index.html.noapp.
 
+### 2026-07-17: Real 404s for unknown paths
+
+The blanket SPA fallback meant every unknown URL got index.html with a
+200 (the Svelte 404 page rendered client-side). Changed the nooz server
+block in noozeconf (backup: noozeconf.bak-20260717-094707) to
+`try_files $uri $uri/ =404`, with explicit `location = /login` and
+`location = /about` fallbacks for hard reloads, and
+`error_page 404 /index.html` so the 404 *body* is still the SPA shell —
+the app's "404 Page not found" page renders, but the status is now 404.
+New client-side routes must be added to noozeconf or they'll 404 on
+hard reload. Verified: / /login /about 200, /nonexistent /foo/bar 404,
+/api/articles 200. `deploy/nginx.conf` updated to match.
+
 ### news.ghmr.net: left on Netlify for now
 
 Decided 2026-07-17 to keep the news.ghmr.net CNAME pointing at the old
