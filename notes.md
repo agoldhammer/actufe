@@ -80,3 +80,20 @@ reloads of client-side routes work, and `location = / { return 302 /news/; }`
 so the root URL lands on the app. All verified end-to-end (page, /_app
 assets, api with and without txtquery, /news/about hard reload, root
 redirect). `deploy/nginx.conf` documents all of this for next time.
+
+## 2026-07-17: Deployed to con1 as https://nooz.ghmr.net
+
+Root-path build (plain `npm run build`), unpacked into /var/www/nooz
+(root-owned). The vhost + certbot cert already existed in
+/etc/nginx/sites-available/noozeconf; added to its nooz.ghmr.net server
+block (backup saved alongside as noozeconf.bak-<timestamp>):
+
+- `location = /api/articles { proxy_pass http://127.0.0.1:33433/; }` —
+  same-machine actuproxy, so no public-endpoint hop like tiny needed
+- immutable cache header for /_app/immutable/
+- SPA fallback `try_files $uri $uri/ /index.html` (was `=404`)
+
+Verified end-to-end: page 200, /_app asset 200 with immutable
+Cache-Control, /api/articles returns JSON, /about hard reload 200,
+http→https 301. The old placeholder is kept at
+/var/www/nooz/index.html.noapp.
