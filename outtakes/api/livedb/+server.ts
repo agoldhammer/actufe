@@ -4,8 +4,9 @@ import { error } from '@sveltejs/kit'; //eslint-disable-line
 
 /** @type {import('./$types').RequestHandler} */
 // tslint-disable-next-line
-export function GET({ url }) { //eslint-disable-line
-    
-    console.log(url)
-    return new Response("hi");
+export function GET({ url }) {
+	//eslint-disable-line
+
+	console.log(url);
+	return new Response('hi');
 }

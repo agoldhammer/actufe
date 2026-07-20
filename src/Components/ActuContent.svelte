@@ -7,7 +7,7 @@
 	export let collapse_summary: boolean;
 
 	/* * before update, get id of top elt in pagecontent viewport*/
-	let topElementId: string = '';
+	let topElementId = '';
 	//
 	/* ! This still seems to have an annoying off-by-one behavior */
 	beforeUpdate(() => {
@@ -86,6 +86,9 @@
 				</div>
 				{#if !collapse_summary}
 					<div class="cardbody">
+						<!-- summaries are HTML fragments from the trusted actuproxy feed;
+						     rendering them is the point of the app -->
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html article.summary}
 					</div>
 				{/if}

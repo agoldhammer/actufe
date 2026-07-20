@@ -10,14 +10,14 @@
 			event.currentTarget.style.color = 'white';
 			const i = selcats.indexOf(cat);
 			selcats.splice(i, 1);
-			selected_cats_store.update((s) => selcats);
+			selected_cats_store.update(() => selcats);
 		} else {
 			// add it in
 			// TODO: single cat sel for now
-			selected_cats_store.update((selcats) => [cat]);
+			selected_cats_store.update(() => [cat]);
 		}
-		// @ts-ignore
-		document.getElementById('pagecontent').scrollTop = 0;
+		const pagecontent = document.getElementById('pagecontent');
+		if (pagecontent) pagecontent.scrollTop = 0;
 	};
 </script>
 
@@ -53,7 +53,7 @@
 
 	.cat {
 		width: fit-content;
-		text-wrap: nowrap;
+		white-space: nowrap;
 		margin: 2px;
 		padding-left: 3px;
 		cursor: zoom-in;

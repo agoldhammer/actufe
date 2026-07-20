@@ -48,36 +48,36 @@ save initial logon time
 Got the SPA fully working at http://tiny:8080/news/ (served by the altsvr
 site out of /var/www/html/altsvr/news). Two separate problems:
 
-1. **404s under /_app/** — the build had no base path, so index.html
-   referenced assets at the server root (/_app/...) while the app lives under
-   /news/. Fix: `svelte.config.js` now reads `BASE_PATH`, so a tiny build is
-   `BASE_PATH=/news npm run build`, then
-   `rsync -a --delete build/ /var/www/html/altsvr/news/`.
-   A plain `npm run build` still produces a root-path build (con1 style).
-   Also prefixed the hardcoded favicon/manifest links in
-   `src/routes/+page.svelte` with `{base}`.
+1.  **404s under /\_app/** — the build had no base path, so index.html
+    referenced assets at the server root (/\_app/...) while the app lives under
+    /news/. Fix: `svelte.config.js` now reads `BASE_PATH`, so a tiny build is
+    `BASE_PATH=/news npm run build`, then
+    `rsync -a --delete build/ /var/www/html/altsvr/news/`.
+    A plain `npm run build` still produces a root-path build (con1 style).
+    Also prefixed the hardcoded favicon/manifest links in
+    `src/routes/+page.svelte` with `{base}`.
 
-2. **500 after login** — tiny's nginx proxied /api/articles to
-   news.ghmr.net, the *old Netlify frontend*, whose connProxy function was
-   deleted in 41512c0; it returned HTML, and +page.ts choked on it. The real
-   backend is actuproxy: runs on con1 under supervisor
-   (/etc/supervisor/conf.d/actur-cloud.conf), bun on 127.0.0.1:33433, exposed
-   publicly as https://www.ghmr.net/actu/api/v1/. Tiny's
-   /etc/nginx/sites-available/altsvr now has:
+2.  **500 after login** — tiny's nginx proxied /api/articles to
+    news.ghmr.net, the _old Netlify frontend_, whose connProxy function was
+    deleted in 41512c0; it returned HTML, and +page.ts choked on it. The real
+    backend is actuproxy: runs on con1 under supervisor
+    (/etc/supervisor/conf.d/actur-cloud.conf), bun on 127.0.0.1:33433, exposed
+    publicly as https://www.ghmr.net/actu/api/v1/. Tiny's
+    /etc/nginx/sites-available/altsvr now has:
 
-       location = /api/articles {
-           proxy_pass https://www.ghmr.net/actu/api/v1/;
-           proxy_ssl_server_name on;
-       }
+        location = /api/articles {
+            proxy_pass https://www.ghmr.net/actu/api/v1/;
+            proxy_ssl_server_name on;
+        }
 
-   (No `proxy_set_header Host` override — it must default to $proxy_host or
-   the upstream vhost routing breaks. Scheme must be https or con1 answers
-   with its 80→443 redirect.)
+    (No `proxy_set_header Host` override — it must default to $proxy_host or
+    the upstream vhost routing breaks. Scheme must be https or con1 answers
+    with its 80→443 redirect.)
 
 Also added to tiny's altsvr config: an SPA fallback
 (`location /news/ { try_files $uri $uri/ /news/index.html; }`) so hard
 reloads of client-side routes work, and `location = / { return 302 /news/; }`
-so the root URL lands on the app. All verified end-to-end (page, /_app
+so the root URL lands on the app. All verified end-to-end (page, /\_app
 assets, api with and without txtquery, /news/about hard reload, root
 redirect). `deploy/nginx.conf` documents all of this for next time.
 
@@ -90,10 +90,10 @@ block (backup saved alongside as noozeconf.bak-<timestamp>):
 
 - `location = /api/articles { proxy_pass http://127.0.0.1:33433/; }` —
   same-machine actuproxy, so no public-endpoint hop like tiny needed
-- immutable cache header for /_app/immutable/
+- immutable cache header for /\_app/immutable/
 - SPA fallback `try_files $uri $uri/ /index.html` (was `=404`)
 
-Verified end-to-end: page 200, /_app asset 200 with immutable
+Verified end-to-end: page 200, /\_app asset 200 with immutable
 Cache-Control, /api/articles returns JSON, /about hard reload 200,
 http→https 301. The old placeholder is kept at
 /var/www/nooz/index.html.noapp.
@@ -105,7 +105,7 @@ The blanket SPA fallback meant every unknown URL got index.html with a
 block in noozeconf (backup: noozeconf.bak-20260717-094707) to
 `try_files $uri $uri/ =404`, with explicit `location = /login` and
 `location = /about` fallbacks for hard reloads, and
-`error_page 404 /index.html` so the 404 *body* is still the SPA shell —
+`error_page 404 /index.html` so the 404 _body_ is still the SPA shell —
 the app's "404 Page not found" page renders, but the status is now 404.
 New client-side routes must be added to noozeconf or they'll 404 on
 hard reload. Verified: / /login /about 200, /nonexistent /foo/bar 404,
@@ -123,6 +123,6 @@ To move the name later, in this order:
 2. add news.ghmr.net to the nooz server block's server_name in
    noozeconf (both the 443 block and the port-80 redirect block)
 3. `certbot --nginx -d nooz.ghmr.net -d news.ghmr.net` — must run
-   *after* the DNS flip, since HTTP-01 validation has to reach con1
+   _after_ the DNS flip, since HTTP-01 validation has to reach con1
 
 Note the flip retires the Netlify frontend immediately.

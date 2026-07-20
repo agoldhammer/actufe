@@ -13,4 +13,4 @@
 // ! https://rodneylab.com/using-netlify-functions-sveltekit/
 // ! https://docs.netlify.com/integrations/frameworks/sveltekit/
 
-export const FETCHED_ARTS = "dummy fetched"
+export const FETCHED_ARTS = 'dummy fetched';

@@ -6,10 +6,6 @@
 	export let timeframe: string;
 	$: flag = timeframe === '0' ? true : false;
 
-	function disableFwd() {
-		return timeframe === '0' ? true : false;
-	}
-
 	let textQueryVisible = false;
 
 	const handleTextReqBtnClick = () => {
@@ -19,17 +15,16 @@
 	const tapress = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			textQuerySubmit(event);
+			textQuerySubmit();
 		}
 	};
 	const gotoQuery = (params: Record<string, string>) => {
 		goto(`${base}/?${new URLSearchParams(params)}`);
 	};
-	// @ts-ignore
-	const handleTimeBtnClick = (event) => {
+	const handleTimeBtnClick = (event: Event) => {
 		const tw = $time_window_store;
 		let newframe;
-		if (event.target.value === 'back') {
+		if ((event.currentTarget as HTMLButtonElement).value === 'back') {
 			newframe = +timeframe + 1;
 		} else {
 			newframe = +timeframe - 1;
@@ -37,11 +32,10 @@
 		}
 		gotoQuery({ timeframe: `${newframe}`, timewindow: `${tw}` });
 		// scroll back to top after time travel
-		// @ts-ignore
-		document.getElementById('pagecontent').scrollTop = 0;
+		const pagecontent = document.getElementById('pagecontent');
+		if (pagecontent) pagecontent.scrollTop = 0;
 	};
-	// @ts-ignore
-	const textQuerySubmit = (event) => {
+	const textQuerySubmit = () => {
 		const elt = document.getElementById('txtqry') as HTMLTextAreaElement;
 		const text = elt.value;
 		// console.log('submit', text);
@@ -52,31 +46,25 @@
 		}
 	};
 
-	import tippy from 'tippy.js';
+	import tippy, { type Props } from 'tippy.js';
 	import 'tippy.js/dist/tippy.css';
 	import 'tippy.js/themes/material.css';
 
-	// @ts-ignore
-	function tooltip(node, options) {
-		// @ts-ignore
-		const tooltip = tippy(node, options);
+	function tooltip(node: HTMLElement, options: Partial<Props>) {
+		const instance = tippy(node, options);
 		return {
-			//@ts-ignore
-			update(options) {
-				//@ts-ignore
-				tooltip.setProps(options);
+			update(newOptions: Partial<Props>) {
+				instance.setProps(newOptions);
 			},
 			destroy() {
-				//@ts-ignore
-				tooltip.destroy();
+				instance.destroy();
 			}
 		};
 	}
 
-	// @ts-ignore
-	function twinChange(event) {
-		const twin = event.target.value;
-		time_window_store.set(twin);
+	function twinChange(event: Event) {
+		const twin = (event.currentTarget as HTMLSelectElement).value;
+		time_window_store.set(parseInt(twin));
 		gotoQuery({ timeframe, timewindow: twin });
 	}
 

@@ -1,6 +1,8 @@
-import { startMongo } from "$db/mongo";
+import { startMongo } from '$db/mongo';
 
 // this runs once when server is started to establish connection with db
-startMongo().then( () =>
-    console.log("Mongo started")
-).catch(e => {console.error(e)})
+startMongo()
+	.then(() => console.log('Mongo started'))
+	.catch((e) => {
+		console.error(e);
+	});
