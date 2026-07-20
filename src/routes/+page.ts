@@ -1,6 +1,5 @@
 export const ssr = false;
 export const prerender = false;
-import { redirect } from '@sveltejs/kit';
 import { Counter } from '$lib/counter';
 import {
 	cats_store,
@@ -23,10 +22,11 @@ export interface Article {
 
 export const load = async function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');
-	// console.log('authed');
 	if (authed !== 'ok') {
-		// console.log('not authenticated!');
-		throw redirect(307, 'login');
+		// A redirect thrown from a client-only load can leave some mobile browsers
+		// with an unfinished initial navigation. Let the page perform a replacement
+		// navigation after it has mounted instead.
+		return { requiresLogin: true };
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	const time_window = url.searchParams.get('timewindow') || '3';
@@ -68,6 +68,7 @@ export const load = async function ({ fetch, url }) {
 	selected_pubs_store.set(pubnames);
 
 	return {
+		requiresLogin: false,
 		arts: response.articles,
 		count: response.count,
 		timeframe: timeframe,
