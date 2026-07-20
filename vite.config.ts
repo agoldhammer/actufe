@@ -8,8 +8,10 @@ export default defineConfig(({ mode }) => {
 		plugins: [sveltekit()],
 		server: {
 			// In production nginx proxies /api/articles to actuproxy (see deploy/nginx.conf).
+			// Exact match (query string aside), mirroring nginx's `location =`:
+			// /api/articles/anything is NOT proxied there, so don't proxy it here.
 			proxy: {
-				'/api/articles': {
+				'^/api/articles($|\\?)': {
 					target: env.PROXY_URI ?? 'http://127.0.0.1:8000',
 					changeOrigin: true,
 					// actuproxy serves at its root: /api/articles?q -> /?q

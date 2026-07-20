@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+	// The page is prerendered, so it paints before the handlers below are
+	// attached; the marker lets tests (and anything else) wait for hydration.
+	let hydrated = false;
+	onMount(() => (hydrated = true));
 	let value = '';
 	function handleEnter(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
@@ -18,7 +23,7 @@
 	}
 </script>
 
-<div class="login">
+<div class="login" data-hydrated={hydrated}>
 	<h1 class="banner">Sorry, but this is not a public website</h1>
 	<h2 class="deck">For development use only</h2>
 	<input

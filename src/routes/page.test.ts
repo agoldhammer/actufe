@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { get } from 'svelte/store';
 import { load } from './+page';
-import type { Article } from './+page';
 import {
 	cats_store,
 	selected_cats_store,
@@ -10,26 +9,7 @@ import {
 	selected_pubs_store
 } from '$lib/actustores';
 import { Counter } from '$lib/counter';
-
-const article = (overrides: Partial<Article> = {}): Article => ({
-	id: '1',
-	title: 'title',
-	summary: 'summary',
-	pubdate: '2026-07-16T00:00:00Z',
-	pubname: 'Le Monde',
-	link: 'https://example.com/1',
-	hash: 'h1',
-	cat: 'politics',
-	...overrides
-});
-
-const makeResponse = (articles: Article[], extra = {}) => ({
-	articles,
-	count: String(articles.length),
-	timespan: { start: '2026-07-16T00:00:00Z', end: '2026-07-16T03:00:00Z' },
-	ndocs: '1000',
-	...extra
-});
+import { article, makeResponse } from '$lib/fixtures';
 
 const mockFetch = (body: unknown) =>
 	vi.fn().mockResolvedValue({ json: () => Promise.resolve(body) });
@@ -56,15 +36,12 @@ describe('load', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('redirects to login when not authenticated', async () => {
+	it('asks for login when not authenticated, without fetching', async () => {
 		vi.stubGlobal('localStorage', {
 			getItem: vi.fn().mockReturnValue(null)
 		});
 		const fetch = mockFetch(makeResponse([]));
-		await expect(runLoad(fetch)).rejects.toMatchObject({
-			status: 307,
-			location: 'login'
-		});
+		await expect(runLoad(fetch)).resolves.toEqual({ requiresLogin: true });
 		expect(fetch).not.toHaveBeenCalled();
 	});
 
@@ -102,6 +79,7 @@ describe('load', () => {
 		const fetch = mockFetch(makeResponse(arts));
 		const result = await runLoad(fetch, '?timeframe=1');
 		expect(result).toEqual({
+			requiresLogin: false,
 			arts,
 			count: '3',
 			timeframe: '1',
@@ -127,10 +105,7 @@ describe('load', () => {
 	});
 
 	it('selects all pubs by default', async () => {
-		const arts = [
-			article({ id: '1', pubname: 'B Pub' }),
-			article({ id: '2', pubname: 'A Pub' })
-		];
+		const arts = [article({ id: '1', pubname: 'B Pub' }), article({ id: '2', pubname: 'A Pub' })];
 		await runLoad(mockFetch(makeResponse(arts)));
 		expect(get(selected_pubs_store)).toEqual(['A Pub', 'B Pub']);
 	});
@@ -142,15 +117,23 @@ describe('load', () => {
 		expect(get(cats_store)).toEqual([]);
 	});
 
-	it('throws a clear error when the fetch fails', async () => {
+	it('throws a 502 with a clear message when the fetch fails', async () => {
 		const fetch = vi.fn().mockRejectedValue(new Error('connection refused'));
-		await expect(runLoad(fetch)).rejects.toThrow(
-			/failed to fetch articles from \/api\/articles\?timeframe=0&timewindow=3/
-		);
+		await expect(runLoad(fetch)).rejects.toMatchObject({
+			status: 502,
+			body: {
+				message: expect.stringContaining(
+					'failed to fetch articles from /api/articles?timeframe=0&timewindow=3'
+				)
+			}
+		});
 	});
 
-	it('throws when articles are missing from the response', async () => {
+	it('throws a 502 when articles are missing from the response', async () => {
 		const fetch = mockFetch({ count: '0' });
-		await expect(runLoad(fetch)).rejects.toThrow(/articles missing from response/);
+		await expect(runLoad(fetch)).rejects.toMatchObject({
+			status: 502,
+			body: { message: expect.stringContaining('articles missing from response') }
+		});
 	});
 });

@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { article, makeResponse } from '../src/lib/fixtures';
 
 const articles = [
-	{
+	article({
 		id: '1',
 		title: 'Élections: le grand débat',
 		summary: '<p>Résumé du débat électoral.</p>',
@@ -11,8 +12,8 @@ const articles = [
 		link: 'https://example.com/debat',
 		hash: 'h1',
 		cat: 'politics'
-	},
-	{
+	}),
+	article({
 		id: '2',
 		title: 'Victoire au Tour de France',
 		summary: '<p>Résumé de la victoire.</p>',
@@ -21,15 +22,13 @@ const articles = [
 		link: 'https://example.com/tour',
 		hash: 'h2',
 		cat: 'sports'
-	}
+	})
 ];
 
-const apiResponse = {
-	articles,
-	count: '2',
+const apiResponse = makeResponse(articles, {
 	timespan: { start: '2026-07-16 07:00', end: '2026-07-16 10:00' },
 	ndocs: '1234'
-};
+});
 
 // The preview server has no /api proxy (nginx provides it in production),
 // so the articles endpoint is always mocked.
@@ -39,6 +38,13 @@ async function mockArticles(page: Page) {
 
 async function loginByStorage(page: Page) {
 	await page.addInitScript(() => localStorage.setItem('auth', 'ok'));
+}
+
+// The login page is prerendered: it paints before its handlers are attached,
+// so wait for hydration before typing into it.
+async function gotoLogin(page: Page) {
+	await page.goto('/login');
+	await page.locator('.login[data-hydrated="true"]').waitFor();
 }
 
 test.describe('authentication', () => {
@@ -51,7 +57,7 @@ test.describe('authentication', () => {
 	});
 
 	test('wrong magic word stays on the login page', async ({ page }) => {
-		await page.goto('/login');
+		await gotoLogin(page);
 		await page.getByPlaceholder('type magic word here').fill('abracadabra');
 		await page.getByRole('button', { name: 'Enter' }).click();
 		await expect(page).toHaveURL(/login/);
@@ -59,7 +65,7 @@ test.describe('authentication', () => {
 
 	test('the magic word logs in and shows the articles', async ({ page }) => {
 		await mockArticles(page);
-		await page.goto('/login');
+		await gotoLogin(page);
 		await page.getByPlaceholder('type magic word here').fill('shazam');
 		await page.getByPlaceholder('type magic word here').press('Enter');
 		await expect(page).toHaveTitle('Euronews');

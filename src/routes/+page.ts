@@ -1,5 +1,7 @@
 export const ssr = false;
 export const prerender = false;
+import { error } from '@sveltejs/kit';
+import { base } from '$app/paths';
 import { Counter } from '$lib/counter';
 import {
 	cats_store,
@@ -40,16 +42,15 @@ export const load = async function ({ fetch, url }) {
 		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
 			params.set('txtquery', text_query);
 		}
-		uri = `/api/articles?${params}`;
+		uri = `${base}/api/articles?${params}`;
 		response = await fetch(uri).then((response) => response.json());
 	} catch (e) {
-		console.log('load error:', e);
-		throw new Error(`failed to fetch articles from ${uri}: ${e}`);
+		throw error(502, `failed to fetch articles from ${uri}: ${e}`);
 	}
 	const pubnameset: Set<string> = new Set();
 	const catset: Set<string> = new Set();
 	if (response.articles === undefined) {
-		throw new Error('articles missing from response; check actuproxy');
+		throw error(502, 'articles missing from response; check actuproxy');
 	}
 	const articles: Article[] = response.articles;
 	const cat_counter = new Counter();

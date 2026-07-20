@@ -3,7 +3,6 @@
 	import { base } from '$app/paths';
 	import { time_window_store } from '$lib/actustores';
 	import logo from '$lib/images/favicon.ico';
-	import { text } from '@sveltejs/kit';
 	export let timeframe: string;
 	$: flag = timeframe === '0' ? true : false;
 
@@ -23,17 +22,20 @@
 			textQuerySubmit(event);
 		}
 	};
+	const gotoQuery = (params: Record<string, string>) => {
+		goto(`${base}/?${new URLSearchParams(params)}`);
+	};
 	// @ts-ignore
 	const handleTimeBtnClick = (event) => {
 		const tw = $time_window_store;
+		let newframe;
 		if (event.target.value === 'back') {
-			const newframe = +timeframe + 1;
-			goto(`${base}/?timeframe=${newframe}&timewindow=${tw}`);
+			newframe = +timeframe + 1;
 		} else {
-			let newframe = +timeframe - 1;
+			newframe = +timeframe - 1;
 			newframe = newframe < 0 ? 0 : newframe;
-			goto(`${base}/?timeframe=${newframe}&timewindow=${tw}`);
 		}
+		gotoQuery({ timeframe: `${newframe}`, timewindow: `${tw}` });
 		// scroll back to top after time travel
 		// @ts-ignore
 		document.getElementById('pagecontent').scrollTop = 0;
@@ -45,11 +47,8 @@
 		// console.log('submit', text);
 		textQueryVisible = false;
 		if (text.length > 0) {
-			const txtpart = encodeURIComponent(text);
 			const tw = $time_window_store;
-			const query = `timeframe=${timeframe}&timewindow=${tw}&txtquery=${txtpart}`;
-			// console.log('query', query);
-			goto(`${base}/?${query}`);
+			gotoQuery({ timeframe, timewindow: `${tw}`, txtquery: text });
 		}
 	};
 
@@ -78,7 +77,7 @@
 	function twinChange(event) {
 		const twin = event.target.value;
 		time_window_store.set(twin);
-		goto(`${base}/?timewindow=${twin}`);
+		gotoQuery({ timeframe, timewindow: twin });
 	}
 
 	const fwdBtnTip = 'Next time frame';
@@ -150,7 +149,9 @@
 			on:click|preventDefault={handleTextReqBtnClick}>Query</button
 		>
 		<!-- help button -->
-		<button class="help" type="button" on:click|preventDefault={() => goto(`${base}/about`)}>Help</button>
+		<button class="help" type="button" on:click|preventDefault={() => goto(`${base}/about`)}
+			>Help</button
+		>
 	{/if}
 </div>
 
