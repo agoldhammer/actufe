@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { time_window_store } from '$lib/actustores';
-	import logo from '$lib/images/favicon.ico';
+	import logo from '$lib/images/nooze-logo.png';
 	export let timeframe: string;
 	$: flag = timeframe === '0' ? true : false;
 
@@ -93,7 +93,7 @@
 		>
 	{:else}
 		<!-- <label for="twin">Window:</label> -->
-		<img src={logo} alt="Nz logo" width="40" height="40" />
+		<img src={logo} alt="Nooze logo" width="40" height="40" />
 		<select
 			class="tsel"
 			bind:value={tval}
