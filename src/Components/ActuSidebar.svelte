@@ -55,4 +55,13 @@
 		width: 90%;
 		margin: 4px;
 	}
+
+	@media (max-width: 640px) {
+		/* the mobile filters panel is height-capped (max-height: 30svh in
+		   ActuCtr); centering a taller list clips its first row (All/None)
+		   off the top with no way to scroll to it, so top-align instead */
+		.sidebar {
+			justify-content: flex-start;
+		}
+	}
 </style>
