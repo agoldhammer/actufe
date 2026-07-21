@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [sveltekit()],
 		server: {
+			// Bind all interfaces so the server is reachable from the Windows host under WSL.
+			host: true,
 			// In production nginx proxies /api/articles to actuproxy (see deploy/nginx.conf).
 			// Exact match (query string aside), mirroring nginx's `location =`:
 			// /api/articles/anything is NOT proxied there, so don't proxy it here.
