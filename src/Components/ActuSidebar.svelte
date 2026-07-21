@@ -32,7 +32,15 @@
 	.sidebar {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		/* fill the aside and act as the scroll viewport; min-height:0 lets the
+		   flex item shrink below its content height so overflow-y engages
+		   instead of the list spilling out and being clipped by the aside */
+		flex: 1;
+		min-height: 0;
+		/* `safe` keeps the list vertically centered when it fits, but falls
+		   back to top-aligned + scrollable (rather than clipping the top row,
+		   e.g. All/None) when the viewport is too short to show every pub */
+		justify-content: safe center;
 		row-gap: 5px;
 		font-size: 0.75rem;
 		overflow-y: auto;
@@ -54,14 +62,5 @@
 		border: solid var(--border) 1px;
 		width: 90%;
 		margin: 4px;
-	}
-
-	@media (max-width: 640px) {
-		/* the mobile filters panel is height-capped (max-height: 30svh in
-		   ActuCtr); centering a taller list clips its first row (All/None)
-		   off the top with no way to scroll to it, so top-align instead */
-		.sidebar {
-			justify-content: flex-start;
-		}
 	}
 </style>
