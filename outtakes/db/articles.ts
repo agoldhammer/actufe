@@ -1,3 +1,3 @@
-import db from "./mongo"
+import db from './mongo';
 
-export const articles = db.collection("articles")
+export const articles = db.collection('articles');

@@ -1,5 +1,7 @@
 export const ssr = false;
-import { redirect } from '@sveltejs/kit';
+export const prerender = false;
+import { error } from '@sveltejs/kit';
+import { base } from '$app/paths';
 import { Counter } from '$lib/counter';
 import {
 	cats_store,
@@ -22,10 +24,11 @@ export interface Article {
 
 export const load = async function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');
-	// console.log('authed');
 	if (authed !== 'ok') {
-		// console.log('not authenticated!');
-		throw redirect(307, 'login');
+		// A redirect thrown from a client-only load can leave some mobile browsers
+		// with an unfinished initial navigation. Let the page perform a replacement
+		// navigation after it has mounted instead.
+		return { requiresLogin: true };
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	const time_window = url.searchParams.get('timewindow') || '3';
@@ -35,19 +38,19 @@ export const load = async function ({ fetch, url }) {
 	let response;
 	let uri;
 	try {
+		const params = new URLSearchParams({ timeframe, timewindow: time_window });
 		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
-			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}&txtquery=${text_query}`;
-		} else {
-			uri = `/.netlify/functions/connProxy?timeframe=${timeframe}&timewindow=${time_window}`;
+			params.set('txtquery', text_query);
 		}
+		uri = `${base}/api/articles?${params}`;
 		response = await fetch(uri).then((response) => response.json());
 	} catch (e) {
-		console.log('load error:', e);
+		throw error(502, `failed to fetch articles from ${uri}: ${e}`);
 	}
 	const pubnameset: Set<string> = new Set();
 	const catset: Set<string> = new Set();
 	if (response.articles === undefined) {
-		throw new Error('articles missing from response; check actuproxy');
+		throw error(502, 'articles missing from response; check actuproxy');
 	}
 	const articles: Article[] = response.articles;
 	const cat_counter = new Counter();
@@ -66,6 +69,7 @@ export const load = async function ({ fetch, url }) {
 	selected_pubs_store.set(pubnames);
 
 	return {
+		requiresLogin: false,
 		arts: response.articles,
 		count: response.count,
 		timeframe: timeframe,
