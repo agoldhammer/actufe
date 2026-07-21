@@ -6,7 +6,8 @@
 <div class="help-card" id={card_id}>
 	<div class="help-card-top">
 		<!-- next do nothing line to suppress spurious warning -->
-		{#if false} <slot />{/if}
+		{#if false}
+			<slot />{/if}
 
 		<slot name="topic" />
 		<button id={card_id} class="open"> &#10133; </button>

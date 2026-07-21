@@ -4,7 +4,7 @@
 > Details below are stale: the real nginx config is `deploy/nginx.conf`
 > (server*name nooz.ghmr.net, root /var/www/nooz, actuproxy on port 33433,
 > scoped SPA fallback per commit 057e771 — not the `server_name *`/ port 8000 /
-blanket-fallback sketch here). Current deployment notes live in`notes.md`.
+> blanket-fallback sketch here). Current deployment notes live in`notes.md`.
 
 ## Context
 

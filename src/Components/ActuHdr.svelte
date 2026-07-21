@@ -95,8 +95,7 @@
 			id="txtqry"
 			cols="30"
 			rows="2"
-			value={activeQuery ?? ''}
-		/>
+			value={activeQuery ?? ''}></textarea>
 		<button type="button" class="textqrysubmit" on:click|preventDefault={textQuerySubmit}
 			>Submit</button
 		>
