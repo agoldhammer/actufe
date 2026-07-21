@@ -1,20 +1,11 @@
 <script lang="ts">
-	type MouseEvent = { currentTarget: HTMLDivElement };
 	import { cats_store, selected_cats_store, cat_count_store } from '$lib/actustores';
-	const hdlClick = (event: MouseEvent) => {
-		const cat = event.currentTarget.id;
-		const selcats = $selected_cats_store;
-		// console.log(selcats);
-		if (selcats.includes(cat)) {
-			// console.log('already in, so remove and chg color');
-			event.currentTarget.style.color = 'white';
-			const i = selcats.indexOf(cat);
-			selcats.splice(i, 1);
-			selected_cats_store.update(() => selcats);
+	const toggleCat = (cat: string) => {
+		if ($selected_cats_store.includes(cat)) {
+			selected_cats_store.update((cats) => cats.filter((c) => c !== cat));
 		} else {
-			// add it in
 			// TODO: single cat sel for now
-			selected_cats_store.update(() => [cat]);
+			selected_cats_store.set([cat]);
 		}
 		const pagecontent = document.getElementById('pagecontent');
 		if (pagecontent) pagecontent.scrollTop = 0;
@@ -22,22 +13,19 @@
 </script>
 
 <div class="cats">
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	{#each $cats_store as cat}
-		{#if $selected_cats_store.includes(cat)}
-			<div id={cat} class="cat" style="color:lightsalmon" on:click|preventDefault={hdlClick}>
-				{cat}
-				({$cat_count_store.getCount(cat)})
-			</div>
-		{:else}
-			<div id={cat} class="cat" on:click|preventDefault={hdlClick}>
-				{cat}
-				<span class="cat-count">
-					({$cat_count_store.getCount(cat)})
-				</span>
-			</div>
-		{/if}
+		<button
+			type="button"
+			class="cat"
+			class:selected={$selected_cats_store.includes(cat)}
+			on:click|preventDefault={() => toggleCat(cat)}
+		>
+			{cat}
+			<span class="cat-count">({$cat_count_store.getCount(cat)})</span>
+			{#if $selected_cats_store.includes(cat)}
+				<span class="cat-x" aria-hidden="true">&#10005;</span>
+			{/if}
+		</button>
 	{/each}
 </div>
 
@@ -45,21 +33,42 @@
 	.cats {
 		display: flex;
 		flex-direction: row;
-		justify-content: left stretch;
 		flex-wrap: wrap;
-		gap: 10px;
-		font-size: small;
+		gap: 6px;
+		padding: 5px 6px;
 	}
 
 	.cat {
 		width: fit-content;
 		white-space: nowrap;
-		margin: 2px;
-		padding-left: 3px;
-		cursor: zoom-in;
+		border: 1px solid var(--accent);
+		border-radius: 999px;
+		background-color: #fff;
+		color: var(--accent);
+		font-size: 0.8rem;
+		padding: 2px 10px;
+		cursor: pointer;
+	}
+
+	.cat:hover {
+		background-color: var(--accent-soft);
+	}
+
+	.cat.selected {
+		background-color: var(--accent);
+		color: #fff;
+	}
+
+	.cat.selected:hover {
+		background-color: var(--accent-dark);
 	}
 
 	.cat-count {
-		font-size: xx-small;
+		font-size: 0.7rem;
+	}
+
+	.cat-x {
+		font-size: 0.7rem;
+		padding-left: 2px;
 	}
 </style>

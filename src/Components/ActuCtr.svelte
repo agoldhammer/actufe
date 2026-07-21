@@ -39,6 +39,7 @@
 	import ActuFtr from './ActuFtr.svelte';
 	export let appdata: Appdata;
 	let collapse_summary = false;
+	let show_filters = false;
 </script>
 
 <div class="pagewrapper">
@@ -48,12 +49,16 @@
 	<div class="cats-ctr">
 		<ActuCats />
 	</div>
+	<!-- only visible on narrow screens, where the sidebar is hidden by default -->
+	<button class="filters-toggle" type="button" on:click={() => (show_filters = !show_filters)}>
+		{show_filters ? 'Hide filters' : 'Filters'}
+	</button>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
-		<ActuContent articles={appdata.arts} {collapse_summary} />
+		<ActuContent articles={appdata.arts} pubnames={appdata.pubnames} {collapse_summary} />
 	</div>
 	{#key appdata.pubnames}
-		<div class="aside">
+		<div class="aside" class:open={show_filters}>
 			<ActuSidebar pubnames={appdata.pubnames} bind:collapse_summary />
 		</div>
 	{/key}
@@ -64,17 +69,25 @@
 
 <style>
 	.pagewrapper {
+		/* single accent + neutral grays, shared by all child components */
+		--accent: #9a031e;
+		--accent-dark: #6e0215;
+		--accent-soft: #f7e9eb;
+		--border: #c8c3c5;
+		--text: #333;
+		--text-muted: #6b6b6b;
 		font-family: Verdana, Geneva, Tahoma, sans-serif;
 		display: grid;
 		margin: 0 auto;
 		padding: 2px;
-		border: 2px solid blue;
+		border: 1px solid var(--border);
 		border-radius: 10px;
 		height: 98svh;
 		max-width: 800px;
 		background-color: rgba(208, 198, 203, 0.2);
+		color: var(--text);
 		grid-template-columns: auto 1fr;
-		grid-template-rows: 1fr 2fr 11fr 1fr;
+		grid-template-rows: auto auto 1fr auto;
 		gap: 0.3em;
 		grid-template-areas:
 			'hdr hdr'
@@ -85,21 +98,20 @@
 
 	.aside {
 		grid-area: aside;
-		border: 1px solid magenta;
+		border: 1px solid var(--border);
 		border-radius: 10px;
 		padding: 1px;
 		margin-left: 0px;
 		margin-top: 4px;
-		color: lightsalmon;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		font-size: xx-small;
+		font-size: 0.75rem;
 		overflow: hidden;
 	}
 
 	.header {
-		border: 1px solid orange;
+		border: 1px solid var(--border);
 		border-radius: 10px;
 		grid-area: hdr;
 		margin: 2px;
@@ -111,7 +123,6 @@
 
 	.content {
 		grid-area: content;
-		color: green;
 		margin-left: 0px;
 		margin-right: 2px;
 		margin-top: 4px;
@@ -121,26 +132,64 @@
 	}
 
 	.footer {
-		border: 2px solid orange;
+		border: 1px solid var(--border);
 		border-radius: 10px;
 		grid-area: footer;
-		color: blue;
+		color: var(--text-muted);
 		padding: 0.5rem;
 		margin: 2px;
-		font-size: xx-small;
+		font-size: 0.75rem;
 	}
 
 	.cats-ctr {
 		width: 99%;
 		margin: 0 auto;
-		border: 1px solid black;
+		border: 1px solid var(--border);
 		border-radius: 10px;
 		grid-area: cats;
 		column-gap: 2px;
-		font-size: xx-small;
-		background-color: rgba(68, 95, 177, 0.8);
-		color: white;
+		background-color: #fff;
 		overflow-x: hidden;
 		overflow-y: auto;
+	}
+
+	.filters-toggle {
+		display: none;
+	}
+
+	@media (max-width: 640px) {
+		.pagewrapper {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto auto auto 1fr auto;
+			grid-template-areas:
+				'hdr'
+				'cats'
+				'ftog'
+				'aside'
+				'content'
+				'footer';
+		}
+
+		.filters-toggle {
+			display: block;
+			grid-area: ftog;
+			margin: 0 2px;
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			background-color: #fff;
+			color: var(--accent);
+			font-size: 0.8rem;
+			padding: 4px;
+			cursor: pointer;
+		}
+
+		.aside {
+			display: none;
+		}
+
+		.aside.open {
+			display: flex;
+			max-height: 30svh;
+		}
 	}
 </style>

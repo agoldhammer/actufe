@@ -90,6 +90,10 @@ test.describe('article display', () => {
 			'href',
 			'https://example.com/debat'
 		);
+		// the headline itself is also a link to the article
+		await expect(
+			cards.first().getByRole('link', { name: 'Élections: le grand débat' })
+		).toHaveAttribute('href', 'https://example.com/debat');
 	});
 
 	test('footer shows document counts and the timespan', async ({ page }) => {
@@ -128,10 +132,60 @@ test.describe('article display', () => {
 		await expect(page.locator('.card')).toHaveCount(2);
 	});
 
+	test('unchecking one publication also unchecks All/None', async ({ page }) => {
+		const allNone = page.locator('label.option', { hasText: 'All/None' }).getByRole('checkbox');
+		await expect(allNone).toBeChecked();
+		await page.locator('label.option', { hasText: 'Libération' }).getByRole('checkbox').uncheck();
+		await expect(allNone).not.toBeChecked();
+	});
+
+	test('filtering out everything shows an empty state whose reset restores all', async ({
+		page
+	}) => {
+		await page.locator('label.option', { hasText: 'All/None' }).getByRole('checkbox').uncheck();
+		await expect(page.locator('.card')).toHaveCount(0);
+		await expect(page.getByText('No articles match the current filters.')).toBeVisible();
+		await page.getByRole('button', { name: 'Reset filters' }).click();
+		await expect(page.locator('.card')).toHaveCount(2);
+	});
+
 	test('the No summary box collapses article summaries', async ({ page }) => {
 		await expect(page.getByText('Résumé du débat électoral.')).toBeVisible();
 		await page.locator('label.option', { hasText: 'No summary' }).getByRole('checkbox').check();
 		await expect(page.getByText('Résumé du débat électoral.')).toHaveCount(0);
 		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
+	});
+
+	test('Escape and Cancel both dismiss the search box without searching', async ({ page }) => {
+		await page.getByRole('button', { name: 'Query' }).click();
+		await page.locator('#txtqry').press('Escape');
+		await expect(page.locator('#txtqry')).toHaveCount(0);
+		await expect(page.getByRole('button', { name: 'Query' })).toBeVisible();
+
+		await page.getByRole('button', { name: 'Query' }).click();
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await expect(page.locator('#txtqry')).toHaveCount(0);
+		await expect(page).not.toHaveURL(/txtquery/);
+	});
+
+	test('an active text query shows a chip that clears it', async ({ page }) => {
+		await page.getByRole('button', { name: 'Query' }).click();
+		await page.locator('#txtqry').fill('macron');
+		await page.getByRole('button', { name: 'Submit' }).click();
+		await expect(page).toHaveURL(/txtquery=macron/);
+		const chip = page.locator('.query-chip');
+		await expect(chip).toContainText('search: macron');
+		await chip.click();
+		await expect(page).not.toHaveURL(/txtquery/);
+		await expect(chip).toHaveCount(0);
+	});
+
+	test('narrow screens hide the sidebar behind a Filters toggle', async ({ page }) => {
+		await page.setViewportSize({ width: 400, height: 800 });
+		await expect(page.locator('.sidebar')).toBeHidden();
+		await page.getByRole('button', { name: /^Filters$/ }).click();
+		await expect(page.locator('.sidebar')).toBeVisible();
+		await page.getByRole('button', { name: 'Hide filters' }).click();
+		await expect(page.locator('.sidebar')).toBeHidden();
 	});
 });
