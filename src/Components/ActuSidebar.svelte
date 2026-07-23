@@ -6,7 +6,6 @@
 	function handleAllNone(event: Event) {
 		selected_pubs_store.set((event.currentTarget as HTMLInputElement).checked ? pubnames : []);
 	}
-	export let collapse_summary: boolean;
 </script>
 
 <div class="sidebar">
@@ -21,11 +20,6 @@
 			<input type="checkbox" bind:group={$selected_pubs_store} value={pubname} />
 		</label>
 	{/each}
-	<hr />
-	<label class="option">
-		No summary
-		<input type="checkbox" bind:checked={collapse_summary} />
-	</label>
 </div>
 
 <style>

@@ -12,7 +12,8 @@ export const helpitems = [
 		topic: 'Publications',
 		description: `The left sidebar displays the names of publications with articles in the current time window. Publications can
       be selected/deselected by clicking the checkbox adjacent to the name. The All/None button selects/deselects all
-      publications. Checking the 'No summary' box suppresses display of article summaries.`
+      publications. The 'Hide summ.' button in the header suppresses display of article summaries; press it again
+      ('Show summ.') to restore them.`
 	},
 	{
 		id: 'help3',
