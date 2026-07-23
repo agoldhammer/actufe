@@ -44,22 +44,18 @@
 
 <div class="pagewrapper">
 	<div class="header">
-		<ActuHdr timeframe={appdata.timeframe} />
+		<ActuHdr timeframe={appdata.timeframe} bind:collapse_summary bind:show_filters />
 	</div>
 	<div class="cats-ctr">
 		<ActuCats />
 	</div>
-	<!-- only visible on narrow screens, where the sidebar is hidden by default -->
-	<button class="filters-toggle" type="button" on:click={() => (show_filters = !show_filters)}>
-		{show_filters ? 'Hide filters' : 'Filters'}
-	</button>
 	<!-- id pagecontent is used in ActuHdr to force scroll to top -->
 	<div id="pagecontent" class="content">
 		<ActuContent articles={appdata.arts} pubnames={appdata.pubnames} {collapse_summary} />
 	</div>
 	{#key appdata.pubnames}
 		<div class="aside" class:open={show_filters}>
-			<ActuSidebar pubnames={appdata.pubnames} bind:collapse_summary />
+			<ActuSidebar pubnames={appdata.pubnames} />
 		</div>
 	{/key}
 	<div class="footer">
@@ -153,34 +149,16 @@
 		overflow-y: auto;
 	}
 
-	.filters-toggle {
-		display: none;
-	}
-
 	@media (max-width: 640px) {
 		.pagewrapper {
 			grid-template-columns: 1fr;
-			grid-template-rows: auto auto auto auto 1fr auto;
+			grid-template-rows: auto auto auto 1fr auto;
 			grid-template-areas:
 				'hdr'
 				'cats'
-				'ftog'
 				'aside'
 				'content'
 				'footer';
-		}
-
-		.filters-toggle {
-			display: block;
-			grid-area: ftog;
-			margin: 0 2px;
-			border: 1px solid var(--border);
-			border-radius: 8px;
-			background-color: #fff;
-			color: var(--accent);
-			font-size: 0.8rem;
-			padding: 4px;
-			cursor: pointer;
 		}
 
 		.aside {

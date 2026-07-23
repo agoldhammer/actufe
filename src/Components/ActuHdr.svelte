@@ -3,8 +3,9 @@
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { time_window_store } from '$lib/actustores';
-	import logo from '$lib/images/nooze-logo.png';
 	export let timeframe: string;
+	export let collapse_summary: boolean;
+	export let show_filters: boolean;
 	$: flag = timeframe === '0' ? true : false;
 	$: activeQuery = $page.url.searchParams.get('txtquery');
 
@@ -82,6 +83,7 @@
 	$: tval = $time_window_store.toString() ?? '3';
 	const twinTip = 'Select time frame size';
 	const txtQryTip = 'Search for keywords in selected time window';
+	const summariesTip = 'Show or hide article summaries';
 </script>
 
 <div class="actu-hdr">
@@ -95,8 +97,7 @@
 			id="txtqry"
 			cols="30"
 			rows="2"
-			value={activeQuery ?? ''}
-		/>
+			value={activeQuery ?? ''}></textarea>
 		<button type="button" class="textqrysubmit" on:click|preventDefault={textQuerySubmit}
 			>Submit</button
 		>
@@ -107,7 +108,6 @@
 		>
 	{:else}
 		<!-- <label for="twin">Window:</label> -->
-		<img src={logo} alt="Nooze logo" width="40" height="40" />
 		<select
 			class="tsel"
 			bind:value={tval}
@@ -160,6 +160,23 @@
 				search: {activeQuery} <span aria-hidden="true">&#10005;</span>
 			</button>
 		{/if}
+		<!-- summaries toggle, with the mobile-only filters toggle stacked beneath it -->
+		<div class="sumfilt">
+			<button
+				class="summaries"
+				type="button"
+				use:tooltip={{ content: summariesTip, theme: 'material', animation: 'fade' }}
+				on:click|preventDefault={() => (collapse_summary = !collapse_summary)}
+				>{collapse_summary ? 'Show' : 'Hide'}<br />summ.</button
+			>
+			<!-- filters toggle, only visible on narrow screens where the sidebar is hidden -->
+			<button
+				class="filters-toggle"
+				type="button"
+				on:click|preventDefault={() => (show_filters = !show_filters)}
+				>{show_filters ? 'Hide filters' : 'Filters'}</button
+			>
+		</div>
 		<!-- help button -->
 		<button class="help" type="button" on:click|preventDefault={() => goto(`${base}/about`)}
 			>Help</button
@@ -183,6 +200,7 @@
 	.timebutton,
 	.textqrysubmit,
 	.textqrycancel,
+	.summaries,
 	.help {
 		height: 85%;
 		border: none;
@@ -197,6 +215,11 @@
 
 	.timebutton {
 		font-size: 0.9rem;
+	}
+
+	.summaries {
+		line-height: 1.15;
+		padding: 2px 8px;
 	}
 
 	.timebutton:disabled,
@@ -223,8 +246,43 @@
 	.timebutton:hover,
 	.textqrysubmit:hover,
 	/* .cat-button:hover, */
+	.summaries:hover,
 	.help:hover {
 		background-color: var(--accent-dark);
+	}
+
+	.sumfilt {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 3px;
+	}
+
+	/* stacked in a column, so size by content rather than header height */
+	.sumfilt .summaries {
+		height: auto;
+	}
+
+	.filters-toggle {
+		display: none;
+		border: none;
+		border-radius: 8px;
+		background-color: var(--accent);
+		color: white;
+		font-size: 0.8rem;
+		padding: 4px 8px;
+		cursor: pointer;
+		transition-duration: 0.3s;
+	}
+
+	.filters-toggle:hover {
+		background-color: var(--accent-dark);
+	}
+
+	@media (max-width: 640px) {
+		.filters-toggle {
+			display: block;
+		}
 	}
 
 	.textqrycancel:hover {

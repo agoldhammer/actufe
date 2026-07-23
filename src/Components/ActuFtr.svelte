@@ -1,9 +1,13 @@
 <script lang="ts">
 	import type { Appdata } from './ActuCtr.svelte';
+	import logo from '$lib/images/nooze-logo.png';
 	export let appdata: Appdata;
 </script>
 
 <div class="ftr">
+	<div class="logo">
+		<img src={logo} alt="Nooze logo" width="40" height="40" />
+	</div>
 	<div class="ndocs">
 		Total no. of docs {appdata.ndocs}
 		<span>Displaying {appdata.count}</span>
@@ -13,7 +17,7 @@
 		<span>End:&nbsp;&nbsp;&nbsp;{appdata.timespan.end}</span>
 	</div>
 	<div class="version">
-		<span>Ver. 0.3</span>
+		<span>Ver. 0.4</span>
 	</div>
 </div>
 
@@ -24,6 +28,11 @@
 		justify-content: space-between;
 		font-size: 0.75rem;
 		gap: 20px;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
 	}
 
 	.ndocs {
