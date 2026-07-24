@@ -233,4 +233,19 @@ test.describe('scroll restoration', () => {
 		await expect(page.locator('#card-10')).toBeVisible();
 		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
 	});
+
+	test('collapsing summaries keeps the top-of-viewport article anchored', async ({ page }) => {
+		await expect(page.locator('.card')).toHaveCount(40);
+
+		// Scroll an article flush to the viewport top.
+		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
+		expect(await page.locator('#pagecontent').evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+
+		// Collapsing summaries shrinks every card. The anchored article must stay
+		// at the top rather than drifting as the cards above it lose height.
+		await page.getByRole('button', { name: /summ\./ }).click();
+		await expect(page.getByText('Summary paragraph for article number 10.')).toHaveCount(0);
+		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+	});
 });
