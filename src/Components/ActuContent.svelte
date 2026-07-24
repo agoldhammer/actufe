@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Article } from '$lib/types';
 	import { selected_cats_store, selected_pubs_store } from '$lib/actustores';
+	import { sanitizeSummary } from '$lib/sanitize';
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
@@ -106,10 +107,11 @@
 			</div>
 			{#if !collapse_summary}
 				<div class="cardbody">
-					<!-- summaries are HTML fragments from the trusted actuproxy feed;
-					     rendering them is the point of the app -->
+					<!-- summaries are HTML fragments that reach actuproxy from third-party
+					     RSS feeds; rendering them is the point of the app, so they are
+					     sanitized (see $lib/sanitize) rather than trusted -->
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html article.summary}
+					{@html sanitizeSummary(article.summary)}
 				</div>
 			{/if}
 		</div>
