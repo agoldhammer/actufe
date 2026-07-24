@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import type { Appdata } from '../Components/ActuCtr.svelte';
+	import type { Appdata } from '$lib/types';
 	import ActuCtr from '../Components/ActuCtr.svelte';
 	export let data;
 

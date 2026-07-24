@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Article } from '$comp/ActuCtr.svelte';
+	import type { Article } from '$lib/types';
 	import { selected_cats_store, selected_pubs_store } from '$lib/actustores';
-	import { afterUpdate, beforeUpdate } from 'svelte';
+	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
@@ -26,47 +26,57 @@
 		}
 	};
 
-	/* * before update, get id of top elt in pagecontent viewport*/
-	let topElementId = '';
+	// Preserve the reading position across re-renders (collapsing summaries or
+	// dropping a publication): find the article at the top of the viewport before
+	// the list re-renders, then scroll it back to the top afterward.
 	//
-	/* ! This still seems to have an annoying off-by-one behavior */
-	beforeUpdate(() => {
-		// console.log('before update called');
+	// The anchor is the article's own id (`card-${article.id}`), never the list
+	// index: when a filter removes articles a given index points at a different
+	// article after the update, so an index-based anchor scrolled to the wrong
+	// card. With a stable id the anchor lands on the same article, or — if that
+	// article was filtered out — is simply absent and the scroll is left alone.
+	//
+	// This is driven by a reactive statement + tick() rather than
+	// beforeUpdate/afterUpdate: under Svelte 5 those legacy hooks fire out of step
+	// with the {#each} DOM patch (afterUpdate still saw the pre-filter cards), so
+	// the anchor was measured and restored against a stale DOM.
+	const cardId = (article: Article) => `card-${article.id}`;
 
-		const cardElts = document.getElementsByClassName('card');
+	function topVisibleCardId(): string {
 		const parent = document.getElementById('pagecontent');
-		if (!parent) return;
-		const top = parent.scrollTop;
-		const height = parent.offsetHeight;
-		for (let i = 0; i < cardElts.length; i++) {
-			let el = cardElts.item(i) as HTMLDivElement;
-			let y = el.offsetTop;
-			// console.log('id y top height', el.id, y, top, height);
-			// check if el is visible in container
-			if (top && height && y >= top && y <= top + height) {
-				topElementId = el.id;
-				// console.log('setting topElementId', topElementId);
-				// break out after first visible el, which will be top one
-				break;
-			}
+		if (!parent) return '';
+		// Measure in viewport coordinates via getBoundingClientRect rather than
+		// offsetTop/scrollTop: #pagecontent isn't a positioned element, so the
+		// cards' offsetParent is some ancestor and offsetTop is in a different
+		// coordinate space than scrollTop — comparing them picks the wrong card.
+		const parentTop = parent.getBoundingClientRect().top;
+		const cards = parent.getElementsByClassName('card');
+		for (let i = 0; i < cards.length; i++) {
+			const el = cards[i] as HTMLDivElement;
+			// First card whose bottom edge is still below the container's top edge is
+			// the topmost (partially) visible one. The 1px slop discounts a sub-pixel
+			// sliver of the card above so the barely off-screen previous card doesn't win.
+			if (el.getBoundingClientRect().bottom > parentTop + 1) return el.id;
 		}
-		// }
-	});
+		return '';
+	}
 
-	/* * After update, find top elt and scroll to it*/
-	afterUpdate(() => {
-		// console.log('after update topElId', topElementId);
+	let scrollKey = '';
+	$: preserveScroll(collapse_summary, visibleArticles);
 
-		if (topElementId) {
-			// console.log('aft: scroll to topElementId\n', topElementId);
-			const el = document.getElementById(topElementId) as HTMLDivElement;
-			if (el) {
-				el.scrollIntoView(true);
-			}
-		} else {
-			// console.log('no top el');
-		}
-	});
+	async function preserveScroll(collapsed: boolean, arts: Article[]) {
+		// Re-run only when the rendered set actually changes; the reactive
+		// statement also fires for unrelated store updates. Collapsing summaries
+		// keeps the same ids but changes heights, so it is part of the key.
+		const key = `${collapsed}|${arts.map((a) => a.id).join(',')}`;
+		if (key === scrollKey) return;
+		scrollKey = key;
+		// Measured against the pre-update DOM (reactive statements run before the
+		// DOM is patched); tick() then waits for the new list to render.
+		const anchorId = topVisibleCardId();
+		await tick();
+		if (anchorId) document.getElementById(anchorId)?.scrollIntoView(true);
+	}
 </script>
 
 {#if visibleArticles.length === 0}
@@ -75,8 +85,8 @@
 		<button type="button" on:click={resetFilters}>Reset filters</button>
 	</div>
 {:else}
-	{#each visibleArticles as article, i}
-		<div id={i.toString()} class="card">
+	{#each visibleArticles as article}
+		<div id={cardId(article)} class="card">
 			<div class="cardhdr" class:nosumm={collapse_summary}>
 				<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
 				<div class="pubdate">[{article.pubdate}: {article.pubname}]</div>

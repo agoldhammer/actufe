@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Appdata } from './ActuCtr.svelte';
+	import type { Appdata } from '$lib/types';
 	import logo from '$lib/images/nooze-logo.png';
 	export let appdata: Appdata;
 </script>

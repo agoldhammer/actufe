@@ -10,17 +10,7 @@ import {
 	time_window_store,
 	selected_pubs_store
 } from '$lib/actustores';
-
-export interface Article {
-	id: string;
-	title: string;
-	summary: string;
-	pubdate: string;
-	pubname: string;
-	link: string;
-	hash: string;
-	cat: string;
-}
+import type { Article } from '$lib/types';
 
 export const load = async function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');

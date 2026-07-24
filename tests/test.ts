@@ -149,9 +149,9 @@ test.describe('article display', () => {
 		await expect(page.locator('.card')).toHaveCount(2);
 	});
 
-	test('the No summary box collapses article summaries', async ({ page }) => {
+	test('the Hide summ. button collapses article summaries', async ({ page }) => {
 		await expect(page.getByText('Résumé du débat électoral.')).toBeVisible();
-		await page.locator('label.option', { hasText: 'No summary' }).getByRole('checkbox').check();
+		await page.getByRole('button', { name: /summ\./ }).click();
 		await expect(page.getByText('Résumé du débat électoral.')).toHaveCount(0);
 		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
 	});
@@ -187,5 +187,50 @@ test.describe('article display', () => {
 		await expect(page.locator('.sidebar')).toBeVisible();
 		await page.getByRole('button', { name: 'Hide filters' }).click();
 		await expect(page.locator('.sidebar')).toBeHidden();
+	});
+});
+
+test.describe('scroll restoration', () => {
+	// Enough articles across two publications to make the list scroll. Even ids
+	// belong to 'Keep Pub' (survive the filter below), odd ids to 'Drop Pub'.
+	const many = Array.from({ length: 40 }, (_, i) =>
+		article({
+			id: String(i),
+			title: `Article ${i}`,
+			summary: `<p>Summary paragraph for article number ${i}.</p>`,
+			pubname: i % 2 === 0 ? 'Keep Pub' : 'Drop Pub'
+		})
+	);
+	const manyResponse = makeResponse(many);
+
+	test.beforeEach(async ({ page }) => {
+		await page.route('**/api/articles*', (route) => route.fulfill({ json: manyResponse }));
+		await loginByStorage(page);
+		await page.goto('/');
+	});
+
+	// Offset of the anchor card's top from the scroll container's top, in px.
+	const anchorOffset = (page: Page) =>
+		page.locator('#pagecontent').evaluate((parent) => {
+			const el = document.getElementById('card-10');
+			return el ? el.getBoundingClientRect().top - parent.getBoundingClientRect().top : null;
+		});
+
+	test('unchecking a publication keeps the top-of-viewport article anchored', async ({ page }) => {
+		await expect(page.locator('.card')).toHaveCount(40);
+
+		// Scroll a 'Keep Pub' card (id 10, so it survives) flush to the viewport top.
+		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
+		expect(await page.locator('#pagecontent').evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+
+		// Drop the other publication. With index-based anchoring the view jumped to
+		// whatever article landed at the old top index; the article's own id must
+		// keep it pinned to the top instead.
+		await page.locator('label.option', { hasText: 'Drop Pub' }).getByRole('checkbox').uncheck();
+		await expect(page.locator('.card')).toHaveCount(20);
+
+		await expect(page.locator('#card-10')).toBeVisible();
+		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
 	});
 });
