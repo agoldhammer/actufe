@@ -6,30 +6,6 @@
  -->
 <script lang="ts" context="module">
 	import ActuCats from './ActuCats.svelte';
-	export interface Article {
-		id: string;
-		title: string;
-		summary: string;
-		pubdate: string;
-		pubname: string;
-		link: string;
-		hash: string;
-		cat?: string;
-	}
-
-	export interface Timespan {
-		start: string;
-		end: string;
-	}
-	export interface Appdata {
-		arts: Article[];
-		count: string;
-		timeframe: string;
-		timespan: Timespan;
-		pubnames: Array<string>; // sorted array of pubnames on current page
-		ndocs: string;
-		// cats: Array<string>;
-	}
 </script>
 
 <script lang="ts">
@@ -37,6 +13,7 @@
 	import ActuHdr from './ActuHdr.svelte';
 	import ActuSidebar from './ActuSidebar.svelte';
 	import ActuFtr from './ActuFtr.svelte';
+	import type { Appdata } from '$lib/types';
 	export let appdata: Appdata;
 	let collapse_summary = false;
 	let show_filters = false;
@@ -125,6 +102,10 @@
 		padding: 0px;
 		overflow-y: scroll;
 		overflow-x: hidden;
+		/* Disable the browser's scroll anchoring so it can't shift scrollTop when
+		   summaries collapse/expand — ActuContent restores the reading position
+		   itself, and anchoring would fight it inconsistently across browsers. */
+		overflow-anchor: none;
 	}
 
 	.footer {

@@ -1,7 +1,7 @@
 // Shared, typed test fixtures for the /api/articles contract, used by both
 // the vitest suite (src/routes/page.test.ts) and the Playwright suite
 // (tests/test.ts) so the mocked shape can't drift in one place only.
-import type { Article } from '../routes/+page';
+import type { Article } from '$lib/types';
 
 export const article = (overrides: Partial<Article> = {}): Article => ({
 	id: '1',

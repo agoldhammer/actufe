@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { Article } from '$comp/ActuCtr.svelte';
+	import type { Article } from '$lib/types';
 	import { selected_cats_store, selected_pubs_store } from '$lib/actustores';
-	import { afterUpdate, beforeUpdate } from 'svelte';
+	import { sanitizeSummary } from '$lib/sanitize';
+	import { tick, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
@@ -26,47 +27,78 @@
 		}
 	};
 
-	/* * before update, get id of top elt in pagecontent viewport*/
-	let topElementId = '';
+	// Preserve the reading position across re-renders (collapsing summaries or
+	// dropping a publication): keep track of the article at the top of the
+	// viewport, and after the list re-renders bring that same article back to the
+	// top.
 	//
-	/* ! This still seems to have an annoying off-by-one behavior */
-	beforeUpdate(() => {
-		// console.log('before update called');
+	// The anchor is the article's own id (`card-${article.id}`), never the list
+	// index: when a filter removes articles a given index points at a different
+	// article after the update. With a stable id the anchor lands on the same
+	// article, or — if that article was filtered out — is simply absent and the
+	// scroll is left alone.
+	//
+	// The anchor is captured continuously by a scroll listener rather than being
+	// measured inside the reactive statement below. Under Svelte 5 that reactive
+	// statement runs *after* the {#each} DOM patch in WebKit but *before* it in
+	// Blink, so measuring there read the wrong (already-collapsed) DOM in Safari
+	// and left the wrong article on top. Reading a value captured during the
+	// user's last scroll is immune to that ordering difference. (Held in an object
+	// so scroll-time writes don't invalidate the component every frame.)
+	const cardId = (article: Article) => `card-${article.id}`;
+	const anchor = { id: '' };
 
-		const cardElts = document.getElementsByClassName('card');
+	// The topmost (partially) visible card in the scroll container. Everything is
+	// measured in viewport coordinates via getBoundingClientRect: #pagecontent
+	// isn't a positioned element, so the cards' offsetParent is some ancestor and
+	// offsetTop lives in a different coordinate space than scrollTop.
+	function topVisibleCardId(parent: HTMLElement): string {
+		const parentTop = parent.getBoundingClientRect().top;
+		const cards = parent.getElementsByClassName('card');
+		for (let i = 0; i < cards.length; i++) {
+			const el = cards[i] as HTMLDivElement;
+			// First card whose bottom edge is still below the container's top edge is
+			// the topmost visible one. The 1px slop discounts a sub-pixel sliver of the
+			// card above so the barely off-screen previous card doesn't win.
+			if (el.getBoundingClientRect().bottom > parentTop + 1) return el.id;
+		}
+		return '';
+	}
+
+	function updateAnchor() {
 		const parent = document.getElementById('pagecontent');
-		if (!parent) return;
-		const top = parent.scrollTop;
-		const height = parent.offsetHeight;
-		for (let i = 0; i < cardElts.length; i++) {
-			let el = cardElts.item(i) as HTMLDivElement;
-			let y = el.offsetTop;
-			// console.log('id y top height', el.id, y, top, height);
-			// check if el is visible in container
-			if (top && height && y >= top && y <= top + height) {
-				topElementId = el.id;
-				// console.log('setting topElementId', topElementId);
-				// break out after first visible el, which will be top one
-				break;
-			}
-		}
-		// }
+		if (parent) anchor.id = topVisibleCardId(parent);
+	}
+
+	onMount(() => {
+		const parent = document.getElementById('pagecontent');
+		updateAnchor();
+		parent?.addEventListener('scroll', updateAnchor, { passive: true });
+		return () => parent?.removeEventListener('scroll', updateAnchor);
 	});
 
-	/* * After update, find top elt and scroll to it*/
-	afterUpdate(() => {
-		// console.log('after update topElId', topElementId);
+	let scrollKey = '';
+	$: preserveScroll(collapse_summary, visibleArticles);
 
-		if (topElementId) {
-			// console.log('aft: scroll to topElementId\n', topElementId);
-			const el = document.getElementById(topElementId) as HTMLDivElement;
-			if (el) {
-				el.scrollIntoView(true);
-			}
-		} else {
-			// console.log('no top el');
-		}
-	});
+	async function preserveScroll(collapsed: boolean, arts: Article[]) {
+		// Re-run only when the rendered set actually changes; the reactive
+		// statement also fires for unrelated store updates. Collapsing summaries
+		// keeps the same ids but changes heights, so it is part of the key.
+		const key = `${collapsed}|${arts.map((a) => a.id).join(',')}`;
+		if (key === scrollKey) return;
+		scrollKey = key;
+		const target = anchor.id; // captured by the scroll listener, before this render
+		await tick();
+		const parent = document.getElementById('pagecontent');
+		if (!target || !parent) return;
+		const el = document.getElementById(target);
+		if (!el) return; // the anchored article was filtered out; leave scroll alone
+		// Bring the anchor card to the top by nudging only this container's
+		// scrollTop. Not scrollIntoView(): that also scrolls ancestor scrollers and
+		// the window and aligns inconsistently across browsers.
+		const delta = el.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+		if (delta !== 0) parent.scrollTop += delta;
+	}
 </script>
 
 {#if visibleArticles.length === 0}
@@ -75,8 +107,8 @@
 		<button type="button" on:click={resetFilters}>Reset filters</button>
 	</div>
 {:else}
-	{#each visibleArticles as article, i}
-		<div id={i.toString()} class="card">
+	{#each visibleArticles as article}
+		<div id={cardId(article)} class="card">
 			<div class="cardhdr" class:nosumm={collapse_summary}>
 				<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
 				<div class="pubdate">[{article.pubdate}: {article.pubname}]</div>
@@ -96,10 +128,11 @@
 			</div>
 			{#if !collapse_summary}
 				<div class="cardbody">
-					<!-- summaries are HTML fragments from the trusted actuproxy feed;
-					     rendering them is the point of the app -->
+					<!-- summaries are HTML fragments that reach actuproxy from third-party
+					     RSS feeds; rendering them is the point of the app, so they are
+					     sanitized (see $lib/sanitize) rather than trusted -->
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html article.summary}
+					{@html sanitizeSummary(article.summary)}
 				</div>
 			{/if}
 		</div>

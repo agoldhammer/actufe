@@ -149,9 +149,9 @@ test.describe('article display', () => {
 		await expect(page.locator('.card')).toHaveCount(2);
 	});
 
-	test('the No summary box collapses article summaries', async ({ page }) => {
+	test('the Hide summ. button collapses article summaries', async ({ page }) => {
 		await expect(page.getByText('Résumé du débat électoral.')).toBeVisible();
-		await page.locator('label.option', { hasText: 'No summary' }).getByRole('checkbox').check();
+		await page.getByRole('button', { name: /summ\./ }).click();
 		await expect(page.getByText('Résumé du débat électoral.')).toHaveCount(0);
 		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
 	});
@@ -187,5 +187,116 @@ test.describe('article display', () => {
 		await expect(page.locator('.sidebar')).toBeVisible();
 		await page.getByRole('button', { name: 'Hide filters' }).click();
 		await expect(page.locator('.sidebar')).toBeHidden();
+	});
+});
+
+test.describe('scroll restoration', () => {
+	// Enough articles across two publications to make the list scroll. Even ids
+	// belong to 'Keep Pub' (survive the filter below), odd ids to 'Drop Pub'.
+	const many = Array.from({ length: 40 }, (_, i) =>
+		article({
+			id: String(i),
+			title: `Article ${i}`,
+			summary: `<p>Summary paragraph for article number ${i}.</p>`,
+			pubname: i % 2 === 0 ? 'Keep Pub' : 'Drop Pub'
+		})
+	);
+	const manyResponse = makeResponse(many);
+
+	test.beforeEach(async ({ page }) => {
+		await page.route('**/api/articles*', (route) => route.fulfill({ json: manyResponse }));
+		await loginByStorage(page);
+		await page.goto('/');
+	});
+
+	// The card currently at the top of the scroll container, and how far its top
+	// sits from the container's top edge (0 = flush, negative = scrolled past).
+	const topCard = (page: Page) =>
+		page.locator('#pagecontent').evaluate((parent) => {
+			const parentTop = parent.getBoundingClientRect().top;
+			const cards = parent.getElementsByClassName('card');
+			for (let i = 0; i < cards.length; i++) {
+				const el = cards[i] as HTMLElement;
+				const r = el.getBoundingClientRect();
+				if (r.bottom > parentTop + 1) return { id: el.id, offset: r.top - parentTop };
+			}
+			return { id: '', offset: NaN };
+		});
+
+	// Leave a 'Keep Pub' card (id 10, survives the pub filter) as the top card,
+	// deliberately scrolled 40px past the top so restoration has real work to do —
+	// not pre-aligned, which would make "returns to the top" trivially true.
+	async function scrollCard10PastTop(page: Page) {
+		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
+		await page.locator('#pagecontent').evaluate((p) => (p.scrollTop += 40));
+		const before = await topCard(page);
+		expect(before.id).toBe('card-10');
+		expect(before.offset).toBeLessThan(-20); // genuinely scrolled off the top
+	}
+
+	test('unchecking a publication keeps the top-of-viewport article anchored', async ({ page }) => {
+		await expect(page.locator('.card')).toHaveCount(40);
+		await scrollCard10PastTop(page);
+
+		// Drop the other publication. With index-based anchoring the view jumped to
+		// whatever article landed at the old top index; the article's own id must
+		// bring it back to the top instead.
+		await page.locator('label.option', { hasText: 'Drop Pub' }).getByRole('checkbox').uncheck();
+		await expect(page.locator('.card')).toHaveCount(20);
+
+		const after = await topCard(page);
+		expect(after.id).toBe('card-10');
+		expect(Math.abs(after.offset)).toBeLessThan(3);
+	});
+
+	test('collapsing summaries returns the top-of-viewport article to the top', async ({ page }) => {
+		await expect(page.locator('.card')).toHaveCount(40);
+		await scrollCard10PastTop(page);
+
+		// Collapsing summaries shrinks every card above the anchor. The anchored
+		// article must be brought back to the top, not left drifting.
+		await page.getByRole('button', { name: /summ\./ }).click();
+		await expect(page.getByText('Summary paragraph for article number 10.')).toHaveCount(0);
+
+		const after = await topCard(page);
+		expect(after.id).toBe('card-10');
+		expect(Math.abs(after.offset)).toBeLessThan(3);
+	});
+});
+
+test.describe('summary sanitization', () => {
+	// Summaries reach the app from third-party RSS feeds, so a hostile one has to
+	// be defused before it is rendered with {@html}. $lib/sanitize is unit-tested
+	// on its own; this checks that it is actually wired into the render path.
+	const hostile = makeResponse([
+		article({
+			id: '1',
+			summary:
+				'<p>Lead paragraph.</p>' +
+				'<script>window.__pwned = true;</script>' +
+				'<img src="/nonexistent.png" onerror="window.__pwned = true;" alt="art">' +
+				'<a href="javascript:window.__pwned = true">click</a>' +
+				'<iframe src="https://example.com/frame"></iframe>'
+		})
+	]);
+
+	test.beforeEach(async ({ page }) => {
+		await page.route('**/api/articles*', (route) => route.fulfill({ json: hostile }));
+		await loginByStorage(page);
+		await page.goto('/');
+	});
+
+	test('active content in a summary is stripped and never runs', async ({ page }) => {
+		const body = page.locator('.cardbody');
+		await expect(body).toContainText('Lead paragraph.');
+
+		await expect(body.locator('script')).toHaveCount(0);
+		await expect(body.locator('iframe')).toHaveCount(0);
+		// The image survives (feeds legitimately use them) minus its handler; the
+		// broken src makes the browser fire error, which must do nothing.
+		await expect(body.locator('img')).toHaveCount(1);
+		await expect(body.locator('img')).not.toHaveAttribute('onerror', /./);
+		await expect(body.locator('a')).not.toHaveAttribute('href', /javascript:/);
+		expect(await page.evaluate(() => '__pwned' in window)).toBe(false);
 	});
 });

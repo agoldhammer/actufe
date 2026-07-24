@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Appdata } from './ActuCtr.svelte';
+	import type { Appdata } from '$lib/types';
 	import logo from '$lib/images/nooze-logo.png';
 	export let appdata: Appdata;
 </script>
@@ -17,7 +17,7 @@
 		<span>End:&nbsp;&nbsp;&nbsp;{appdata.timespan.end}</span>
 	</div>
 	<div class="version">
-		<span>Ver. 0.4</span>
+		<span>Ver. 0.5</span>
 	</div>
 </div>
 
