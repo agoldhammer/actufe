@@ -102,6 +102,10 @@
 		padding: 0px;
 		overflow-y: scroll;
 		overflow-x: hidden;
+		/* Disable the browser's scroll anchoring so it can't shift scrollTop when
+		   summaries collapse/expand — ActuContent restores the reading position
+		   itself, and anchoring would fight it inconsistently across browsers. */
+		overflow-anchor: none;
 	}
 
 	.footer {

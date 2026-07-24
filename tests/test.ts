@@ -209,44 +209,58 @@ test.describe('scroll restoration', () => {
 		await page.goto('/');
 	});
 
-	// Offset of the anchor card's top from the scroll container's top, in px.
-	const anchorOffset = (page: Page) =>
+	// The card currently at the top of the scroll container, and how far its top
+	// sits from the container's top edge (0 = flush, negative = scrolled past).
+	const topCard = (page: Page) =>
 		page.locator('#pagecontent').evaluate((parent) => {
-			const el = document.getElementById('card-10');
-			return el ? el.getBoundingClientRect().top - parent.getBoundingClientRect().top : null;
+			const parentTop = parent.getBoundingClientRect().top;
+			const cards = parent.getElementsByClassName('card');
+			for (let i = 0; i < cards.length; i++) {
+				const el = cards[i] as HTMLElement;
+				const r = el.getBoundingClientRect();
+				if (r.bottom > parentTop + 1) return { id: el.id, offset: r.top - parentTop };
+			}
+			return { id: '', offset: NaN };
 		});
+
+	// Leave a 'Keep Pub' card (id 10, survives the pub filter) as the top card,
+	// deliberately scrolled 40px past the top so restoration has real work to do —
+	// not pre-aligned, which would make "returns to the top" trivially true.
+	async function scrollCard10PastTop(page: Page) {
+		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
+		await page.locator('#pagecontent').evaluate((p) => (p.scrollTop += 40));
+		const before = await topCard(page);
+		expect(before.id).toBe('card-10');
+		expect(before.offset).toBeLessThan(-20); // genuinely scrolled off the top
+	}
 
 	test('unchecking a publication keeps the top-of-viewport article anchored', async ({ page }) => {
 		await expect(page.locator('.card')).toHaveCount(40);
-
-		// Scroll a 'Keep Pub' card (id 10, so it survives) flush to the viewport top.
-		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
-		expect(await page.locator('#pagecontent').evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
-		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+		await scrollCard10PastTop(page);
 
 		// Drop the other publication. With index-based anchoring the view jumped to
 		// whatever article landed at the old top index; the article's own id must
-		// keep it pinned to the top instead.
+		// bring it back to the top instead.
 		await page.locator('label.option', { hasText: 'Drop Pub' }).getByRole('checkbox').uncheck();
 		await expect(page.locator('.card')).toHaveCount(20);
 
-		await expect(page.locator('#card-10')).toBeVisible();
-		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+		const after = await topCard(page);
+		expect(after.id).toBe('card-10');
+		expect(Math.abs(after.offset)).toBeLessThan(3);
 	});
 
-	test('collapsing summaries keeps the top-of-viewport article anchored', async ({ page }) => {
+	test('collapsing summaries returns the top-of-viewport article to the top', async ({ page }) => {
 		await expect(page.locator('.card')).toHaveCount(40);
+		await scrollCard10PastTop(page);
 
-		// Scroll an article flush to the viewport top.
-		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
-		expect(await page.locator('#pagecontent').evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
-		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
-
-		// Collapsing summaries shrinks every card. The anchored article must stay
-		// at the top rather than drifting as the cards above it lose height.
+		// Collapsing summaries shrinks every card above the anchor. The anchored
+		// article must be brought back to the top, not left drifting.
 		await page.getByRole('button', { name: /summ\./ }).click();
 		await expect(page.getByText('Summary paragraph for article number 10.')).toHaveCount(0);
-		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
+
+		const after = await topCard(page);
+		expect(after.id).toBe('card-10');
+		expect(Math.abs(after.offset)).toBeLessThan(3);
 	});
 });
 

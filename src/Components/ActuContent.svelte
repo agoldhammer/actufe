@@ -2,7 +2,7 @@
 	import type { Article } from '$lib/types';
 	import { selected_cats_store, selected_pubs_store } from '$lib/actustores';
 	import { sanitizeSummary } from '$lib/sanitize';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
@@ -28,39 +28,54 @@
 	};
 
 	// Preserve the reading position across re-renders (collapsing summaries or
-	// dropping a publication): find the article at the top of the viewport before
-	// the list re-renders, then scroll it back to the top afterward.
+	// dropping a publication): keep track of the article at the top of the
+	// viewport, and after the list re-renders bring that same article back to the
+	// top.
 	//
 	// The anchor is the article's own id (`card-${article.id}`), never the list
 	// index: when a filter removes articles a given index points at a different
-	// article after the update, so an index-based anchor scrolled to the wrong
-	// card. With a stable id the anchor lands on the same article, or — if that
-	// article was filtered out — is simply absent and the scroll is left alone.
+	// article after the update. With a stable id the anchor lands on the same
+	// article, or — if that article was filtered out — is simply absent and the
+	// scroll is left alone.
 	//
-	// This is driven by a reactive statement + tick() rather than
-	// beforeUpdate/afterUpdate: under Svelte 5 those legacy hooks fire out of step
-	// with the {#each} DOM patch (afterUpdate still saw the pre-filter cards), so
-	// the anchor was measured and restored against a stale DOM.
+	// The anchor is captured continuously by a scroll listener rather than being
+	// measured inside the reactive statement below. Under Svelte 5 that reactive
+	// statement runs *after* the {#each} DOM patch in WebKit but *before* it in
+	// Blink, so measuring there read the wrong (already-collapsed) DOM in Safari
+	// and left the wrong article on top. Reading a value captured during the
+	// user's last scroll is immune to that ordering difference. (Held in an object
+	// so scroll-time writes don't invalidate the component every frame.)
 	const cardId = (article: Article) => `card-${article.id}`;
+	const anchor = { id: '' };
 
-	function topVisibleCardId(): string {
-		const parent = document.getElementById('pagecontent');
-		if (!parent) return '';
-		// Measure in viewport coordinates via getBoundingClientRect rather than
-		// offsetTop/scrollTop: #pagecontent isn't a positioned element, so the
-		// cards' offsetParent is some ancestor and offsetTop is in a different
-		// coordinate space than scrollTop — comparing them picks the wrong card.
+	// The topmost (partially) visible card in the scroll container. Everything is
+	// measured in viewport coordinates via getBoundingClientRect: #pagecontent
+	// isn't a positioned element, so the cards' offsetParent is some ancestor and
+	// offsetTop lives in a different coordinate space than scrollTop.
+	function topVisibleCardId(parent: HTMLElement): string {
 		const parentTop = parent.getBoundingClientRect().top;
 		const cards = parent.getElementsByClassName('card');
 		for (let i = 0; i < cards.length; i++) {
 			const el = cards[i] as HTMLDivElement;
 			// First card whose bottom edge is still below the container's top edge is
-			// the topmost (partially) visible one. The 1px slop discounts a sub-pixel
-			// sliver of the card above so the barely off-screen previous card doesn't win.
+			// the topmost visible one. The 1px slop discounts a sub-pixel sliver of the
+			// card above so the barely off-screen previous card doesn't win.
 			if (el.getBoundingClientRect().bottom > parentTop + 1) return el.id;
 		}
 		return '';
 	}
+
+	function updateAnchor() {
+		const parent = document.getElementById('pagecontent');
+		if (parent) anchor.id = topVisibleCardId(parent);
+	}
+
+	onMount(() => {
+		const parent = document.getElementById('pagecontent');
+		updateAnchor();
+		parent?.addEventListener('scroll', updateAnchor, { passive: true });
+		return () => parent?.removeEventListener('scroll', updateAnchor);
+	});
 
 	let scrollKey = '';
 	$: preserveScroll(collapse_summary, visibleArticles);
@@ -72,11 +87,17 @@
 		const key = `${collapsed}|${arts.map((a) => a.id).join(',')}`;
 		if (key === scrollKey) return;
 		scrollKey = key;
-		// Measured against the pre-update DOM (reactive statements run before the
-		// DOM is patched); tick() then waits for the new list to render.
-		const anchorId = topVisibleCardId();
+		const target = anchor.id; // captured by the scroll listener, before this render
 		await tick();
-		if (anchorId) document.getElementById(anchorId)?.scrollIntoView(true);
+		const parent = document.getElementById('pagecontent');
+		if (!target || !parent) return;
+		const el = document.getElementById(target);
+		if (!el) return; // the anchored article was filtered out; leave scroll alone
+		// Bring the anchor card to the top by nudging only this container's
+		// scrollTop. Not scrollIntoView(): that also scrolls ancestor scrollers and
+		// the window and aligns inconsistently across browsers.
+		const delta = el.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+		if (delta !== 0) parent.scrollTop += delta;
 	}
 </script>
 

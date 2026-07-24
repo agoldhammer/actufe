@@ -3,6 +3,8 @@ node_modules
 /build
 /.svelte-kit
 /package
+# Claude Code worktrees and local state (nested checkouts, builds, etc.)
+.claude
 .env
 .env.*
 !.env.example
