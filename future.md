@@ -2,25 +2,19 @@
 
 Deferred items from the code review (2026-07-24).
 
-## Sanitize article summaries rendered with `{@html}`
+## ~~Sanitize article summaries rendered with `{@html}`~~ — done 2026-07-24
 
-**Where:** `src/Components/ActuContent.svelte` — `{@html article.summary}`.
+Summaries reaching `src/Components/ActuContent.svelte` from third-party RSS
+feeds were injected as raw HTML, so a summary containing `<script>` or an event
+handler such as `<img src=x onerror=...>` would have run in the logged-in
+user's session — a stored-XSS vector.
 
-**Issue:** Article summaries are injected as raw HTML. The inline comment calls
-the actuproxy feed "trusted," but those summaries ultimately originate from
-third-party publication RSS feeds. A summary containing `<script>` or an event
-handler such as `<img src=x onerror=...>` executes in the logged-in user's
-session — a stored-XSS vector.
+They now go through `sanitizeSummary()` in `src/lib/sanitize.ts` (DOMPurify,
+html profile, with form controls and `<style>` additionally forbidden) before
+being rendered. Inline images — which summaries legitimately contain, and which
+ActuContent styles with `max-width: 20%` — are preserved, as are links, lists,
+tables and inline markup.
 
-**Current blast radius:** small — single-user dev tool behind a gate, and the
-login page itself says "not a public website / development use only." But
-"the feed is trusted" is a strong assumption for content the app does not
-author.
-
-**Fix when it matters (e.g. if the audience ever widens):**
-- Run summaries through a sanitizer (DOMPurify) before rendering, or
-- Strip `<script>` and event-handler attributes at the actuproxy layer so the
-  frontend never receives active content.
-
-Keep the `img { max-width: 20% }` styling in mind — whatever sanitization is
-chosen must still allow the inline images that summaries legitimately contain.
+Covered by unit tests in `src/lib/sanitize.test.ts` and an end-to-end check in
+`tests/test.ts` ("summary sanitization") that a hostile summary is defused in
+the real render path.

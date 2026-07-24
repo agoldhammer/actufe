@@ -249,3 +249,40 @@ test.describe('scroll restoration', () => {
 		expect(Math.abs((await anchorOffset(page)) ?? Infinity)).toBeLessThan(3);
 	});
 });
+
+test.describe('summary sanitization', () => {
+	// Summaries reach the app from third-party RSS feeds, so a hostile one has to
+	// be defused before it is rendered with {@html}. $lib/sanitize is unit-tested
+	// on its own; this checks that it is actually wired into the render path.
+	const hostile = makeResponse([
+		article({
+			id: '1',
+			summary:
+				'<p>Lead paragraph.</p>' +
+				'<script>window.__pwned = true;</script>' +
+				'<img src="/nonexistent.png" onerror="window.__pwned = true;" alt="art">' +
+				'<a href="javascript:window.__pwned = true">click</a>' +
+				'<iframe src="https://example.com/frame"></iframe>'
+		})
+	]);
+
+	test.beforeEach(async ({ page }) => {
+		await page.route('**/api/articles*', (route) => route.fulfill({ json: hostile }));
+		await loginByStorage(page);
+		await page.goto('/');
+	});
+
+	test('active content in a summary is stripped and never runs', async ({ page }) => {
+		const body = page.locator('.cardbody');
+		await expect(body).toContainText('Lead paragraph.');
+
+		await expect(body.locator('script')).toHaveCount(0);
+		await expect(body.locator('iframe')).toHaveCount(0);
+		// The image survives (feeds legitimately use them) minus its handler; the
+		// broken src makes the browser fire error, which must do nothing.
+		await expect(body.locator('img')).toHaveCount(1);
+		await expect(body.locator('img')).not.toHaveAttribute('onerror', /./);
+		await expect(body.locator('a')).not.toHaveAttribute('href', /javascript:/);
+		expect(await page.evaluate(() => '__pwned' in window)).toBe(false);
+	});
+});
