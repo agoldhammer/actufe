@@ -174,7 +174,7 @@
 				class="filters-toggle"
 				type="button"
 				on:click|preventDefault={() => (show_filters = !show_filters)}
-				>{show_filters ? 'Hide filters' : 'Filters'}</button
+				>{#if show_filters}Hide<br />filters{:else}Filters{/if}</button
 			>
 		</div>
 		<!-- help button -->
