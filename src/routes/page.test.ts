@@ -72,9 +72,9 @@ describe('load', () => {
 
 	it('returns the response data and sorted pubnames', async () => {
 		const arts = [
-			article({ id: '1', pubname: 'Le Monde', cat: 'politics' }),
-			article({ id: '2', pubname: 'Libération', cat: 'sports' }),
-			article({ id: '3', pubname: 'AFP', cat: 'politics' })
+			article({ hash: 'h1', pubname: 'Le Monde', cat: 'politics' }),
+			article({ hash: 'h2', pubname: 'Libération', cat: 'sports' }),
+			article({ hash: 'h3', pubname: 'AFP', cat: 'politics' })
 		];
 		const fetch = mockFetch(makeResponse(arts));
 		const result = await runLoad(fetch, '?timeframe=1');
@@ -91,9 +91,9 @@ describe('load', () => {
 
 	it('populates the category stores from the articles', async () => {
 		const arts = [
-			article({ id: '1', cat: 'politics' }),
-			article({ id: '2', cat: 'sports' }),
-			article({ id: '3', cat: 'politics' })
+			article({ hash: 'h1', cat: 'politics' }),
+			article({ hash: 'h2', cat: 'sports' }),
+			article({ hash: 'h3', cat: 'politics' })
 		];
 		selected_cats_store.set(['stale selection']);
 		await runLoad(mockFetch(makeResponse(arts)));
@@ -105,7 +105,10 @@ describe('load', () => {
 	});
 
 	it('selects all pubs by default', async () => {
-		const arts = [article({ id: '1', pubname: 'B Pub' }), article({ id: '2', pubname: 'A Pub' })];
+		const arts = [
+			article({ hash: 'h1', pubname: 'B Pub' }),
+			article({ hash: 'h2', pubname: 'A Pub' })
+		];
 		await runLoad(mockFetch(makeResponse(arts)));
 		expect(get(selected_pubs_store)).toEqual(['A Pub', 'B Pub']);
 	});
