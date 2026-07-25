@@ -4,7 +4,6 @@ import { article, makeResponse } from '../src/lib/fixtures';
 
 const articles = [
 	article({
-		id: '1',
 		title: 'Élections: le grand débat',
 		summary: '<p>Résumé du débat électoral.</p>',
 		pubdate: '2026-07-16 08:00',
@@ -14,7 +13,6 @@ const articles = [
 		cat: 'politics'
 	}),
 	article({
-		id: '2',
 		title: 'Victoire au Tour de France',
 		summary: '<p>Résumé de la victoire.</p>',
 		pubdate: '2026-07-16 09:00',
@@ -191,17 +189,24 @@ test.describe('article display', () => {
 });
 
 test.describe('scroll restoration', () => {
-	// Enough articles across two publications to make the list scroll. Even ids
-	// belong to 'Keep Pub' (survive the filter below), odd ids to 'Drop Pub'.
+	// Enough articles across two publications to make the list scroll. Even
+	// indexes belong to 'Keep Pub' (survive the filter below), odd ones to
+	// 'Drop Pub'. Articles 20 and 21 deliberately share a hash: a feed can
+	// deliver the same story twice in one window (the live feed does), and the
+	// card ids must still be unique or the anchor lookup finds the wrong card.
 	const many = Array.from({ length: 40 }, (_, i) =>
 		article({
-			id: String(i),
+			hash: i === 21 ? 'h20' : `h${i}`,
 			title: `Article ${i}`,
 			summary: `<p>Summary paragraph for article number ${i}.</p>`,
 			pubname: i % 2 === 0 ? 'Keep Pub' : 'Drop Pub'
 		})
 	);
 	const manyResponse = makeResponse(many);
+
+	// Cards are addressed by position in the unfiltered list, not by anything the
+	// backend may or may not send.
+	const card = (i: number) => `#card-${i}-${i === 21 ? 'h20' : `h${i}`}`;
 
 	test.beforeEach(async ({ page }) => {
 		await page.route('**/api/articles*', (route) => route.fulfill({ json: manyResponse }));
@@ -223,16 +228,30 @@ test.describe('scroll restoration', () => {
 			return { id: '', offset: NaN };
 		});
 
-	// Leave a 'Keep Pub' card (id 10, survives the pub filter) as the top card,
+	// Leave a 'Keep Pub' card (index 10, survives the pub filter) as the top card,
 	// deliberately scrolled 40px past the top so restoration has real work to do —
 	// not pre-aligned, which would make "returns to the top" trivially true.
 	async function scrollCard10PastTop(page: Page) {
-		await page.locator('#card-10').evaluate((el) => el.scrollIntoView(true));
+		await page.locator(card(10)).evaluate((el) => el.scrollIntoView(true));
 		await page.locator('#pagecontent').evaluate((p) => (p.scrollTop += 40));
 		const before = await topCard(page);
-		expect(before.id).toBe('card-10');
+		expect(before.id).toBe(card(10).slice(1));
 		expect(before.offset).toBeLessThan(-20); // genuinely scrolled off the top
 	}
+
+	// The anchor is looked up with getElementById, so a repeated or missing card
+	// id silently resolves to the first matching card and the restore scrolls the
+	// list to the top. That is exactly what happened in production, where the
+	// backend sends no `id` field and every card was id="card-undefined", while
+	// the fixtures supplied one and kept these tests green.
+	test('every card has a distinct, fully-resolved id', async ({ page }) => {
+		const ids = await page
+			.locator('#pagecontent')
+			.evaluate((parent) => Array.from(parent.getElementsByClassName('card')).map((el) => el.id));
+		expect(ids).toHaveLength(40);
+		expect(new Set(ids).size).toBe(40);
+		expect(ids.filter((id) => !id || /undefined|null/.test(id))).toEqual([]);
+	});
 
 	test('unchecking a publication keeps the top-of-viewport article anchored', async ({ page }) => {
 		await expect(page.locator('.card')).toHaveCount(40);
@@ -245,7 +264,7 @@ test.describe('scroll restoration', () => {
 		await expect(page.locator('.card')).toHaveCount(20);
 
 		const after = await topCard(page);
-		expect(after.id).toBe('card-10');
+		expect(after.id).toBe(card(10).slice(1));
 		expect(Math.abs(after.offset)).toBeLessThan(3);
 	});
 
@@ -259,7 +278,7 @@ test.describe('scroll restoration', () => {
 		await expect(page.getByText('Summary paragraph for article number 10.')).toHaveCount(0);
 
 		const after = await topCard(page);
-		expect(after.id).toBe('card-10');
+		expect(after.id).toBe(card(10).slice(1));
 		expect(Math.abs(after.offset)).toBeLessThan(3);
 	});
 });
@@ -270,7 +289,6 @@ test.describe('summary sanitization', () => {
 	// on its own; this checks that it is actually wired into the render path.
 	const hostile = makeResponse([
 		article({
-			id: '1',
 			summary:
 				'<p>Lead paragraph.</p>' +
 				'<script>window.__pwned = true;</script>' +

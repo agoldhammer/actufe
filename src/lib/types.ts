@@ -3,8 +3,11 @@
 // across the app (it previously lived in both routes/+page.ts and
 // Components/ActuCtr.svelte, and the two copies had already diverged).
 
+// Field-for-field what actuproxy sends in /api/articles. Nothing may be added
+// here that the backend does not actually send: an invented `id` field once
+// made every article card render as id="card-undefined" in production while
+// the fixtures (which did supply an id) kept the tests green.
 export interface Article {
-	id: string;
 	title: string;
 	summary: string;
 	pubdate: string;

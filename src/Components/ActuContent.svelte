@@ -10,8 +10,20 @@
 	export let pubnames: string[];
 	export let collapse_summary: boolean;
 
-	$: visibleArticles = articles.filter(
-		(a) =>
+	type KeyedArticle = { article: Article; cardId: string };
+
+	// Pair every article with the DOM id of its card up front, from its position
+	// in the *unfiltered* list, so the id survives filtering (see the scroll
+	// notes below). `hash` is the backend's own identifier; the index only
+	// guarantees uniqueness, since a feed can legitimately deliver the same
+	// article — same hash — twice in one window.
+	$: keyedArticles = articles.map((article, i) => ({
+		article,
+		cardId: `card-${i}-${article.hash}`
+	}));
+
+	$: visibleArticles = keyedArticles.filter(
+		({ article: a }) =>
 			($selected_cats_store.length === 0 ||
 				$selected_cats_store.includes(a.cat ?? 'uncategorized')) &&
 			$selected_pubs_store.includes(a.pubname)
@@ -32,11 +44,11 @@
 	// viewport, and after the list re-renders bring that same article back to the
 	// top.
 	//
-	// The anchor is the article's own id (`card-${article.id}`), never the list
-	// index: when a filter removes articles a given index points at a different
-	// article after the update. With a stable id the anchor lands on the same
-	// article, or — if that article was filtered out — is simply absent and the
-	// scroll is left alone.
+	// The anchor is the card's own id (see keyedArticles above), never an index
+	// into the rendered list: when a filter removes articles a given index points
+	// at a different article after the update. With a stable id the anchor lands
+	// on the same article, or — if that article was filtered out — is simply
+	// absent and the scroll is left alone.
 	//
 	// The anchor is captured continuously by a scroll listener rather than being
 	// measured inside the reactive statement below. Under Svelte 5 that reactive
@@ -45,7 +57,6 @@
 	// and left the wrong article on top. Reading a value captured during the
 	// user's last scroll is immune to that ordering difference. (Held in an object
 	// so scroll-time writes don't invalidate the component every frame.)
-	const cardId = (article: Article) => `card-${article.id}`;
 	const anchor = { id: '' };
 
 	// The topmost (partially) visible card in the scroll container. Everything is
@@ -80,11 +91,11 @@
 	let scrollKey = '';
 	$: preserveScroll(collapse_summary, visibleArticles);
 
-	async function preserveScroll(collapsed: boolean, arts: Article[]) {
+	async function preserveScroll(collapsed: boolean, arts: KeyedArticle[]) {
 		// Re-run only when the rendered set actually changes; the reactive
 		// statement also fires for unrelated store updates. Collapsing summaries
 		// keeps the same ids but changes heights, so it is part of the key.
-		const key = `${collapsed}|${arts.map((a) => a.id).join(',')}`;
+		const key = `${collapsed}|${arts.map((a) => a.cardId).join(',')}`;
 		if (key === scrollKey) return;
 		scrollKey = key;
 		const target = anchor.id; // captured by the scroll listener, before this render
@@ -92,7 +103,10 @@
 		const parent = document.getElementById('pagecontent');
 		if (!target || !parent) return;
 		const el = document.getElementById(target);
-		if (!el) return; // the anchored article was filtered out; leave scroll alone
+		// Missing: the anchored article was filtered out. Outside the container:
+		// the id is not one of ours. Either way, leave the scroll alone rather
+		// than yanking the view to an unrelated element.
+		if (!el || !parent.contains(el)) return;
 		// Bring the anchor card to the top by nudging only this container's
 		// scrollTop. Not scrollIntoView(): that also scrolls ancestor scrollers and
 		// the window and aligns inconsistently across browsers.
@@ -107,8 +121,8 @@
 		<button type="button" on:click={resetFilters}>Reset filters</button>
 	</div>
 {:else}
-	{#each visibleArticles as article}
-		<div id={cardId(article)} class="card">
+	{#each visibleArticles as { article, cardId } (cardId)}
+		<div id={cardId} class="card">
 			<div class="cardhdr" class:nosumm={collapse_summary}>
 				<!-- <span class="pubdate">[{article.pubdate}: {article.pubname}-{article.hash}]</span> -->
 				<div class="pubdate">[{article.pubdate}: {article.pubname}]</div>

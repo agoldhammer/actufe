@@ -3,8 +3,9 @@
 // (tests/test.ts) so the mocked shape can't drift in one place only.
 import type { Article } from '$lib/types';
 
+// Keep this in the exact shape of a real /api/articles article — no extra
+// fields. `hash` is the only per-article identifier the backend supplies.
 export const article = (overrides: Partial<Article> = {}): Article => ({
-	id: '1',
 	title: 'title',
 	summary: 'summary',
 	pubdate: '2026-07-16T00:00:00Z',
