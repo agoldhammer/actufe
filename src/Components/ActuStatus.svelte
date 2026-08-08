@@ -5,13 +5,35 @@
 	component isn't on screen, nothing is.
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	export let kind: 'loading' | 'error' = 'loading';
 	export let message = '';
 	export let onRetry: (() => void) | null = null;
+
+	// Held back so a fast request never flashes a spinner. A failure is not
+	// transient noise, so it appears at once.
+	const APPEAR_AFTER_MS = 500;
+
+	// The boot skeleton in app.html runs the same timer before the app exists.
+	// If its spinner was already on screen when we took over, show ours
+	// immediately: restarting the clock here would blink the spinner off in the
+	// middle of a single continuous wait.
+	const carriedOver =
+		typeof window !== 'undefined' &&
+		(window as unknown as { __bootSpinnerShown?: boolean }).__bootSpinnerShown === true;
+
+	let visible = kind === 'error' || carriedOver;
+
+	onMount(() => {
+		if (visible) return;
+		const timer = setTimeout(() => (visible = true), APPEAR_AFTER_MS);
+		return () => clearTimeout(timer);
+	});
 </script>
 
 <div class="frame">
-	<div class="panel" class:failed={kind === 'error'}>
+	<div class="panel" class:visible>
 		{#if kind === 'loading'}
 			<div class="spinner" aria-hidden="true"></div>
 			<p class="headline" aria-live="polite">Loading articles…</p>
@@ -50,21 +72,13 @@
 		gap: 0.75rem;
 		text-align: center;
 		padding: 1rem;
-		/* Hold it back briefly: a fast request should not make a spinner flash.
-		   Anything slower than this is worth acknowledging on screen. */
+		/* Timed in the script above, not here, so the delay can be skipped when
+		   the boot skeleton has already been showing a spinner. */
 		opacity: 0;
-		animation: appear 0s linear 500ms forwards;
 	}
 
-	/* A failure is never transient noise — show it at once. */
-	.panel.failed {
-		animation-delay: 0s;
-	}
-
-	@keyframes appear {
-		to {
-			opacity: 1;
-		}
+	.panel.visible {
+		opacity: 1;
 	}
 
 	.headline {
@@ -113,9 +127,6 @@
 	@media (prefers-reduced-motion: reduce) {
 		.spinner {
 			animation: none;
-		}
-		.panel {
-			animation-duration: 0s;
 		}
 	}
 </style>

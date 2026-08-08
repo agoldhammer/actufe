@@ -368,3 +368,41 @@ test.describe('slow and failed article requests', () => {
 		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
 	});
 });
+
+test.describe('the boot skeleton', () => {
+	// app.html carries markup and a watchdog because the shell is otherwise
+	// empty: with `ssr = false` nothing is on screen until the app's modules have
+	// downloaded and run, and if one of them never arrives the shell's
+	// Promise.all([...]).then(...) stays pending forever with nothing to report it.
+	test('reports a boot that never completes, and the page can be reloaded', async ({ page }) => {
+		test.setTimeout(60000);
+		await loginByStorage(page);
+		// Kill the module graph the way a dropped mobile connection does.
+		await page.route('**/_app/**', (route) => route.abort());
+
+		await page.goto('/', { waitUntil: 'commit' });
+
+		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible({
+			timeout: 30000
+		});
+		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+		// The loading spinner must not still be claiming progress underneath.
+		await expect(page.locator('#boot .boot-loading')).toBeHidden();
+	});
+
+	test('gets out of the way once the app renders', async ({ page }) => {
+		await mockArticles(page);
+		await loginByStorage(page);
+		await page.goto('/');
+
+		await expect(page.locator('.card').first()).toBeVisible();
+		// Removed from the DOM, not merely hidden: it is position:fixed over the
+		// whole viewport, so anything left behind would swallow clicks.
+		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+
+	test('is gone immediately on a prerendered page', async ({ page }) => {
+		await page.goto('/about');
+		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+});
