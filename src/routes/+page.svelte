@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import type { Appdata } from '$lib/types';
 	import ActuCtr from '../Components/ActuCtr.svelte';
+	import ActuStatus from '../Components/ActuStatus.svelte';
 	export let data;
 
 	onMount(() => {
@@ -13,8 +13,6 @@
 			goto(`${base}/login`, { replaceState: true });
 		}
 	});
-
-	$: appdata = data as Appdata;
 </script>
 
 <svelte:head>
@@ -25,10 +23,19 @@
 	<link rel="manifest" href="{base}/site.webmanifest" />
 </svelte:head>
 
-{#if data.requiresLogin}
+{#if data.requiresLogin || !data.appdata}
 	<main class="redirecting" aria-live="polite">Checking access...</main>
 {:else}
-	<ActuCtr {appdata} />
+	<!-- The articles are still on the wire at this point: load() hands over an
+	     unresolved promise so that this page paints, and the client router
+	     starts, without waiting for the network. -->
+	{#await data.appdata}
+		<ActuStatus kind="loading" />
+	{:then appdata}
+		<ActuCtr {appdata} />
+	{:catch err}
+		<ActuStatus kind="error" message={err.message} onRetry={() => invalidateAll()} />
+	{/await}
 {/if}
 
 <style>

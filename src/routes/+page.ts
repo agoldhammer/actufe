@@ -1,70 +1,35 @@
 export const ssr = false;
 export const prerender = false;
-import { error } from '@sveltejs/kit';
-import { base } from '$app/paths';
-import { Counter } from '$lib/counter';
-import {
-	cats_store,
-	selected_cats_store,
-	cat_count_store,
-	time_window_store,
-	selected_pubs_store
-} from '$lib/actustores';
-import type { Article } from '$lib/types';
+import { time_window_store } from '$lib/actustores';
+import { fetchAppdata } from '$lib/articles';
 
-export const load = async function ({ fetch, url }) {
+export const load = function ({ fetch, url }) {
 	const authed = localStorage.getItem('auth');
 	if (authed !== 'ok') {
 		// A redirect thrown from a client-only load can leave some mobile browsers
 		// with an unfinished initial navigation. Let the page perform a replacement
 		// navigation after it has mounted instead.
-		return { requiresLogin: true };
+		return { requiresLogin: true as const, appdata: null };
 	}
 	const timeframe = url.searchParams.get('timeframe') || '0';
 	const time_window = url.searchParams.get('timewindow') || '3';
 	const text_query = url.searchParams.get('txtquery');
+	// URL-derived, so it is known without touching the network and the header's
+	// window selector is correct on the very first paint.
 	time_window_store.set(parseInt(time_window));
-	// console.log('load: timeframe', timeframe);
-	let response;
-	let uri;
-	try {
-		const params = new URLSearchParams({ timeframe, timewindow: time_window });
-		if (text_query !== null && text_query !== undefined && text_query.length > 0) {
-			params.set('txtquery', text_query);
-		}
-		uri = `${base}/api/articles?${params}`;
-		response = await fetch(uri).then((response) => response.json());
-	} catch (e) {
-		throw error(502, `failed to fetch articles from ${uri}: ${e}`);
-	}
-	const pubnameset: Set<string> = new Set();
-	const catset: Set<string> = new Set();
-	if (response.articles === undefined) {
-		throw error(502, 'articles missing from response; check actuproxy');
-	}
-	const articles: Article[] = response.articles;
-	const cat_counter = new Counter();
-	articles.forEach((article) => {
-		pubnameset.add(article.pubname);
-		catset.add(article.cat);
-		cat_counter.inc(article.cat);
+
+	// Deliberately NOT awaited — see the header comment in $lib/articles. Awaiting
+	// here blocks the first paint *and* the start of the client router on exactly
+	// the flaky mobile connections where that hurts most. SvelteKit 2 does not
+	// unwrap top-level promises returned from a universal load, so this arrives at
+	// the page unresolved and +page.svelte renders it with {#await}.
+	const appdata = fetchAppdata(fetch, { timeframe, time_window, text_query });
+	// Mark it handled so a rejection landing before {#await} subscribes is not
+	// reported as an unhandled rejection. {#await} still receives the rejection;
+	// this only attaches a second, no-op handler.
+	appdata.catch(() => {
+		// deliberately empty: the {#await} block is what actually reports this
 	});
 
-	const pubnames: Array<string> = Array.from(pubnameset).sort();
-	const catnames: Array<string> = Array.from(catset).sort();
-	// reset the category stores
-	cats_store.set(catnames);
-	selected_cats_store.set([]);
-	cat_count_store.set(cat_counter);
-	selected_pubs_store.set(pubnames);
-
-	return {
-		requiresLogin: false,
-		arts: response.articles,
-		count: response.count,
-		timeframe: timeframe,
-		timespan: response.timespan,
-		pubnames: pubnames,
-		ndocs: response.ndocs
-	};
+	return { requiresLogin: false as const, appdata };
 };

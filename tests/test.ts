@@ -318,3 +318,91 @@ test.describe('summary sanitization', () => {
 		expect(await page.evaluate(() => '__pwned' in window)).toBe(false);
 	});
 });
+
+test.describe('slow and failed article requests', () => {
+	// The reported mobile bug: roughly one load in five came up blank and stayed
+	// that way until the user pressed Back. With `ssr = false` there is no
+	// server-rendered markup, and SvelteKit's client router only starts once the
+	// initial load resolves — so awaiting the article fetch inside load left the
+	// page both empty and inert, and Back "fixed" it only by leaving the document.
+	test('a slow request shows a loading panel and a live router, not a blank page', async ({
+		page
+	}) => {
+		await loginByStorage(page);
+		let release!: () => void;
+		const held = new Promise<void>((resolve) => (release = resolve));
+		await page.route('**/api/articles*', async (route) => {
+			await held;
+			await route.fulfill({ json: apiResponse });
+		});
+
+		await page.goto('/', { waitUntil: 'commit' });
+
+		// Something is on screen while the articles are still on the wire...
+		await expect(page.getByText('Loading articles…')).toBeVisible();
+		// ...and the router is running, which is what makes links, in-app
+		// navigation and scroll restoration work during the wait. SvelteKit sets
+		// scrollRestoration to 'manual' as the first act of _start_router().
+		await expect.poll(() => page.evaluate(() => history.scrollRestoration)).toBe('manual');
+
+		release();
+		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
+	});
+
+	test('a failed request explains itself and the retry recovers', async ({ page }) => {
+		await loginByStorage(page);
+		let attempts = 0;
+		await page.route('**/api/articles*', (route) => {
+			attempts += 1;
+			// $lib/articles retries once on its own, so fail both tries of the first
+			// request, then serve the articles to whatever the retry button sends.
+			if (attempts <= 2) return route.fulfill({ status: 502, body: 'bad gateway' });
+			return route.fulfill({ json: apiResponse });
+		});
+
+		await page.goto('/');
+
+		await expect(page.getByText('Could not load the articles.')).toBeVisible();
+		await expect(page.getByText(/HTTP 502/)).toBeVisible();
+		await page.getByRole('button', { name: 'Try again' }).click();
+		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
+	});
+});
+
+test.describe('the boot skeleton', () => {
+	// app.html carries markup and a watchdog because the shell is otherwise
+	// empty: with `ssr = false` nothing is on screen until the app's modules have
+	// downloaded and run, and if one of them never arrives the shell's
+	// Promise.all([...]).then(...) stays pending forever with nothing to report it.
+	test('reports a boot that never completes, and the page can be reloaded', async ({ page }) => {
+		test.setTimeout(60000);
+		await loginByStorage(page);
+		// Kill the module graph the way a dropped mobile connection does.
+		await page.route('**/_app/**', (route) => route.abort());
+
+		await page.goto('/', { waitUntil: 'commit' });
+
+		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible({
+			timeout: 30000
+		});
+		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+		// The loading spinner must not still be claiming progress underneath.
+		await expect(page.locator('#boot .boot-loading')).toBeHidden();
+	});
+
+	test('gets out of the way once the app renders', async ({ page }) => {
+		await mockArticles(page);
+		await loginByStorage(page);
+		await page.goto('/');
+
+		await expect(page.locator('.card').first()).toBeVisible();
+		// Removed from the DOM, not merely hidden: it is position:fixed over the
+		// whole viewport, so anything left behind would swallow clicks.
+		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+
+	test('is gone immediately on a prerendered page', async ({ page }) => {
+		await page.goto('/about');
+		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+});
