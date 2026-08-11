@@ -6,9 +6,10 @@
 		<meta name="viewport" content="width=device-width" />
 		<style>
 			/*
-				The boot skeleton. With `ssr = false` this file is the only markup the
-				server sends, so between the first byte and the app's first render there
-				is otherwise nothing on screen at all. On a phone that gap is the module
+				Styles for the boot skeleton, which the watchdog below builds from
+				script. With `ssr = false` this file is the only markup the server
+				sends, so between the first byte and the app's first render there is
+				otherwise nothing on screen at all. On a phone that gap is the module
 				downloads plus their execution — seconds, sometimes — and if a chunk
 				never arrives it is permanent, with no error and no way out but the
 				browser's own controls.
@@ -102,74 +103,189 @@
 				}
 			}
 		</style>
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div id="boot">
-			<div class="boot-panel boot-loading">
-				<div class="boot-spinner"></div>
-				<p aria-live="polite">Loading…</p>
-			</div>
-			<div class="boot-panel boot-failed">
-				<p>The app didn’t finish loading.</p>
-				<p class="boot-detail">
-					Some of it never arrived — usually a dropped connection. Reloading normally fixes it.
-				</p>
-				<button type="button" onclick="location.reload()">Reload</button>
-			</div>
-		</div>
-		<div id="app" style="display: contents">%sveltekit.body%</div>
 		<script>
-			// Watchdog for the boot skeleton above.
+			// Watchdog for the boot skeleton.
 			//
 			// The app's own loading and error states (ActuStatus) can only help once
-			// the app is running. Nothing covered the case where it never starts: the
-			// shell's bootstrap does `Promise.all([import(...), import(...)]).then(...)`,
-			// so a single chunk that fails to load leaves that promise forever pending
-			// — no error, no handler, nothing on screen. This is the only thing that
-			// can report that, because it is the only script that already ran.
+			// the app is running. Nothing else covers the case where it never starts:
+			// the shell's bootstrap does `Promise.all([import(...), import(...)])
+			// .then(...)`, so a single chunk that fails to load leaves that promise
+			// forever pending — no error, no handler, nothing on screen.
+			//
+			// This lives in <head>, and builds its overlay from script rather than
+			// having it in the markup, because of a failure one layer below that: a
+			// phone waking on a cold radio, or handing off wifi<->cellular, commits
+			// the response and then loses the socket. The document has replaced
+			// whatever was on screen, so the page is white, and the parser stalls
+			// partway through. A watchdog at the end of <body> is never reached, its
+			// timers are never armed, and nothing is left alive to report the failure
+			// or offer a way out — a permanently white, inert page whose only escape
+			// is the browser's Back button. Armed here, before a single byte of
+			// <body> has parsed, the timers survive a document that stops arriving.
 			(function () {
 				// Matches the threshold in Components/ActuStatus.svelte.
 				var SPINNER_AFTER_MS = 500;
 				var GIVE_UP_AFTER_MS = 10000;
 
-				var boot = document.getElementById('boot');
-				var app = document.getElementById('app');
-				if (!boot || !app) return;
+				var CHUNK_DETAIL =
+					'Some of it never arrived — usually a dropped connection. Reloading normally fixes it.';
+				var DOCUMENT_DETAIL =
+					'The connection dropped while the page was loading. Reloading normally fixes it.';
+
+				// 0 nothing to show yet, 1 loading, 2 gave up.
+				var state = 0;
+				var detail = CHUNK_DETAIL;
+				var boot = null;
+				var detailNode = null;
+				var finished = false;
 
 				var spinnerTimer = setTimeout(function () {
-					boot.classList.add('showing');
+					if (state === 0) state = 1;
 					// Read once by the first ActuStatus so it doesn't restart the clock
 					// and blink the spinner off mid-wait.
 					window.__bootSpinnerShown = true;
+					render();
 				}, SPINNER_AFTER_MS);
 
 				var failTimer = setTimeout(function () {
-					boot.classList.add('showing', 'failed');
+					// Still parsing after all this time means the document itself never
+					// finished arriving, which is a different story to tell than a
+					// module that went missing.
+					fail(document.readyState === 'loading' ? DOCUMENT_DETAIL : null);
 				}, GIVE_UP_AFTER_MS);
 
-				var observer = new MutationObserver(check);
+				var observer = new MutationObserver(tick);
+
+				function tick() {
+					check();
+					// Rides along so an overlay built before <body> existed is moved into
+					// it as soon as it appears.
+					render();
+				}
+
+				function el(tag, cls, text) {
+					var node = document.createElement(tag);
+					if (cls) node.className = cls;
+					if (text) node.textContent = text;
+					return node;
+				}
+
+				function build() {
+					var root = el('div');
+					root.id = 'boot';
+
+					var loading = el('div', 'boot-panel boot-loading');
+					loading.appendChild(el('div', 'boot-spinner'));
+					var loadingText = el('p', null, 'Loading…');
+					loadingText.setAttribute('aria-live', 'polite');
+					loading.appendChild(loadingText);
+
+					var failed = el('div', 'boot-panel boot-failed');
+					failed.appendChild(el('p', null, 'The app didn’t finish loading.'));
+					detailNode = el('p', 'boot-detail', detail);
+					failed.appendChild(detailNode);
+					var button = el('button', null, 'Reload');
+					button.type = 'button';
+					button.onclick = function () {
+						location.reload();
+					};
+					failed.appendChild(button);
+
+					root.appendChild(loading);
+					root.appendChild(failed);
+					return root;
+				}
+
+				// Every write here is guarded by a read. The overlay lives inside the
+				// subtree the observer is watching, and assigning textContent replaces a
+				// child node — so an unconditional write would re-trigger the observer,
+				// which calls render() again, forever.
+				function render() {
+					if (finished || state === 0) return;
+					if (!boot) boot = build();
+					if (detailNode.textContent !== detail) detailNode.textContent = detail;
+					var cls = state === 2 ? 'showing failed' : 'showing';
+					if (boot.className !== cls) boot.className = cls;
+					// <body> may not exist yet, and may appear after we first needed to
+					// paint; appendChild moves the overlay across when it does.
+					var parent = document.body || document.documentElement;
+					if (boot.parentNode !== parent) parent.appendChild(boot);
+				}
+
+				function fail(text) {
+					// Give the app a last chance to be found before blaming it: an error
+					// can arrive in the same task as the render that resolves it.
+					check();
+					if (finished) return;
+					state = 2;
+					if (text) detail = text;
+					clearTimeout(spinnerTimer);
+					clearTimeout(failTimer);
+					render();
+				}
 
 				function done() {
+					finished = true;
 					clearTimeout(spinnerTimer);
 					clearTimeout(failTimer);
 					observer.disconnect();
-					if (boot.parentNode) boot.parentNode.removeChild(boot);
+					if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
 					// Later loading panels time themselves from scratch.
 					window.__bootSpinnerShown = false;
 				}
 
 				function check() {
-					// The app has taken over as soon as it has rendered a real element.
-					// #app already holds SvelteKit's inline bootstrap <script>, which is
-					// why this looks for anything that isn't one.
-					if (app.querySelector(':scope > :not(script)')) done();
+					if (finished) return;
+					var app = document.getElementById('app');
+					if (!app) return;
+					// The app has taken over once it has rendered something that occupies
+					// space. Requiring layout rather than merely an element matters
+					// because done() disarms this for good: a mounted-but-empty tree
+					// looks exactly like the blank page we are here to report. #app also
+					// holds SvelteKit's inline bootstrap <script>, hence the skip.
+					var kids = app.children;
+					for (var i = 0; i < kids.length; i++) {
+						if (kids[i].tagName === 'SCRIPT') continue;
+						if (kids[i].getBoundingClientRect().height > 0) return done();
+					}
 				}
 
-				observer.observe(app, { childList: true, subtree: true });
-				// Prerendered pages (/login, /about) already have their markup here.
+				// A failed dynamic import in SvelteKit's bootstrap surfaces here and
+				// nowhere else — that Promise.all has no .catch() of its own.
+				window.addEventListener('unhandledrejection', function (event) {
+					var reason = event.reason;
+					fail(reason && reason.message ? String(reason.message) : null);
+				});
+
+				// Capture phase, because resource load failures don't bubble. Narrowed
+				// to the module graph: a summary's image 404ing is not a dead app.
+				window.addEventListener(
+					'error',
+					function (event) {
+						var target = event.target;
+						if (target && target !== window && target.tagName) {
+							var tag = target.tagName;
+							if (tag !== 'SCRIPT' && !(tag === 'LINK' && target.rel === 'modulepreload')) return;
+							fail('Could not load ' + (target.src || target.href || tag.toLowerCase()) + '.');
+						} else {
+							fail(event.message ? String(event.message) : null);
+						}
+					},
+					true
+				);
+
+				// #app does not exist yet, so watch the document and look it up lazily.
+				// Every render() call also rides along, which is how the overlay reaches
+				// <body> if it had to be built before <body> existed.
+				observer.observe(document.documentElement, { childList: true, subtree: true });
+				// Prerendered pages (/login, /about) may already be in place.
+				document.addEventListener('DOMContentLoaded', check);
 				check();
 			})();
 		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div id="app" style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
