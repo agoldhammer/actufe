@@ -370,23 +370,50 @@ test.describe('slow and failed article requests', () => {
 });
 
 test.describe('the boot skeleton', () => {
-	// app.html carries markup and a watchdog because the shell is otherwise
-	// empty: with `ssr = false` nothing is on screen until the app's modules have
-	// downloaded and run, and if one of them never arrives the shell's
+	// app.html carries a watchdog because the shell is otherwise empty: with
+	// `ssr = false` nothing is on screen until the app's modules have downloaded
+	// and run, and if one of them never arrives the shell's
 	// Promise.all([...]).then(...) stays pending forever with nothing to report it.
 	test('reports a boot that never completes, and the page can be reloaded', async ({ page }) => {
-		test.setTimeout(60000);
 		await loginByStorage(page);
 		// Kill the module graph the way a dropped mobile connection does.
 		await page.route('**/_app/**', (route) => route.abort());
 
 		await page.goto('/', { waitUntil: 'commit' });
 
+		// Well inside GIVE_UP_AFTER_MS (10s): the failed dynamic imports reject the
+		// shell's un-caught Promise.all, and the watchdog's unhandledrejection
+		// handler reports that at once rather than sitting out the whole timeout.
 		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible({
-			timeout: 30000
+			timeout: 5000
 		});
 		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
 		// The loading spinner must not still be claiming progress underneath.
+		await expect(page.locator('#boot .boot-loading')).toBeHidden();
+	});
+
+	// The failure the watchdog moved into <head> for. A phone waking on a cold
+	// radio commits the response and then loses the socket, so the document
+	// arrives truncated: the parser never reaches the end of <body>, where both
+	// the skeleton's markup and its watchdog used to live. Nothing was left
+	// running to report it, and the page stayed white until the user pressed Back.
+	test('reports a document that stops arriving partway through', async ({ page }) => {
+		await loginByStorage(page);
+		await page.route('**/', async (route) => {
+			if (route.request().resourceType() !== 'document') return route.fallback();
+			const html = await (await route.fetch()).text();
+			// Cut immediately after the opening #app tag — everything SvelteKit and
+			// the old watchdog needed came after this point.
+			const cut = html.indexOf('>', html.indexOf('<div id="app"')) + 1;
+			await route.fulfill({ contentType: 'text/html', body: html.slice(0, cut) });
+		});
+
+		await page.goto('/');
+
+		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible({
+			timeout: 15000
+		});
+		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
 		await expect(page.locator('#boot .boot-loading')).toBeHidden();
 	});
 
