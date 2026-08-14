@@ -54,13 +54,26 @@ export function articlesUri(q: ArticlesQuery): string {
 	return `${base}/api/articles?${params}`;
 }
 
-async function fetchWithTimeout(fetch: LoadFetch, uri: string): Promise<Response> {
+// The deadline has to cover reading the body, not just arriving at the headers.
+// `await fetch(...)` resolves as soon as the response head is in, so a timer
+// cleared at that point leaves the socket unguarded for the part most likely to
+// stall: the wifi<->cellular handoff above kills the connection mid-body, and
+// `response.json()` then awaits a stream that never completes and never errors.
+// That hangs the whole attempt without rejecting, so the retry below never runs
+// and {#await} spins forever — the exact failure this module exists to prevent.
+// The controller therefore stays armed until the JSON has been parsed; aborting
+// it errors the body stream, so a stalled read rejects like any other failure.
+async function attemptRequest(fetch: LoadFetch, uri: string): Promise<ArticlesResponse> {
 	// AbortController + setTimeout rather than AbortSignal.timeout(): identical
 	// effect, but supported by every browser that can run the rest of the app.
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
 	try {
-		return await fetch(uri, { signal: controller.signal });
+		const response = await fetch(uri, { signal: controller.signal });
+		// A non-2xx is nginx or actuproxy talking, and the body is usually not
+		// JSON; parsing it would throw a syntax error that hides the real status.
+		if (!response.ok) throw new Error(`HTTP ${response.status}`);
+		return await response.json();
 	} finally {
 		clearTimeout(timer);
 	}
@@ -70,11 +83,7 @@ async function requestArticles(fetch: LoadFetch, uri: string): Promise<ArticlesR
 	let lastError: unknown;
 	for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
 		try {
-			const response = await fetchWithTimeout(fetch, uri);
-			// A non-2xx is nginx or actuproxy talking, and the body is usually not
-			// JSON; parsing it would throw a syntax error that hides the real status.
-			if (!response.ok) throw new Error(`HTTP ${response.status}`);
-			return await response.json();
+			return await attemptRequest(fetch, uri);
 		} catch (e) {
 			lastError = e;
 		}

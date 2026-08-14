@@ -37,6 +37,33 @@ describe('sanitizeSummary', () => {
 
 	it('keeps inline styles, which some feeds use to size their images', () => {
 		expect(sanitizeSummary('<img src="p.jpg" style="width:200px;">')).toContain('style');
+		expect(sanitizeSummary('<img src="p.jpg" style="max-width:100%">')).toContain('max-width');
+		expect(sanitizeSummary('<img src="p.jpg" style="width:200px; height:100px">')).toContain(
+			'height'
+		);
+	});
+
+	// Forbidding <style> while passing the `style` attribute through untouched
+	// still let a summary escape its card: position/inset/z-index turn a link
+	// into a full-viewport invisible overlay. Sizing is all a feed needs.
+	it('strips style declarations that could position or stack an element', () => {
+		expect(
+			sanitizeSummary(
+				'<a href="https://evil.com" style="position:fixed;inset:0;z-index:99999">z</a>'
+			)
+		).toBe('<a href="https://evil.com">z</a>');
+		expect(sanitizeSummary('<div style="transform:scale(50)">x</div>')).toBe('<div>x</div>');
+		expect(sanitizeSummary('<div style="display:none">x</div>')).toBe('<div>x</div>');
+	});
+
+	it('rejects !important, url() and expression() even on an allowed property', () => {
+		expect(sanitizeSummary('<img src="p.jpg" style="width:2000px !important">')).toBe(
+			'<img src="p.jpg">'
+		);
+		expect(sanitizeSummary('<div style="width:expression(alert(1))">x</div>')).toBe('<div>x</div>');
+		expect(sanitizeSummary('<div style="width:100px;background:url(//evil/t)">x</div>')).toBe(
+			'<div style="width:100px">x</div>'
+		);
 	});
 
 	it('returns an empty string for a missing summary', () => {

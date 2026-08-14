@@ -13,6 +13,14 @@
 			handleReady();
 		}
 	}
+	// This is a "keep out" sign, NOT authentication, and it cannot be made into
+	// authentication from here: the page is prerendered, so the word below ships
+	// in the JS bundle for anyone to read, and the flag it sets is one devtools
+	// line away regardless. /api/articles serves the same data without ever
+	// consulting it (deploy/nginx.conf rate-limits that endpoint rather than
+	// guarding it, since the data is aggregated public news). If this ever needs
+	// to be a real boundary, it has to move to nginx — auth_basic on both the
+	// site and = /api/articles, or a signed cookie checked there.
 	function handleReady() {
 		// console.log('hdl', value);
 		if (value === 'shazam') {

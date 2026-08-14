@@ -174,5 +174,30 @@ describe('fetchAppdata', () => {
 			await settled;
 			expect(fetch).toHaveBeenCalledTimes(ATTEMPTS);
 		});
+
+		// The headers can arrive and the body still never finish — a socket that
+		// dies mid-response. The deadline has to outlive the headers, or the
+		// attempt hangs in response.json() and never rejects, so nothing retries
+		// and the page spins forever.
+		it('is aborted when the body stalls after the headers arrive', async () => {
+			const fetch = vi.fn((_uri: string, init: { signal: AbortSignal }) =>
+				Promise.resolve({
+					ok: true,
+					status: 200,
+					// A real body stream errors when the signal aborts; a plain
+					// never-settling promise here would hang the test itself.
+					json: () =>
+						new Promise((_resolve, reject) => {
+							init.signal.addEventListener('abort', () =>
+								reject(new DOMException('The operation was aborted.', 'AbortError'))
+							);
+						})
+				})
+			);
+			const settled = expect(run(fetch)).rejects.toThrow(/failed to fetch articles/);
+			await vi.advanceTimersByTimeAsync(ATTEMPT_TIMEOUT_MS * ATTEMPTS + 100);
+			await settled;
+			expect(fetch).toHaveBeenCalledTimes(ATTEMPTS);
+		});
 	});
 });
