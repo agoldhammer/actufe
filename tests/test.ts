@@ -397,24 +397,79 @@ test.describe('the boot skeleton', () => {
 	// arrives truncated: the parser never reaches the end of <body>, where both
 	// the skeleton's markup and its watchdog used to live. Nothing was left
 	// running to report it, and the page stayed white until the user pressed Back.
-	test('reports a document that stops arriving partway through', async ({ page }) => {
-		await loginByStorage(page);
+	//
+	// Moving it into <head> was worth much less than it looked: the watchdog
+	// finished parsing at 90% of the shell, so 90% still had to arrive. The two
+	// timers now live in a stub at the very top of <head> — 8% in — and the rest
+	// of the file is only what dresses their verdict up. A single cut proves
+	// almost nothing about that (the old one cut at <div id="app">, 89% in, and
+	// so exercised the last 11%), which is why this sweeps the offset instead.
+	// `reporter` is which half of the pair is expected to do the reporting: the
+	// stub's bare fallback, or the styled #boot panel once the watchdog has
+	// parsed. Both have to offer a way out, since Back is the only other one.
+	const cuts: [string, (html: string) => number, 'stub' | 'panel'][] = [
+		// Immediately after the stub's own closing tag: everything else — the
+		// stylesheet, the watchdog, SvelteKit, <body> — is still missing.
+		['just after the head stub', (html) => html.indexOf('</script>') + '</script>'.length, 'stub'],
+		// Mid-stylesheet, so the stub is armed but the boot skeleton's CSS is not.
+		['midway through the boot stylesheet', (html) => html.indexOf('#boot .boot-spinner'), 'stub'],
+		// After the full watchdog, which reports through the styled overlay.
+		[
+			'just after the watchdog',
+			(html) => html.indexOf('</script>', html.indexOf('Watchdog for the boot skeleton')) + 9,
+			'panel'
+		],
+		// The original case: everything but SvelteKit's own bootstrap.
+		[
+			'at the opening #app tag',
+			(html) => html.indexOf('>', html.indexOf('<div id="app"')) + 1,
+			'panel'
+		]
+	];
+
+	async function truncateShell(page: Page, at: (html: string) => number) {
 		await page.route('**/', async (route) => {
 			if (route.request().resourceType() !== 'document') return route.fallback();
 			const html = await (await route.fetch()).text();
-			// Cut immediately after the opening #app tag — everything SvelteKit and
-			// the old watchdog needed came after this point.
-			const cut = html.indexOf('>', html.indexOf('<div id="app"')) + 1;
-			await route.fulfill({ contentType: 'text/html', body: html.slice(0, cut) });
+			await route.fulfill({ contentType: 'text/html', body: html.slice(0, at(html)) });
 		});
+	}
+
+	for (const [where, at, reporter] of cuts) {
+		test(`reports a document that stops arriving ${where}`, async ({ page }) => {
+			await loginByStorage(page);
+			await truncateShell(page, at);
+
+			await page.goto('/');
+
+			// Said by both halves; only the second can dress it up.
+			await expect(page.getByText('finish loading')).toBeVisible({ timeout: 15000 });
+
+			if (reporter === 'stub') {
+				await expect(page.getByText('Tap to reload')).toBeVisible();
+				await expect(page.locator('#boot')).toHaveCount(0);
+			} else {
+				await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+				// The spinner must not still be claiming progress underneath.
+				await expect(page.locator('#boot .boot-loading')).toBeHidden();
+			}
+		});
+	}
+
+	// The control that keeps the four above honest. One character earlier the
+	// stub's closing </script> is incomplete, so the HTML parser never runs it,
+	// no timer is ever armed, and nothing reports anything — which is precisely
+	// the state the whole file exists to prevent, and precisely what the old
+	// single cut at <div id="app"> could not tell apart from success.
+	test('one character before the stub closes, nothing reports at all', async ({ page }) => {
+		await loginByStorage(page);
+		await truncateShell(page, (html) => html.indexOf('</script>') + '</script>'.length - 1);
 
 		await page.goto('/');
 
-		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible({
-			timeout: 15000
-		});
-		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
-		await expect(page.locator('#boot .boot-loading')).toBeHidden();
+		await page.waitForTimeout(12000);
+		await expect(page.getByText('finish loading')).toHaveCount(0);
+		await expect(page.getByText('Loading…')).toHaveCount(0);
 	});
 
 	test('gets out of the way once the app renders', async ({ page }) => {
@@ -431,5 +486,151 @@ test.describe('the boot skeleton', () => {
 	test('is gone immediately on a prerendered page', async ({ page }) => {
 		await page.goto('/about');
 		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+});
+
+test.describe('the service worker', () => {
+	// Everywhere else these run with service workers blocked (see
+	// playwright.config.ts). Here they are the subject.
+	test.use({ serviceWorkers: 'allow' });
+
+	// Registration happens on the window's load event, and the page that
+	// registers is deliberately not claimed — so the worker only takes over from
+	// the *next* launch. This is that launch. Logged in first, because the
+	// redirect to /login would tear down the execution context mid-evaluate.
+	async function launchUnderServiceWorker(page: Page) {
+		await loginByStorage(page);
+		await page.goto('/');
+		await page.evaluate(() => navigator.serviceWorker.ready);
+		await page.goto('/');
+		await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+	}
+
+	// Navigation Timing's transferSize is zero exactly when nothing came off the
+	// network (Chromium additionally labels the entry deliveryType
+	// 'cache-storage'). It is what tells a document served out of the precache
+	// apart from one the worker merely fetched on the page's behalf — a
+	// distinction fromServiceWorker() cannot make — and both engines report it.
+	const transferredBytes = (page: Page) =>
+		page.evaluate(
+			() =>
+				(performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).transferSize
+		);
+
+	// The one sentence this whole file is for. Everything that has gone wrong on
+	// this app's launch path has gone wrong in the stretch between tapping the
+	// icon and the app running — a document that arrived truncated, a document
+	// that arrived and never ran, a chunk that never arrived at all — and every
+	// one of those needed the document to come off the wire. Now it does not.
+	test('serves the launch document itself, without a byte off the wire', async ({ page }) => {
+		const shell: boolean[] = [];
+		page.on('response', (response) => {
+			if (new URL(response.url()).pathname === '/') shell.push(response.fromServiceWorker());
+		});
+
+		await loginByStorage(page);
+		await page.goto('/');
+		// The launch that registers the worker is deliberately left uncontrolled and
+		// pays full price for the document, which is what makes the figure below
+		// mean something.
+		expect(await transferredBytes(page)).toBeGreaterThan(0);
+
+		await page.evaluate(() => navigator.serviceWorker.ready);
+		await page.goto('/');
+		await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+
+		expect(await transferredBytes(page)).toBe(0);
+		expect(shell).toEqual([false, true]);
+	});
+
+	// The end-to-end version of the test above: with the plug pulled there is no
+	// network for anything to come from, so an app that renders at all rendered
+	// out of the precache — shell, entry chunks, route chunks and CSS. It cannot
+	// have the articles, and saying so in its own words is the proof that it is
+	// the app talking and not the boot skeleton.
+	test('launches with no network at all, and says why it has no articles', async ({
+		page,
+		context,
+		browserName
+	}) => {
+		// Playwright's WebKit cannot navigate at all while offline — page.goto
+		// fails with an internal error before the worker is ever consulted. The
+		// test above covers both engines; this one goes further where it can.
+		test.skip(browserName === 'webkit', 'Playwright WebKit cannot navigate offline');
+
+		await launchUnderServiceWorker(page);
+
+		// Belt and braces, so that what answers below can only be the precache.
+		// Chromium as it stands declines to serve an offline navigation from its
+		// own HTTP cache — checked, by stripping Cache Storage out of the worker
+		// with this line both present and absent — but that is a policy, not a
+		// guarantee, and it is the sort of policy that changes quietly.
+		await (await context.newCDPSession(page)).send('Network.clearBrowserCache');
+
+		await context.setOffline(true);
+		await page.goto('/');
+
+		await expect(page.getByText('Could not load the articles.')).toBeVisible({ timeout: 15000 });
+		await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
+		// Not the boot skeleton's failure — that would mean the shell never ran.
+		await expect(page.getByText('finish loading')).toHaveCount(0);
+		// And the router is running, not just some markup on screen: SvelteKit
+		// sets this as the first act of _start_router().
+		expect(await page.evaluate(() => history.scrollRestoration)).toBe('manual');
+	});
+
+	// The one request on the page whose whole purpose is to differ between two
+	// launches five minutes apart. Caching it would freeze the news at whatever
+	// was current when the build shipped — a quieter bug than a blank page and a
+	// worse one — and would hide nginx's 429 from the app's own error panel.
+	test('precaches the shell and its chunks, and never the articles', async ({
+		page,
+		browserName
+	}) => {
+		// A real 200, because a worker that cached indiscriminately would still
+		// skip the preview server's bare 502 and the test would prove nothing.
+		// Playwright only intercepts a service-worker-controlled page's requests
+		// in Chromium, so on WebKit this stays an assertion about the cache's
+		// contents rather than a demonstration.
+		await mockArticles(page);
+		await launchUnderServiceWorker(page);
+		if (browserName === 'chromium') await expect(page.locator('.card').first()).toBeVisible();
+		// The app has asked for the articles by now, so anything that was going to
+		// put them in the cache has had its chance.
+		await expect.poll(() => page.evaluate(() => history.scrollRestoration)).toBe('manual');
+
+		const paths = await page.evaluate(async () => {
+			const [name] = await caches.keys();
+			const cache = await caches.open(name);
+			return (await cache.keys()).map((request) => new URL(request.url).pathname);
+		});
+
+		expect(paths).toContain('/');
+		expect(paths).toContain('/login');
+		expect(paths.filter((p) => p.startsWith('/_app/immutable/'))).not.toHaveLength(0);
+		expect(paths.filter((p) => p.startsWith('/api/'))).toEqual([]);
+	});
+
+	// A precache that outlives the build it was made from is the stale-shell
+	// blank page wearing a new hat: a cached index.html referencing chunks the
+	// next `rsync --delete` has already pruned. One cache per build version, and
+	// activate dropping every other one, is what keeps a shell and its chunks
+	// together.
+	test('drops an earlier build’s cache when it takes over', async ({ page }) => {
+		// Stands in for what a previous deploy left behind. It has to exist before
+		// the worker activates, hence addInitScript rather than a plain evaluate —
+		// and the guard keeps the second launch, which the worker is already
+		// controlling, from putting it back after the deletion it is testing.
+		await page.addInitScript(() => {
+			if (!navigator.serviceWorker.controller) void caches.open('nooze-stale');
+		});
+
+		await launchUnderServiceWorker(page);
+
+		// Polled: `ready` can resolve while the worker is still activating, i.e.
+		// with the deletion still in flight.
+		await expect
+			.poll(() => page.evaluate(() => caches.keys()))
+			.toEqual([expect.stringMatching(/^nooze-\d+$/)]);
 	});
 });

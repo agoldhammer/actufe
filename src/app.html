@@ -3,6 +3,82 @@
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.ico" />
+		<script>
+			(function () {
+				var b = (window.__boot = { s: 0, d: null });
+				var n;
+				b.render = function () {
+					if (!b.s) return;
+					if (!n) {
+						n = document.createElement('div');
+						n.setAttribute(
+							'style',
+							'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;background:#fff;color:#6b6b6b;font:0.9rem Verdana,sans-serif'
+						);
+						(document.body || document.documentElement).appendChild(n);
+					}
+					var f = b.s > 1;
+					n.textContent = f ? 'The app didn’t finish loading. Tap to reload.' : 'Loading…';
+					if (f)
+						n.onclick = function () {
+							location.reload();
+						};
+				};
+				b.drop = function () {
+					if (n) n.remove();
+					n = null;
+				};
+				b.stop = function () {
+					clearTimeout(t1);
+					clearTimeout(t2);
+				};
+				var t1 = setTimeout(function () {
+					if (!b.s) {
+						b.s = 1;
+						window.__bootSpinnerShown = true;
+					}
+					b.render();
+				}, 500);
+				var t2 = setTimeout(function () {
+					b.s = 2;
+					b.render();
+				}, 10000);
+			})();
+		</script>
+		<!--
+			The explanation of the script above sits below it rather than in it, and
+			this is the one place in the project where that is worth doing. Everything
+			the app has to say about a failed launch is said by code that has to have
+			arrived to say it, so the only figure that matters is how far into the
+			document that code sits. The full watchdog further down used to be the
+			whole of it, and it finishes parsing at 90% of the shell: measured on both
+			engines, truncating one character earlier reports nothing at all. Splitting
+			it moves the two timers — the only irreplaceable part, because everything
+			else can be rebuilt later but a clock that was never started cannot be —
+			into the first few hundred bytes, so a document that stops arriving almost
+			anywhere still has something running to say so.
+
+			The stub owns `window.__boot`: `s` (0 nothing yet, 1 loading, 2 gave up),
+			`d` (a detail message from whatever failed), `render`, `drop` and `stop`.
+			Its own `render` is a bare styled div, because at 500 milliseconds the
+			<style> block below may not have arrived either. The watchdog replaces
+			`render` with the real overlay when it parses, and calls `drop` to clear
+			the fallback if the stub had already painted one.
+
+			The two thresholds are 500ms before anything is shown — the same one
+			Components/ActuStatus.svelte uses, so that a single continuous wait is not
+			handed off with a blink — and 10s before the wait is called a failure.
+			The <link rel="icon"> above the script is deliberately ahead of it and
+			must stay there. It is a beacon: the browser requests favicon.ico the
+			moment that tag parses, and favicon.ico is served no-cache, so a launch
+			that does not produce that request in the nginx access log is a launch
+			whose parser never reached byte ~94. That is the measurement that
+			identified the failure of 13 Aug 2026, where the shell was fetched (304)
+			and *nothing else* followed. Note that it only reads that way for a client
+			the service worker is not yet controlling — once it is, favicon.ico is
+			served from Cache Storage and never reaches nginx at all, and the log
+			signal for "the app mounted" becomes the /api/articles request instead.
+		-->
 		<meta name="viewport" content="width=device-width" />
 		<style>
 			/*
@@ -104,7 +180,9 @@
 			}
 		</style>
 		<script>
-			// Watchdog for the boot skeleton.
+			// Watchdog for the boot skeleton — the reporting half of the pair; the
+			// timers are armed by the stub at the top of <head>, which is the half
+			// that has to arrive.
 			//
 			// The app's own loading and error states (ActuStatus) can only help once
 			// the app is running. Nothing else covers the case where it never starts:
@@ -112,47 +190,25 @@
 			// .then(...)`, so a single chunk that fails to load leaves that promise
 			// forever pending — no error, no handler, nothing on screen.
 			//
-			// This lives in <head>, and builds its overlay from script rather than
-			// having it in the markup, because of a failure one layer below that: a
-			// phone waking on a cold radio, or handing off wifi<->cellular, commits
-			// the response and then loses the socket. The document has replaced
-			// whatever was on screen, so the page is white, and the parser stalls
-			// partway through. A watchdog at the end of <body> is never reached, its
-			// timers are never armed, and nothing is left alive to report the failure
-			// or offer a way out — a permanently white, inert page whose only escape
-			// is the browser's Back button. Armed here, before a single byte of
-			// <body> has parsed, the timers survive a document that stops arriving.
+			// This builds its overlay from script rather than having it in the markup
+			// because of a failure one layer below that: a phone waking on a cold
+			// radio, or handing off wifi<->cellular, commits the response and then
+			// loses the socket. The document has replaced whatever was on screen, so
+			// the page is white, and the parser stalls partway through — possibly
+			// before this script. Whatever arrives has to be able to build its own
+			// DOM, and to pick up the state the stub has already reached.
 			(function () {
-				// Matches the threshold in Components/ActuStatus.svelte.
-				var SPINNER_AFTER_MS = 500;
-				var GIVE_UP_AFTER_MS = 10000;
+				var b = window.__boot;
 
 				var CHUNK_DETAIL =
 					'Some of it never arrived — usually a dropped connection. Reloading normally fixes it.';
 				var DOCUMENT_DETAIL =
 					'The connection dropped while the page was loading. Reloading normally fixes it.';
 
-				// 0 nothing to show yet, 1 loading, 2 gave up.
-				var state = 0;
-				var detail = CHUNK_DETAIL;
 				var boot = null;
 				var detailNode = null;
+				var failDetail = null;
 				var finished = false;
-
-				var spinnerTimer = setTimeout(function () {
-					if (state === 0) state = 1;
-					// Read once by the first ActuStatus so it doesn't restart the clock
-					// and blink the spinner off mid-wait.
-					window.__bootSpinnerShown = true;
-					render();
-				}, SPINNER_AFTER_MS);
-
-				var failTimer = setTimeout(function () {
-					// Still parsing after all this time means the document itself never
-					// finished arriving, which is a different story to tell than a
-					// module that went missing.
-					fail(document.readyState === 'loading' ? DOCUMENT_DETAIL : null);
-				}, GIVE_UP_AFTER_MS);
 
 				var observer = new MutationObserver(tick);
 
@@ -182,7 +238,7 @@
 
 					var failed = el('div', 'boot-panel boot-failed');
 					failed.appendChild(el('p', null, 'The app didn’t finish loading.'));
-					detailNode = el('p', 'boot-detail', detail);
+					detailNode = el('p', 'boot-detail', CHUNK_DETAIL);
 					failed.appendChild(detailNode);
 					var button = el('button', null, 'Reload');
 					button.type = 'button';
@@ -200,11 +256,36 @@
 				// subtree the observer is watching, and assigning textContent replaces a
 				// child node — so an unconditional write would re-trigger the observer,
 				// which calls render() again, forever.
+				//
+				// This is what the stub's timers call once this script has parsed, so
+				// the transition into the failed state is handled here rather than in
+				// the timer: the stub only knows that ten seconds have passed.
 				function render() {
-					if (finished || state === 0) return;
+					if (finished) return;
+					if (b.s === 2 && failDetail === null) {
+						// Give the app a last chance to be found before blaming it: an
+						// error can arrive in the same task as the render that resolves it.
+						check();
+						if (finished) return;
+						// Still parsing after all this time means the document itself never
+						// finished arriving, which is a different story to tell than a
+						// module that went missing. Latched, because the observer calls
+						// render() again and readyState will have moved on by then.
+						failDetail =
+							b.d || (document.readyState === 'loading' ? DOCUMENT_DETAIL : CHUNK_DETAIL);
+						b.stop();
+					}
+					if (b.s === 0) return;
+					// The stub's bare fallback, if its 500ms timer beat this script into
+					// the document. Replaced rather than left underneath.
+					if (b.drop) {
+						b.drop();
+						b.drop = null;
+					}
 					if (!boot) boot = build();
+					var detail = failDetail || CHUNK_DETAIL;
 					if (detailNode.textContent !== detail) detailNode.textContent = detail;
-					var cls = state === 2 ? 'showing failed' : 'showing';
+					var cls = b.s === 2 ? 'showing failed' : 'showing';
 					if (boot.className !== cls) boot.className = cls;
 					// <body> may not exist yet, and may appear after we first needed to
 					// paint; appendChild moves the overlay across when it does.
@@ -213,21 +294,19 @@
 				}
 
 				function fail(text) {
-					// Give the app a last chance to be found before blaming it: an error
-					// can arrive in the same task as the render that resolves it.
-					check();
 					if (finished) return;
-					state = 2;
-					if (text) detail = text;
-					clearTimeout(spinnerTimer);
-					clearTimeout(failTimer);
+					if (text) b.d = text;
+					b.s = 2;
 					render();
 				}
 
 				function done() {
 					finished = true;
-					clearTimeout(spinnerTimer);
-					clearTimeout(failTimer);
+					b.stop();
+					if (b.drop) {
+						b.drop();
+						b.drop = null;
+					}
 					observer.disconnect();
 					if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
 					// Later loading panels time themselves from scratch.
@@ -274,6 +353,10 @@
 					true
 				);
 
+				// Take over from the stub's fallback renderer. From here its timers
+				// drive the overlay below rather than the bare div above.
+				b.render = render;
+
 				// #app does not exist yet, so watch the document and look it up lazily.
 				// Every render() call also rides along, which is how the overlay reaches
 				// <body> if it had to be built before <body> existed.
@@ -281,6 +364,9 @@
 				// Prerendered pages (/login, /about) may already be in place.
 				document.addEventListener('DOMContentLoaded', check);
 				check();
+				// Catch up on anything the stub decided before this script parsed — on
+				// a slow document that can already be the spinner, or the failure.
+				render();
 			})();
 		</script>
 		%sveltekit.head%
