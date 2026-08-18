@@ -367,6 +367,27 @@ test.describe('slow and failed article requests', () => {
 		await page.getByRole('button', { name: 'Try again' }).click();
 		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
 	});
+
+	// A 200 carrying a body the components can't render is worse than a 502: the
+	// fetch succeeds, {#await} moves to its :then branch, and the throw lands in
+	// the middle of building the article tree — where it is not a rejected
+	// promise, so {#await} never sees it, and where the boot watchdog has long
+	// since bowed out. Measured on both engines, the page keeps the loading
+	// panel and spins on it for good. $lib/articles therefore checks every field
+	// the components read unguarded, so this arrives as a rejection instead.
+	test('a response missing timespan fails the load, not the render', async ({ page }) => {
+		await loginByStorage(page);
+		const malformed: Record<string, unknown> = { ...apiResponse };
+		delete malformed.timespan;
+		await page.route('**/api/articles*', (route) => route.fulfill({ json: malformed }));
+
+		await page.goto('/');
+
+		await expect(page.getByText('Could not load the articles.')).toBeVisible();
+		await expect(page.getByText(/timespan missing/)).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
+		await expect(page.getByText('Loading articles…')).toHaveCount(0);
+	});
 });
 
 test.describe('the boot skeleton', () => {
@@ -486,6 +507,72 @@ test.describe('the boot skeleton', () => {
 	test('is gone immediately on a prerendered page', async ({ page }) => {
 		await page.goto('/about');
 		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+
+	// ...but getting out of the way used to mean going deaf. done() latched
+	// `finished`, and every later error and rejection was dropped on the floor —
+	// so anything that killed the app after its first render left whatever was
+	// last on screen there, saying nothing, forever. The launch of 18 Aug 2026
+	// reached /api/articles and then showed nothing for the half minute before
+	// the reader gave up and pressed Back, and no in-page code was left running
+	// that could have said why.
+	test('still reports an error that arrives after the app has rendered', async ({ page }) => {
+		await loginByStorage(page);
+		let release!: () => void;
+		const held = new Promise<void>((resolve) => (release = resolve));
+		await page.route('**/api/articles*', async (route) => {
+			await held;
+			await route.fulfill({ json: apiResponse });
+		});
+
+		await page.goto('/');
+		// The panel that retires the watchdog: it has a height, so as far as
+		// done() is concerned the app is up.
+		await expect(page.getByText('Loading articles…')).toBeVisible();
+
+		// Detached from evaluate's own promise so it reaches the window as an
+		// unhandled rejection, the way a pruned chunk does.
+		await page.evaluate(() => {
+			setTimeout(() => {
+				Promise.reject(new Error('chunk gone'));
+			}, 0);
+		});
+
+		await expect(page.getByText('The app didn’t finish loading.')).toBeVisible();
+		await expect(page.getByText(/chunk gone/)).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+
+		// And it yields again if the app turns out to be alive after all: the
+		// overlay is only there because the panel underneath it was still
+		// promising articles.
+		release();
+		await expect(page.getByText('Élections: le grand débat')).toBeVisible();
+		await expect(page.locator('#boot')).toHaveCount(0);
+	});
+
+	// The app cannot be asked what it saw: it runs on a phone, with no console
+	// to open, and a reader who can only describe the screen afterwards. So it
+	// tells the server, and the answers land in the nginx access log next to the
+	// /api/articles request from the same launch.
+	test('reports how far the launch got', async ({ page }) => {
+		const beacons: string[] = [];
+		page.on('request', (request) => {
+			const url = new URL(request.url());
+			if (url.pathname.endsWith('/_b')) beacons.push(url.searchParams.get('m') ?? '');
+		});
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+
+		// `app` is the app having rendered something; `up` is a frame having been
+		// painted afterwards, which is the one that separates an app that died
+		// from an app that was never put on screen. The preview server has no /_b
+		// (nginx provides it in production), and the 404 is deliberately not
+		// mocked away — a beacon that fails must never be visible to the reader.
+		await expect.poll(() => beacons).toContain('app');
+		await expect.poll(() => beacons).toContain('up');
 	});
 });
 

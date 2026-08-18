@@ -96,6 +96,17 @@ export async function fetchAppdata(fetch: LoadFetch, q: ArticlesQuery): Promise<
 	if (response.articles === undefined) {
 		throw new Error('articles missing from response; check actuproxy');
 	}
+	// Everything the components read unguarded has to be checked here, where a
+	// failure is a rejected promise the page's {#await} turns into a panel with
+	// a Try again button. A field that is only found missing during the render —
+	// ActuFtr reads timespan.start — throws where nothing catches it: not a
+	// rejection, so {#await} never sees it, and past the point where the boot
+	// watchdog is still watching. The page then sits on the loading spinner for
+	// good.
+	const timespan = response.timespan;
+	if (!timespan || typeof timespan.start !== 'string' || typeof timespan.end !== 'string') {
+		throw new Error('timespan missing from response; check actuproxy');
+	}
 	const articles = response.articles;
 	const pubnameset: Set<string> = new Set();
 	const catset: Set<string> = new Set();

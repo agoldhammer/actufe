@@ -209,6 +209,99 @@
 				var detailNode = null;
 				var failDetail = null;
 				var finished = false;
+				// Set when the overlay had to come back over a loading panel that was
+				// still promising articles after they had failed — see fail() below.
+				var lied = false;
+
+				// Where the launch got to, sent to the server. Everything above is
+				// for the reader; this is the half that survives the reader closing
+				// the app, and it is the only account of a failure anyone will ever
+				// get: the phone has no console to open and no way to report what it
+				// saw beyond describing it. nginx answers /_b with a 204 and logs the
+				// query string, so one launch becomes two or three lines in the
+				// access log next to the /api/articles request they belong with.
+				//
+				// It lives here rather than in the stub on purpose. The stub is sized
+				// to arrive — it is the first few hundred bytes of the document, and
+				// what it buys is that a truncated document still has a clock running
+				// — so nothing goes in it that does not have to. A document that dies
+				// before this point is already legible in the access log without help
+				// (a `GET /` with no /api/articles behind it, and — before a service
+				// worker is controlling the client — no favicon.ico either). What was
+				// not legible, and is what this is for, is the launch that fetches its
+				// articles and then shows nothing: from outside it is indistinguishable
+				// from a launch that worked.
+				//
+				//   m=app  the app rendered something with a height. Sent from done().
+				//   m=up   a frame was produced *after* that render, so what the app
+				//          built actually reached the screen. Absent means the page
+				//          stopped painting, which no amount of in-page repair fixes.
+				//   m=err  any error or rejection, at any point in the document's life,
+				//          including long after the boot overlay has bowed out.
+				//   m=end  the reader left. Sent once, and the only one that reports a
+				//          launch nothing else had anything to say about.
+				//
+				// Fields: t ms since this script parsed, s the stub's state (0/1/2),
+				// v visibilityState, h whether the document was ever hidden (a phone
+				// that never brought the page to the front explains a white screen by
+				// itself), f frames painted, d a truncated detail for m=err.
+				var BEACON = '%sveltekit.assets%/_b';
+				var t0 = Date.now();
+				var painted = 0;
+				var everHidden = document.visibilityState === 'hidden';
+				var ended = false;
+
+				function report(m, detail) {
+					var q =
+						'?m=' +
+						m +
+						'&t=' +
+						(Date.now() - t0) +
+						'&s=' +
+						b.s +
+						'&v=' +
+						document.visibilityState.charAt(0) +
+						'&h=' +
+						(everHidden ? 1 : 0) +
+						'&f=' +
+						painted;
+					if (detail) q += '&d=' + encodeURIComponent(String(detail).slice(0, 120));
+					try {
+						// sendBeacon survives the unload m=end is sent during; the image
+						// is for anything that has not got it. Neither is allowed to be
+						// the thing that breaks a launch, hence the try.
+						if (navigator.sendBeacon) navigator.sendBeacon(BEACON + q);
+						else new Image().src = BEACON + q;
+					} catch (e) {
+						/* nothing to report the reporter to */
+					}
+				}
+
+				// One frame, unconditionally: rAF does not run in a document the
+				// browser is not rendering, so `f=0` in any later report is itself the
+				// finding. Not a standing loop — that would keep the compositor awake
+				// for the life of the page to measure it.
+				requestAnimationFrame(function () {
+					painted++;
+				});
+
+				document.addEventListener('visibilitychange', function () {
+					if (document.visibilityState === 'hidden') everHidden = true;
+				});
+
+				function end() {
+					if (ended) return;
+					ended = true;
+					report('end');
+				}
+
+				// Both, because neither is reliable alone on a phone: pagehide is
+				// skipped when the OS takes the app away without a navigation, and
+				// visibilitychange does not fire on some same-tab navigations.
+				window.addEventListener('pagehide', end);
+				document.addEventListener('visibilitychange', function () {
+					if (document.visibilityState === 'hidden') end();
+				});
 
 				var observer = new MutationObserver(tick);
 
@@ -293,8 +386,33 @@
 					if (boot.parentNode !== parent) parent.appendChild(boot);
 				}
 
+				// Reporting an error is unconditional; taking the screen back for it is
+				// not. Before the app is up there is nothing on screen to protect, so
+				// the overlay wins outright. After it is up, covering a working page
+				// with "the app didn't finish loading" over a 404ed summary image
+				// would be its own bug — so the overlay returns only when what is on
+				// screen has stopped being true: nothing rendered at all, or a loading
+				// panel still promising articles that have already failed to arrive.
+				//
+				// That second case is the one worth having. A throw while rendering
+				// the article tree — one unguarded field in a response that arrived
+				// malformed is enough — is caught by nothing: it is not a rejected
+				// promise, so the page's {#await} never sees it, and done() has long
+				// since bowed out. Both engines leave the loading panel in place and
+				// spin forever, which is indistinguishable from a slow network and
+				// stays that way until the reader gives up.
 				function fail(text) {
-					if (finished) return;
+					report('err', text);
+					if (finished) {
+						if (rendered() && !b.busy) return;
+						// Put the machinery back the way it was before done() retired it.
+						finished = false;
+						lied = b.busy;
+						boot = null;
+						detailNode = null;
+						failDetail = null;
+						observer.observe(document.documentElement, { childList: true, subtree: true });
+					}
 					if (text) b.d = text;
 					b.s = 2;
 					render();
@@ -311,22 +429,40 @@
 					if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
 					// Later loading panels time themselves from scratch.
 					window.__bootSpinnerShown = false;
+					report('app');
+					// Deliberately after the render rather than with it: what this asks
+					// is not "did the app build a tree" — done() already knows that —
+					// but "did the browser then draw it".
+					requestAnimationFrame(function () {
+						painted++;
+						report('up');
+					});
+				}
+
+				// The app has taken over once it has rendered something that occupies
+				// space. Requiring layout rather than merely an element matters because
+				// a mounted-but-empty tree looks exactly like the blank page we are
+				// here to report. #app also holds SvelteKit's inline bootstrap
+				// <script>, hence the skip.
+				function rendered() {
+					var app = document.getElementById('app');
+					if (!app) return false;
+					var kids = app.children;
+					for (var i = 0; i < kids.length; i++) {
+						if (kids[i].tagName === 'SCRIPT') continue;
+						if (kids[i].getBoundingClientRect().height > 0) return true;
+					}
+					return false;
 				}
 
 				function check() {
 					if (finished) return;
-					var app = document.getElementById('app');
-					if (!app) return;
-					// The app has taken over once it has rendered something that occupies
-					// space. Requiring layout rather than merely an element matters
-					// because done() disarms this for good: a mounted-but-empty tree
-					// looks exactly like the blank page we are here to report. #app also
-					// holds SvelteKit's inline bootstrap <script>, hence the skip.
-					var kids = app.children;
-					for (var i = 0; i < kids.length; i++) {
-						if (kids[i].tagName === 'SCRIPT') continue;
-						if (kids[i].getBoundingClientRect().height > 0) return done();
-					}
+					// A loading panel that has already been caught lying is not evidence
+					// the app is up. Hold the overlay until the app replaces it with
+					// something else — which is also how it takes the screen back if it
+					// does recover.
+					if (lied && b.busy) return;
+					if (rendered()) done();
 				}
 
 				// A failed dynamic import in SvelteKit's bootstrap surfaces here and

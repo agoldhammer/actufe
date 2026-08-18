@@ -19,16 +19,24 @@
 	// If its spinner was already on screen when we took over, show ours
 	// immediately: restarting the clock here would blink the spinner off in the
 	// middle of a single continuous wait.
-	const carriedOver =
-		typeof window !== 'undefined' &&
-		(window as unknown as { __bootSpinnerShown?: boolean }).__bootSpinnerShown === true;
+	type BootHandle = { __bootSpinnerShown?: boolean; __boot?: { busy?: boolean } };
+	const w = typeof window !== 'undefined' ? (window as unknown as BootHandle) : null;
+	const carriedOver = w?.__bootSpinnerShown === true;
 
 	let visible = kind === 'error' || carriedOver;
 
 	onMount(() => {
-		if (visible) return;
-		const timer = setTimeout(() => (visible = true), APPEAR_AFTER_MS);
-		return () => clearTimeout(timer);
+		// While this is on screen the page is claiming the articles are still
+		// coming. The watchdog in app.html needs to know that, because it retired
+		// itself the moment this panel rendered: an error arriving afterwards
+		// finds a page that looks alive and would otherwise be swallowed, leaving
+		// the spinner below promising something that has already failed.
+		if (kind === 'loading' && w?.__boot) w.__boot.busy = true;
+		const timer = visible ? null : setTimeout(() => (visible = true), APPEAR_AFTER_MS);
+		return () => {
+			if (timer !== null) clearTimeout(timer);
+			if (kind === 'loading' && w?.__boot) w.__boot.busy = false;
+		};
 	});
 </script>
 
