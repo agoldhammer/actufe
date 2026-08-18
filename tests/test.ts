@@ -574,6 +574,174 @@ test.describe('the boot skeleton', () => {
 		await expect.poll(() => beacons).toContain('app');
 		await expect.poll(() => beacons).toContain('up');
 	});
+
+	// Everything below is about the question m=app and m=up cannot answer. Both
+	// fired on the launch of 18 Aug 2026 21:30:05Z, no error was raised anywhere,
+	// and the reader still saw plain white until Back brought the articles up
+	// instantly. Two readings survived that: a document that stopped being drawn,
+	// and a document that was simply taken away and given back. These are the
+	// beacons that tell them apart.
+	function collectBeacons(page: Page) {
+		const sent: URLSearchParams[] = [];
+		page.on('request', (request) => {
+			const url = new URL(request.url());
+			if (url.pathname.endsWith('/_b')) sent.push(url.searchParams);
+		});
+		return {
+			all: sent,
+			kinds: () => sent.map((p) => p.get('m')),
+			last: (m: string) => sent.filter((p) => p.get('m') === m).pop()
+		};
+	}
+
+	// Playwright cannot put a page in the background, so visibility is driven
+	// directly. That is not a weaker test than the real thing: what the watchdog
+	// reads is document.visibilityState, and this is that value changing.
+	async function setVisibility(page: Page, state: 'hidden' | 'visible') {
+		await page.evaluate((value) => {
+			Object.defineProperty(document, 'visibilityState', { value, configurable: true });
+			document.dispatchEvent(new Event('visibilitychange'));
+		}, state);
+	}
+
+	test('a launch that is never taken away reports no return', async ({ page }) => {
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+		await expect.poll(() => beacons.kinds()).toContain('up');
+
+		// m=show is only ever the partner of an m=end. A launch nobody interrupted
+		// costs nothing, which is what keeps a healthy one inside the burst nginx
+		// allows on /_b.
+		expect(beacons.kinds()).not.toContain('show');
+		expect(beacons.kinds()).not.toContain('end');
+	});
+
+	test('a document taken away and given back reports both halves', async ({ page }) => {
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+
+		await setVisibility(page, 'hidden');
+		await expect.poll(() => beacons.kinds()).toContain('end');
+		expect(beacons.last('end')?.get('h')).toBe('1');
+
+		await setVisibility(page, 'visible');
+		await expect.poll(() => beacons.kinds()).toContain('show');
+
+		// The pair is the finding: end-then-show is a launch that was backgrounded
+		// and returned to, which is the reading the 18 Aug log could not rule out.
+		// end with nothing after it is a launch that really did go away.
+		const kinds = beacons.kinds();
+		expect(kinds.indexOf('show')).toBeGreaterThan(kinds.indexOf('end'));
+
+		// And it goes on pairing, rather than latching after the first departure.
+		await setVisibility(page, 'hidden');
+		await expect.poll(() => beacons.kinds().filter((m) => m === 'end').length).toBe(2);
+	});
+
+	test('pairing stops before a long session can flood the log', async ({ page }) => {
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+
+		// m=show is the one beacon a reader can ask for on demand, simply by
+		// leaving and coming back. Fifteen rounds, and the log gets ten.
+		for (let i = 0; i < 15; i++) {
+			await setVisibility(page, 'hidden');
+			await setVisibility(page, 'visible');
+		}
+		await expect.poll(() => beacons.kinds().filter((m) => m === 'end').length).toBe(10);
+		expect(beacons.kinds().filter((m) => m === 'show').length).toBe(10);
+	});
+
+	test('a restore from the back/forward cache names itself', async ({ page }) => {
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+
+		await setVisibility(page, 'hidden');
+		await expect.poll(() => beacons.kinds()).toContain('end');
+
+		// A page restored whole, rather than reloaded, is what "I hit Back and the
+		// articles were instantly there" would be. Only `persisted` names it.
+		await page.evaluate(() => {
+			window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+		});
+		await expect.poll(() => beacons.kinds()).toContain('show');
+		expect(beacons.last('show')?.get('d')).toBe('bfcache');
+	});
+
+	// The frame sampler. A document cannot see its own pixels, but it can ask for
+	// a frame and time the answer, and a visible document that never gets one is
+	// the failure no in-page repair can reach.
+	test('a visible document that stops being drawn says so', async ({ page }) => {
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		// Installed before the watchdog runs, because it looks the global up on
+		// every call. Frozen, the page is exactly the case being measured: still
+		// visible, still asking, and never drawn again.
+		await page.addInitScript(() => {
+			const real = window.requestAnimationFrame.bind(window);
+			let frozen = false;
+			(window as unknown as { __freezeFrames: () => void }).__freezeFrames = () => {
+				frozen = true;
+			};
+			window.requestAnimationFrame = (cb) => (frozen ? 0 : real(cb));
+		});
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+		await expect.poll(() => beacons.kinds()).toContain('up');
+		expect(beacons.kinds()).not.toContain('stall');
+
+		await page.evaluate(() =>
+			(window as unknown as { __freezeFrames: () => void }).__freezeFrames()
+		);
+
+		await expect.poll(() => beacons.kinds(), { timeout: 10000 }).toContain('stall');
+		const stall = beacons.last('stall');
+		// Reported by a timer, not by a frame callback — the callback is the thing
+		// that never runs — and while the document still calls itself visible.
+		expect(stall?.get('v')).toBe('v');
+		expect(Number(stall?.get('g'))).toBeGreaterThanOrEqual(1500);
+	});
+
+	test('a page that keeps being drawn closes its window quietly', async ({ page }) => {
+		test.setTimeout(60000);
+		const beacons = collectBeacons(page);
+		await mockArticles(page);
+		await loginByStorage(page);
+
+		await page.goto('/');
+		await expect(page.locator('.card').first()).toBeVisible();
+
+		// The sampler runs for 15s and then reports once. This is the baseline that
+		// makes m=stall mean something: on a healthy page the longest wait for a
+		// frame is a frame, and no stall is ever claimed.
+		await expect.poll(() => beacons.kinds(), { timeout: 25000 }).toContain('fr');
+		expect(beacons.kinds()).not.toContain('stall');
+
+		const fr = beacons.last('fr');
+		expect(Number(fr?.get('g'))).toBeLessThan(1500);
+		// Sampled at 5Hz for 15s, so a drawn page has produced plenty. The point of
+		// counting is that a page which stopped would not have.
+		expect(Number(fr?.get('f'))).toBeGreaterThan(20);
+	});
 });
 
 test.describe('the service worker', () => {

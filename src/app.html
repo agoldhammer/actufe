@@ -238,16 +238,32 @@
 				//          stopped painting, which no amount of in-page repair fixes.
 				//   m=err  any error or rejection, at any point in the document's life,
 				//          including long after the boot overlay has bowed out.
-				//   m=end  the reader left. Sent once, and the only one that reports a
-				//          launch nothing else had anything to say about.
+				//   m=end  the reader left, or the OS took the app away. Sent once per
+				//          departure, and the only one that reports a launch nothing else
+				//          had anything to say about. m=show is its partner.
+				//   m=show the document came back. Only ever sent after an m=end, so the
+				//          two read as a pair: end-then-show is a launch that was put in
+				//          the background and returned to, end-with-nothing-after is one
+				//          that was not. `d=bfcache` when the browser restored the page
+				//          whole, which is what "I hit Back and the articles were
+				//          instantly there" looks like from inside the document.
+				//   m=fr   the frame sampler's window closed with the reader still here.
+				//          Routine; it is the baseline that makes m=stall mean something.
+				//   m=stall a *visible* document went STALL_MS without being drawn. This is
+				//          the one that separates an app that died from an app that was
+				//          never put on screen, which is the question left open by
+				//          21:30:05Z on 18 Aug 2026: that launch reported m=app and m=up,
+				//          had no error of any kind, and showed the reader plain white.
 				//
 				// Fields: t ms since this script parsed, s the stub's state (0/1/2),
 				// v visibilityState, h whether the document was ever hidden (a phone
 				// that never brought the page to the front explains a white screen by
-				// itself), f frames painted, d a truncated detail for m=err.
+				// itself), f frames painted, g the longest a visible document kept us
+				// waiting for a frame, d a truncated detail for m=err and m=show.
 				var BEACON = '%sveltekit.assets%/_b';
 				var t0 = Date.now();
 				var painted = 0;
+				var maxGap = 0;
 				var everHidden = document.visibilityState === 'hidden';
 				var ended = false;
 
@@ -264,7 +280,9 @@
 						'&h=' +
 						(everHidden ? 1 : 0) +
 						'&f=' +
-						painted;
+						painted +
+						'&g=' +
+						maxGap;
 					if (detail) q += '&d=' + encodeURIComponent(String(detail).slice(0, 120));
 					try {
 						// sendBeacon survives the unload m=end is sent during; the image
@@ -277,30 +295,124 @@
 					}
 				}
 
-				// One frame, unconditionally: rAF does not run in a document the
-				// browser is not rendering, so `f=0` in any later report is itself the
-				// finding. Not a standing loop — that would keep the compositor awake
-				// for the life of the page to measure it.
-				requestAnimationFrame(function () {
-					painted++;
-				});
+				// The frame sampler.
+				//
+				// m=up proves that one frame followed the app's first render. It cannot
+				// prove the page went on being drawn, and that is exactly the gap the
+				// 18 Aug 2026 failure fell through: the app rendered, a frame was
+				// produced, both were reported, no error was raised anywhere, and the
+				// reader sat looking at white until Back brought the articles up
+				// instantly. A document cannot see its own pixels, but it can ask for a
+				// frame and time how long the answer takes — and a *visible* document
+				// that is not being drawn is the one thing no in-page repair can fix,
+				// so it is worth being able to name.
+				//
+				// Sampled at 5Hz rather than run flat out. The answer is the same, the
+				// cost is nothing, and asking for a frame is also a reason to produce
+				// one — which may keep the compositor from settling across the handoff
+				// from the launcher's splash screen, where the surface is suspected of
+				// being lost. Bounded to the launch, because the earlier objection to a
+				// standing rAF loop stands: over the life of the page it would be a
+				// battery drain kept alive purely to measure itself.
+				var FRAME_SAMPLE_MS = 200;
+				var FRAME_WINDOW_MS = 15000;
+				// Three samples' worth, and ~90 missed frames at 60Hz: long enough that a
+				// phone busy parsing the articles is not accused of having stopped.
+				var STALL_MS = 1500;
+				var sampling = true;
+				var awaitingFrame = false;
+				var frameAskedAt = Date.now();
+				var stallReported = false;
 
-				document.addEventListener('visibilitychange', function () {
-					if (document.visibilityState === 'hidden') everHidden = true;
-				});
+				function noteGap() {
+					var gap = Date.now() - frameAskedAt;
+					if (gap > maxGap) maxGap = gap;
+				}
+
+				function askForFrame() {
+					if (!sampling) return;
+					awaitingFrame = true;
+					frameAskedAt = Date.now();
+					requestAnimationFrame(function () {
+						if (!awaitingFrame) return;
+						awaitingFrame = false;
+						painted++;
+						noteGap();
+						setTimeout(askForFrame, FRAME_SAMPLE_MS);
+					});
+				}
+
+				// The stall check has to be a timer and not a frame callback, because the
+				// case it exists for is the one where the frame callback never runs. It
+				// also owns the end of the window: if frames have stopped, askForFrame is
+				// parked inside a rAF that will never fire and could not close it.
+				var frameWatch = setInterval(function () {
+					if (Date.now() - t0 >= FRAME_WINDOW_MS) {
+						clearInterval(frameWatch);
+						sampling = false;
+						// Nobody is there to have a launch measured; m=end already went.
+						if (!ended) report('fr');
+						return;
+					}
+					if (!awaitingFrame) return;
+					// A hidden document is not being drawn and is not supposed to be. That
+					// is m=end's story, not this one.
+					if (document.visibilityState !== 'visible') return;
+					if (Date.now() - frameAskedAt < STALL_MS) return;
+					noteGap();
+					if (stallReported) return;
+					stallReported = true;
+					report('stall');
+				}, 500);
+
+				askForFrame();
+
+				// Bounded, because m=show made this the one beacon a reader can produce on
+				// demand: an afternoon of switching between apps would otherwise write an
+				// unbounded number of lines into the access log, and by the tenth round
+				// whatever the pattern was going to say it has said.
+				var PAIR_CAP = 10;
+				var pairs = 0;
 
 				function end() {
-					if (ended) return;
+					if (ended || pairs >= PAIR_CAP) return;
 					ended = true;
+					pairs++;
 					report('end');
 				}
 
-				// Both, because neither is reliable alone on a phone: pagehide is
-				// skipped when the OS takes the app away without a navigation, and
-				// visibilitychange does not fire on some same-tab navigations.
-				window.addEventListener('pagehide', end);
+				// The other half of m=end. Reported only when an m=end has gone before it,
+				// which keeps a launch that was visible throughout at no cost, makes the
+				// two a matched pair in the log, and means the duplicate notification a
+				// bfcache restore produces (pageshow *and* visibilitychange) reports once.
+				function show(persisted) {
+					// Time spent in the background is not time a visible document was left
+					// undrawn, so the frame clock restarts here rather than counting it.
+					frameAskedAt = Date.now();
+					if (!ended) return;
+					ended = false;
+					report('show', persisted ? 'bfcache' : null);
+				}
+
 				document.addEventListener('visibilitychange', function () {
-					if (document.visibilityState === 'hidden') end();
+					if (document.visibilityState === 'hidden') {
+						everHidden = true;
+						end();
+					} else {
+						show(false);
+					}
+				});
+
+				// Both pairs, because neither is reliable alone on a phone: pagehide is
+				// skipped when the OS takes the app away without a navigation, and
+				// visibilitychange does not fire on some same-tab navigations. `persisted`
+				// is also the only thing that names a bfcache restore, and a bfcache
+				// restore is precisely what "Back, and the articles were instantly there"
+				// would be — a page that was never lost, only stopped being shown.
+				window.addEventListener('pagehide', end);
+				window.addEventListener('pageshow', function (event) {
+					if (event.persisted) everHidden = true;
+					show(!!event.persisted);
 				});
 
 				var observer = new MutationObserver(tick);
