@@ -17,7 +17,7 @@
 		<span>End:&nbsp;&nbsp;&nbsp;{appdata.timespan.end}</span>
 	</div>
 	<div class="version">
-		<span>Ver. 0.5</span>
+		<span>Ver. 1.0</span>
 	</div>
 </div>
 
